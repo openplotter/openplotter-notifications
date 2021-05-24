@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Notifications
+Exec=openplotter-notifications
+Icon=openplotter-notifications
+StartupNotify=true
+Terminal=false
+Type=Application
+Categories=OpenPlotter
