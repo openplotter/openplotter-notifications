@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, os, webbrowser, subprocess, time, ujson
+import wx, os, sys, webbrowser, subprocess, time, ujson
 import wx.richtext as rt
 from openplotterSettings import conf
 from openplotterSettings import language
@@ -25,6 +25,7 @@ from .version import version
 
 class MyFrame(wx.Frame):
 	def __init__(self):
+		if not 'openplotter-notifications-read' in subprocess.check_output(['ps','aux']).decode(sys.stdin.encoding): subprocess.Popen('openplotter-notifications-read')
 		self.conf = conf.Conf()
 		self.conf_folder = self.conf.conf_folder
 		self.platform = platform.Platform()
@@ -48,9 +49,9 @@ class MyFrame(wx.Frame):
 		toolSettings = self.toolbar1.AddTool(102, _('Settings'), wx.Bitmap(self.currentdir+"/data/settings.png"))
 		self.Bind(wx.EVT_TOOL, self.OnToolSettings, toolSettings)
 		self.toolbar1.AddSeparator()
-		aproveSK = self.toolbar1.AddTool(105, _('Approve device'), wx.Bitmap(self.currentdir+"/data/sk.png"))
+		aproveSK = self.toolbar1.AddTool(105, _('Approve'), wx.Bitmap(self.currentdir+"/data/sk.png"))
 		self.Bind(wx.EVT_TOOL, self.onAproveSK, aproveSK)
-		connectionSK = self.toolbar1.AddTool(106, _('Allowed devices'), wx.Bitmap(self.currentdir+"/data/sk.png"))
+		connectionSK = self.toolbar1.AddTool(106, _('Allowed'), wx.Bitmap(self.currentdir+"/data/sk.png"))
 		self.Bind(wx.EVT_TOOL, self.onConnectionSK, connectionSK)
 		self.toolbar1.AddSeparator()
 		refresh = self.toolbar1.AddTool(104, _('Refresh'), wx.Bitmap(self.currentdir+"/data/refresh.png"))
@@ -61,7 +62,7 @@ class MyFrame(wx.Frame):
 		self.summary = wx.Panel(self.notebook)
 		self.visualMethod = wx.Panel(self.notebook)
 		self.soundMethod = wx.Panel(self.notebook)
-		self.setSKkey = wx.Panel(self.notebook)
+		self.sk = wx.Panel(self.notebook)
 		self.command = wx.Panel(self.notebook)
 		self.gpio = wx.Panel(self.notebook)
 		self.mqtt = wx.Panel(self.notebook)
@@ -72,8 +73,8 @@ class MyFrame(wx.Frame):
 		self.notebook.AddPage(self.summary, _('Thresholds'))
 		self.notebook.AddPage(self.visualMethod, _('Visual'))
 		self.notebook.AddPage(self.soundMethod, _('Sound'))
-		self.notebook.AddPage(self.setSKkey, 'Signal K key')
 		self.notebook.AddPage(self.command, _('Command'))
+		self.notebook.AddPage(self.sk, 'Signal K key')
 		self.notebook.AddPage(self.gpio, 'GPIO')
 		self.notebook.AddPage(self.mqtt, 'MQTT')
 		self.notebook.AddPage(self.mastodon, 'Mastodon')
@@ -82,8 +83,12 @@ class MyFrame(wx.Frame):
 		self.notebook.AddPage(self.sms, 'SMS')
 		self.il = wx.ImageList(24, 24)
 		img0 = self.il.Add(wx.Bitmap(self.currentdir+"/data/sk.png", wx.BITMAP_TYPE_PNG))
+		img1 = self.il.Add(wx.Bitmap(self.currentdir+"/data/visual.png", wx.BITMAP_TYPE_PNG))
+		img2 = self.il.Add(wx.Bitmap(self.currentdir+"/data/play.png", wx.BITMAP_TYPE_PNG))
 		self.notebook.AssignImageList(self.il)
 		self.notebook.SetPageImage(0, img0)
+		self.notebook.SetPageImage(1, img1)
+		self.notebook.SetPageImage(2, img2)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.Add(self.toolbar1, 0, wx.EXPAND)
@@ -93,6 +98,8 @@ class MyFrame(wx.Frame):
 		self.pageSummary()
 		self.pageVisual()
 		self.pageSound()
+		self.pageCommand()
+		self.pageSK()
 		
 		self.onRefresh()
 
@@ -154,7 +161,7 @@ class MyFrame(wx.Frame):
 		elif result[0] == 'repeat':
 			self.ShowStatusBarYELLOW(result[1]+_(' Press "Refresh".'))
 		elif result[0] == 'permissions':
-			self.ShowStatusBarYELLOW(result[1]+_(' Press "Allowed devices".'))
+			self.ShowStatusBarYELLOW(result[1]+_(' Press "Allowed".'))
 		elif result[0] == 'approved':
 			self.ShowStatusBarGREEN(result[1])
 
@@ -167,7 +174,7 @@ class MyFrame(wx.Frame):
 		self.summaryLogger.SetMargins((10,10))
 
 		self.toolbar3 = wx.ToolBar(self.summary, style=wx.TB_TEXT | wx.TB_VERTICAL)
-		toolThresholds = self.toolbar3.AddTool(301, _('Thresholds'), wx.Bitmap(self.currentdir+"/data/sk.png"))
+		toolThresholds = self.toolbar3.AddTool(301, _('Edit'), wx.Bitmap(self.currentdir+"/data/sk.png"))
 		self.Bind(wx.EVT_TOOL, self.OnToolThresholds, toolThresholds)
 
 		sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -190,15 +197,15 @@ class MyFrame(wx.Frame):
 	def OnReadThresholds(self):
 		self.summaryLogger.Clear()
 		try: visualNormal = eval(self.conf.get('NOTIFICATIONS', 'visualNormal'))
-		except: visualNormal = (46, 52, 54, 255)
+		except: visualNormal = [(46, 52, 54, 255), True]
 		try: visualAlert = eval(self.conf.get('NOTIFICATIONS', 'visualAlert'))
-		except: visualAlert = (32, 74, 135, 255)
+		except: visualAlert = [(32, 74, 135, 255), True]
 		try: visualWarn = eval(self.conf.get('NOTIFICATIONS', 'visualWarn'))
-		except: visualWarn = (196, 160, 0, 255)
+		except: visualWarn = [(196, 160, 0, 255), True]
 		try: visualAlarm = eval(self.conf.get('NOTIFICATIONS', 'visualAlarm'))
-		except: visualAlarm = (206, 92, 0, 255)
+		except: visualAlarm = [(206, 92, 0, 255), True]
 		try: visualEmergency = eval(self.conf.get('NOTIFICATIONS', 'visualEmergency'))
-		except: visualEmergency = (164, 0, 0, 255)
+		except: visualEmergency = [(164, 0, 0, 255), True]
 		file = self.platform.skDir+'/plugin-config-data/threshold-notifier.json'
 		try:
 			with open(file) as data_file:
@@ -231,11 +238,11 @@ class MyFrame(wx.Frame):
 				self.summaryLogger.EndTextColour()
 				self.summaryLogger.Newline()
 				for state in skKeys[path]:
-					if state == 'normal': stateColour = visualNormal
-					if state == 'alert': stateColour = visualAlert
-					if state == 'warn': stateColour = visualWarn
-					if state == 'alarm': stateColour = visualAlarm
-					if state == 'emergency': stateColour = visualEmergency
+					if state == 'normal': stateColour = visualNormal[0]
+					if state == 'alert': stateColour = visualAlert[0]
+					if state == 'warn': stateColour = visualWarn[0]
+					if state == 'alarm': stateColour = visualAlarm[0]
+					if state == 'emergency': stateColour = visualEmergency[0]
 					self.summaryLogger.BeginTextColour(stateColour)
 					self.summaryLogger.WriteText('      '+state)
 					self.summaryLogger.EndTextColour()
@@ -249,7 +256,7 @@ class MyFrame(wx.Frame):
 								self.summaryLogger.WriteText('                  '+_('Message: ')+i['message'])
 								self.summaryLogger.Newline()
 							if i['highthreshold']['method']: 
-								self.summaryLogger.WriteText('                  '+str(i['highthreshold']['method']))
+								self.summaryLogger.WriteText('                  '+_('Methods: ')+', '.join(i['highthreshold']['method']))
 								self.summaryLogger.Newline()
 						if 'lowthreshold' in i:
 							self.summaryLogger.WriteText('            '+_('Low threshold: ')+str(i['lowthreshold']['value']))
@@ -258,7 +265,7 @@ class MyFrame(wx.Frame):
 								self.summaryLogger.WriteText('                  '+_('Message: ')+i['message'])
 								self.summaryLogger.Newline()
 							if i['lowthreshold']['method']: 
-								self.summaryLogger.WriteText('                  '+str(i['lowthreshold']['method']))
+								self.summaryLogger.WriteText('                  '+_('Methods: ')+', '.join(i['lowthreshold']['method']))
 								self.summaryLogger.Newline()
 				self.summaryLogger.EndTextColour()
 		else:
@@ -270,24 +277,32 @@ class MyFrame(wx.Frame):
 	def pageVisual(self):
 		normalLabel = wx.StaticText(self.visualMethod, label='normal')
 		self.visualNormal = wx.ColourPickerCtrl(self.visualMethod)
+		self.normalAuto = wx.CheckBox(self.visualMethod, label=_('auto closing'))
 
 		alertLabel = wx.StaticText(self.visualMethod, label='alert')
 		self.visualAlert = wx.ColourPickerCtrl(self.visualMethod)
+		self.alertAuto = wx.CheckBox(self.visualMethod, label=_('auto closing'))
 
 		warnLabel = wx.StaticText(self.visualMethod, label='warn')
 		self.visualWarn = wx.ColourPickerCtrl(self.visualMethod)
+		self.warnAuto = wx.CheckBox(self.visualMethod, label=_('auto closing'))
 
 		alarmLabel = wx.StaticText(self.visualMethod, label='alarm')
 		self.visualAlarm = wx.ColourPickerCtrl(self.visualMethod)
+		self.alarmAuto = wx.CheckBox(self.visualMethod, label=_('auto closing'))
 
 		emergencyLabel = wx.StaticText(self.visualMethod, label='emergency')
 		self.visualEmergency= wx.ColourPickerCtrl(self.visualMethod)
+		self.emergencyAuto = wx.CheckBox(self.visualMethod, label=_('auto closing'))
 
 		self.toolbar2 = wx.ToolBar(self.visualMethod, style=wx.TB_TEXT | wx.TB_VERTICAL)
 		save2 = self.toolbar2.AddTool(201, _('Save'), wx.Bitmap(self.currentdir+"/data/apply.png"))
 		self.Bind(wx.EVT_TOOL, self.onSave2, save2)
 		cancel2 = self.toolbar2.AddTool(202, _('Cancel'), wx.Bitmap(self.currentdir+"/data/cancel.png"))
 		self.Bind(wx.EVT_TOOL, self.onCancel2, cancel2)
+		self.toolbar2.AddSeparator()
+		stopvisual = self.toolbar2.AddTool(203, _('Close all windows'), wx.Bitmap(self.currentdir+"/data/stop.png"))
+		self.Bind(wx.EVT_TOOL, self.onStopAllVisual, stopvisual)
 
 		names = wx.BoxSizer(wx.VERTICAL)
 		names.AddSpacer(35)
@@ -309,9 +324,18 @@ class MyFrame(wx.Frame):
 		colours.Add(self.visualAlarm, 0, wx.ALL | wx.EXPAND, 5)
 		colours.Add(self.visualEmergency, 0, wx.ALL | wx.EXPAND, 5)
 
+		auto = wx.BoxSizer(wx.VERTICAL)
+		auto.AddSpacer(30)
+		auto.Add(self.normalAuto, 0, wx.ALL | wx.EXPAND, 10)
+		auto.Add(self.alertAuto, 0, wx.ALL | wx.EXPAND, 10)
+		auto.Add(self.warnAuto, 0, wx.ALL | wx.EXPAND, 10)
+		auto.Add(self.alarmAuto, 0, wx.ALL | wx.EXPAND, 10)
+		auto.Add(self.emergencyAuto, 0, wx.ALL | wx.EXPAND, 10)
+
 		sizer = wx.BoxSizer(wx.HORIZONTAL)
 		sizer.Add(names, 0, wx.ALL | wx.EXPAND, 10)
 		sizer.Add(colours, 1, wx.ALL | wx.EXPAND, 10)
+		sizer.Add(auto, 0, wx.ALL | wx.EXPAND, 10)
 		sizer.Add(self.toolbar2, 0,  wx.EXPAND, 0)
 		self.visualMethod.SetSizer(sizer)
 
@@ -320,45 +344,58 @@ class MyFrame(wx.Frame):
 	def readColours(self):
 		try: visualNormal = eval(self.conf.get('NOTIFICATIONS', 'visualNormal'))
 		except: 
-			visualNormal = (46, 52, 54, 255)
+			visualNormal = [(46, 52, 54, 255), True]
 			self.conf.set('NOTIFICATIONS', 'visualNormal', str(visualNormal))
-		try: self.visualNormal.SetColour(visualNormal)
+		try: 
+			self.visualNormal.SetColour(visualNormal[0])
+			self.normalAuto.SetValue(visualNormal[1])
 		except: pass
 
 		try: visualAlert = eval(self.conf.get('NOTIFICATIONS', 'visualAlert'))
 		except: 
-			visualAlert = (32, 74, 135, 255)
+			visualAlert = [(32, 74, 135, 255), True]
 			self.conf.set('NOTIFICATIONS', 'visualAlert', str(visualAlert))
-		try: self.visualAlert.SetColour(visualAlert)
+		try: 
+			self.visualAlert.SetColour(visualAlert[0])
+			self.alertAuto.SetValue(visualAlert[1])
 		except: pass
 
 		try: visualWarn = eval(self.conf.get('NOTIFICATIONS', 'visualWarn'))
 		except: 
-			visualWarn = (196, 160, 0, 255)
+			visualWarn = [(196, 160, 0, 255), True]
 			self.conf.set('NOTIFICATIONS', 'visualWarn', str(visualWarn))
-		try: self.visualWarn.SetColour(visualWarn)
+		try: 
+			self.visualWarn.SetColour(visualWarn[0])
+			self.warnAuto.SetValue(visualWarn[1])
 		except: pass
 
 		try: visualAlarm = eval(self.conf.get('NOTIFICATIONS', 'visualAlarm'))
 		except: 
-			visualAlarm = (206, 92, 0, 255)
+			visualAlarm = [(206, 92, 0, 255), False]
 			self.conf.set('NOTIFICATIONS', 'visualAlarm', str(visualAlarm))
-		try: self.visualAlarm.SetColour(visualAlarm)
+		try: 
+			self.visualAlarm.SetColour(visualAlarm[0])
+			self.alarmAuto.SetValue(visualAlarm[1])
 		except: pass
 
 		try: visualEmergency = eval(self.conf.get('NOTIFICATIONS', 'visualEmergency'))
 		except: 
-			visualEmergency = (164, 0, 0, 255)
+			visualEmergency = [(164, 0, 0, 255), False]
 			self.conf.set('NOTIFICATIONS', 'visualEmergency', str(visualEmergency))
-		try: self.visualEmergency.SetColour(visualEmergency)
+		try: 
+			self.visualEmergency.SetColour(visualEmergency[0])
+			self.emergencyAuto.SetValue(visualEmergency[1])
 		except: pass
 
+	def onStopAllVisual(self,e):
+		subprocess.call(['pkill','-f','openplotter-notifications-visual'])
+
 	def onSave2(self,e):
-		self.conf.set('NOTIFICATIONS', 'visualNormal', str(self.visualNormal.GetColour()))
-		self.conf.set('NOTIFICATIONS', 'visualAlert', str(self.visualAlert.GetColour()))
-		self.conf.set('NOTIFICATIONS', 'visualWarn', str(self.visualWarn.GetColour()))
-		self.conf.set('NOTIFICATIONS', 'visualAlarm', str(self.visualAlarm.GetColour()))
-		self.conf.set('NOTIFICATIONS', 'visualEmergency', str(self.visualEmergency.GetColour()))
+		self.conf.set('NOTIFICATIONS', 'visualNormal', str([self.visualNormal.GetColour(),self.normalAuto.GetValue()]))
+		self.conf.set('NOTIFICATIONS', 'visualAlert', str([self.visualAlert.GetColour(),self.alertAuto.GetValue()]))
+		self.conf.set('NOTIFICATIONS', 'visualWarn', str([self.visualWarn.GetColour(),self.warnAuto.GetValue()]))
+		self.conf.set('NOTIFICATIONS', 'visualAlarm', str([self.visualAlarm.GetColour(),self.alarmAuto.GetValue()]))
+		self.conf.set('NOTIFICATIONS', 'visualEmergency', str([self.visualEmergency.GetColour(),self.emergencyAuto.GetValue()]))
 		self.ShowStatusBarGREEN(_('Colours saved'))
 
 	def onCancel2(self,e):
@@ -369,7 +406,6 @@ class MyFrame(wx.Frame):
 
 	def pageSound(self):
 		filesLabel = wx.StaticText(self.soundMethod, label=_('File'))
-		priorityLabel = wx.StaticText(self.soundMethod, label=_('Priority'))
 
 		playButtonImg = wx.Bitmap(self.currentdir+"/data/play.png", wx.BITMAP_TYPE_ANY)
 
@@ -379,7 +415,8 @@ class MyFrame(wx.Frame):
 		playButton1.Bind(wx.EVT_BUTTON, self.onPlayButton)
 		normalSelect = wx.Button(self.soundMethod, id=5001, label=_('Select'))
 		normalSelect.Bind(wx.EVT_BUTTON, self.OnFile)
-		self.normalPriority = wx.TextCtrl(self.soundMethod)
+		self.normalStop = wx.CheckBox(self.soundMethod, label=_('auto stop'))
+
 
 		alertLabel = wx.StaticText(self.soundMethod, label='alert')
 		self.soundAlert = wx.TextCtrl(self.soundMethod)
@@ -387,7 +424,7 @@ class MyFrame(wx.Frame):
 		playButton2.Bind(wx.EVT_BUTTON, self.onPlayButton)
 		alertSelect = wx.Button(self.soundMethod, id=5002, label=_('Select'))
 		alertSelect.Bind(wx.EVT_BUTTON, self.OnFile)
-		self.alertPriority = wx.TextCtrl(self.soundMethod)
+		self.alertStop = wx.CheckBox(self.soundMethod, label=_('auto stop'))
 
 		warnLabel = wx.StaticText(self.soundMethod, label='warn')
 		self.soundWarn = wx.TextCtrl(self.soundMethod)
@@ -395,7 +432,7 @@ class MyFrame(wx.Frame):
 		playButton3.Bind(wx.EVT_BUTTON, self.onPlayButton)
 		warnSelect = wx.Button(self.soundMethod, id=5003, label=_('Select'))
 		warnSelect.Bind(wx.EVT_BUTTON, self.OnFile)
-		self.warnPriority = wx.TextCtrl(self.soundMethod)
+		self.warnStop = wx.CheckBox(self.soundMethod, label=_('auto stop'))
 
 		alarmLabel = wx.StaticText(self.soundMethod, label='alarm')
 		self.soundAlarm = wx.TextCtrl(self.soundMethod)
@@ -403,7 +440,7 @@ class MyFrame(wx.Frame):
 		playButton4.Bind(wx.EVT_BUTTON, self.onPlayButton)
 		alarmSelect = wx.Button(self.soundMethod, id=5004, label=_('Select'))
 		alarmSelect.Bind(wx.EVT_BUTTON, self.OnFile)
-		self.alarmPriority = wx.TextCtrl(self.soundMethod)
+		self.alarmStop = wx.CheckBox(self.soundMethod, label=_('auto stop'))
 
 		emergencyLabel = wx.StaticText(self.soundMethod, label='emergency')
 		self.soundEmergency= wx.TextCtrl(self.soundMethod)
@@ -411,13 +448,16 @@ class MyFrame(wx.Frame):
 		playButton5.Bind(wx.EVT_BUTTON, self.onPlayButton)
 		emergencySelect = wx.Button(self.soundMethod, id=5005, label=_('Select'))
 		emergencySelect.Bind(wx.EVT_BUTTON, self.OnFile)
-		self.emergencyPriority = wx.TextCtrl(self.soundMethod)
+		self.emergencyStop = wx.CheckBox(self.soundMethod, label=_('auto stop'))
 
 		self.toolbar5 = wx.ToolBar(self.soundMethod, style=wx.TB_TEXT | wx.TB_VERTICAL)
 		save2 = self.toolbar5.AddTool(501, _('Save'), wx.Bitmap(self.currentdir+"/data/apply.png"))
 		self.Bind(wx.EVT_TOOL, self.onSave3, save2)
 		cancel2 = self.toolbar5.AddTool(502, _('Cancel'), wx.Bitmap(self.currentdir+"/data/cancel.png"))
 		self.Bind(wx.EVT_TOOL, self.onCancel3, cancel2)
+		self.toolbar5.AddSeparator()
+		stopsounds = self.toolbar5.AddTool(503, _('Stop all sounds'), wx.Bitmap(self.currentdir+"/data/stop.png"))
+		self.Bind(wx.EVT_TOOL, self.onStopAllSounds, stopsounds)
 
 		names = wx.BoxSizer(wx.VERTICAL)
 		names.AddSpacer(35)
@@ -433,37 +473,36 @@ class MyFrame(wx.Frame):
 
 		title = wx.BoxSizer(wx.HORIZONTAL)
 		title.Add(filesLabel, 1, wx.ALL | wx.EXPAND, 5)
-		title.Add(priorityLabel, 0, wx.ALL | wx.EXPAND, 5)
 
 		normal = wx.BoxSizer(wx.HORIZONTAL)
 		normal.Add(self.soundNormal, 1, wx.ALL | wx.EXPAND, 5)
 		normal.Add(playButton1, 0, wx.ALL | wx.EXPAND, 5)
 		normal.Add(normalSelect, 0, wx.ALL | wx.EXPAND, 5)
-		normal.Add(self.normalPriority, 0, wx.ALL | wx.EXPAND, 5)
+		normal.Add(self.normalStop, 0, wx.ALL | wx.EXPAND, 5)
 
 		alert = wx.BoxSizer(wx.HORIZONTAL)
 		alert.Add(self.soundAlert, 1, wx.ALL | wx.EXPAND, 5)
 		alert.Add(playButton2, 0, wx.ALL | wx.EXPAND, 5)
 		alert.Add(alertSelect, 0, wx.ALL | wx.EXPAND, 5)
-		alert.Add(self.alertPriority, 0, wx.ALL | wx.EXPAND, 5)
+		alert.Add(self.alertStop, 0, wx.ALL | wx.EXPAND, 5)
 
 		warn = wx.BoxSizer(wx.HORIZONTAL)
 		warn.Add(self.soundWarn, 1, wx.ALL | wx.EXPAND, 5)
 		warn.Add(playButton3, 0, wx.ALL | wx.EXPAND, 5)
 		warn.Add(warnSelect, 0, wx.ALL | wx.EXPAND, 5)
-		warn.Add(self.warnPriority, 0, wx.ALL | wx.EXPAND, 5)
+		warn.Add(self.warnStop, 0, wx.ALL | wx.EXPAND, 5)
 
 		alarm = wx.BoxSizer(wx.HORIZONTAL)
 		alarm.Add(self.soundAlarm, 1, wx.ALL | wx.EXPAND, 5)
 		alarm.Add(playButton4, 0, wx.ALL | wx.EXPAND, 5)
 		alarm.Add(alarmSelect, 0, wx.ALL | wx.EXPAND, 5)
-		alarm.Add(self.alarmPriority, 0, wx.ALL | wx.EXPAND, 5)
+		alarm.Add(self.alarmStop, 0, wx.ALL | wx.EXPAND, 5)
 
 		emergency = wx.BoxSizer(wx.HORIZONTAL)
 		emergency.Add(self.soundEmergency, 1, wx.ALL | wx.EXPAND, 5)
 		emergency.Add(playButton5, 0, wx.ALL | wx.EXPAND, 5)
 		emergency.Add(emergencySelect, 0, wx.ALL | wx.EXPAND, 5)
-		emergency.Add(self.emergencyPriority, 0, wx.ALL | wx.EXPAND, 5)
+		emergency.Add(self.emergencyStop, 0, wx.ALL | wx.EXPAND, 5)
 
 		sounds = wx.BoxSizer(wx.VERTICAL)
 		sounds.AddSpacer(5)
@@ -490,47 +529,47 @@ class MyFrame(wx.Frame):
 	def readSounds(self):
 		try: soundNormal = eval(self.conf.get('NOTIFICATIONS', 'soundNormal'))
 		except: 
-			soundNormal = ['/usr/share/sounds/openplotter/Bleep.mp3', 1]
+			soundNormal = ['/usr/share/sounds/openplotter/Bleep.mp3', True]
 			self.conf.set('NOTIFICATIONS', 'soundNormal', str(soundNormal))
 		try: 
 			self.soundNormal.SetValue(soundNormal[0])
-			self.normalPriority.SetValue(str(soundNormal[1]))
+			self.normalStop.SetValue(soundNormal[1])
 		except: pass
 
 		try: soundAlert = eval(self.conf.get('NOTIFICATIONS', 'soundAlert'))
 		except: 
-			soundAlert = ['/usr/share/sounds/openplotter/Store_Door_Chime.mp3', 2]
+			soundAlert = ['/usr/share/sounds/openplotter/Store_Door_Chime.mp3', True]
 			self.conf.set('NOTIFICATIONS', 'soundAlert', str(soundAlert))
 		try: 
 			self.soundAlert.SetValue(soundAlert[0])
-			self.alertPriority.SetValue(str(soundAlert[1]))
+			self.alertStop.SetValue(soundAlert[1])
 		except: pass
 
 		try: soundWarn = eval(self.conf.get('NOTIFICATIONS', 'soundWarn'))
 		except: 
-			soundWarn = ['/usr/share/sounds/openplotter/Ship_Bell.mp3', 3]
+			soundWarn = ['/usr/share/sounds/openplotter/Ship_Bell.mp3', True]
 			self.conf.set('NOTIFICATIONS', 'soundWarn', str(soundWarn))
 		try: 
 			self.soundWarn.SetValue(soundWarn[0])
-			self.warnPriority.SetValue(str(soundWarn[1]))
+			self.warnStop.SetValue(soundWarn[1])
 		except: pass
 
 		try: soundAlarm = eval(self.conf.get('NOTIFICATIONS', 'soundAlarm'))
 		except: 
-			soundAlarm = ['/usr/share/sounds/openplotter/House_Fire_Alarm.mp3', 4]
+			soundAlarm = ['/usr/share/sounds/openplotter/House_Fire_Alarm.mp3', False]
 			self.conf.set('NOTIFICATIONS', 'soundAlarm', str(soundAlarm))
 		try: 
 			self.soundAlarm.SetValue(soundAlarm[0])
-			self.alarmPriority.SetValue(str(soundAlarm[1]))
+			self.alarmStop.SetValue(soundAlarm[1])
 		except: pass
 
 		try: soundEmergency = eval(self.conf.get('NOTIFICATIONS', 'soundEmergency'))
 		except: 
-			soundEmergency = ['/usr/share/sounds/openplotter/Tornado_Siren_II.mp3', 5]
+			soundEmergency = ['/usr/share/sounds/openplotter/Tornado_Siren_II.mp3', False]
 			self.conf.set('NOTIFICATIONS', 'soundEmergency', str(soundEmergency))
 		try: 
 			self.soundEmergency.SetValue(soundEmergency[0])
-			self.emergencyPriority.SetValue(str(soundEmergency[1]))
+			self.emergencyStop.SetValue(soundEmergency[1])
 		except: pass
 
 	def onPlayButton(self,e):
@@ -543,6 +582,9 @@ class MyFrame(wx.Frame):
 			elif select == 6004: subprocess.Popen(['cvlc', '--play-and-exit', self.soundAlarm.GetValue()])
 			elif select == 6005: subprocess.Popen(['cvlc', '--play-and-exit', self.soundEmergency.GetValue()])
 		except: self.ShowStatusBarRED(_('Failed: Error playing file'))
+
+	def onStopAllSounds(self,e):
+		subprocess.call(['pkill','-f','openplotter-notifications-sound'])
 
 	def OnFile(self,e):
 		select = e.GetId()
@@ -558,20 +600,11 @@ class MyFrame(wx.Frame):
 		dlg.Destroy()
 
 	def onSave3(self,e):
-		try: 
-			normalPriority = int(self.normalPriority.GetValue())
-			alertPriority = int(self.alertPriority.GetValue())
-			warnPriority = int(self.warnPriority.GetValue())
-			alarmPriority = int(self.alarmPriority.GetValue())
-			emergencyPriority = int(self.emergencyPriority.GetValue())
-		except:
-			self.ShowStatusBarRED(_('Failed: Priority must be a number'))
-			return
-		self.conf.set('NOTIFICATIONS', 'soundNormal', str([self.soundNormal.GetValue(), normalPriority]))
-		self.conf.set('NOTIFICATIONS', 'soundAlert', str([self.soundAlert.GetValue(), normalPriority]))
-		self.conf.set('NOTIFICATIONS', 'soundWarn', str([self.soundWarn.GetValue(), normalPriority]))
-		self.conf.set('NOTIFICATIONS', 'soundAlarm', str([self.soundAlarm.GetValue(), normalPriority]))
-		self.conf.set('NOTIFICATIONS', 'soundEmergency', str([self.soundEmergency.GetValue(), normalPriority]))
+		self.conf.set('NOTIFICATIONS', 'soundNormal', str([self.soundNormal.GetValue(), self.normalStop.GetValue()]))
+		self.conf.set('NOTIFICATIONS', 'soundAlert', str([self.soundAlert.GetValue(), self.alertStop.GetValue()]))
+		self.conf.set('NOTIFICATIONS', 'soundWarn', str([self.soundWarn.GetValue(), self.warnStop.GetValue()]))
+		self.conf.set('NOTIFICATIONS', 'soundAlarm', str([self.soundAlarm.GetValue(), self.alarmStop.GetValue()]))
+		self.conf.set('NOTIFICATIONS', 'soundEmergency', str([self.soundEmergency.GetValue(), self.emergencyStop.GetValue()]))
 		self.ShowStatusBarGREEN(_('Sounds saved'))
 
 	def onCancel3(self,e):
@@ -579,6 +612,32 @@ class MyFrame(wx.Frame):
 		self.ShowStatusBarRED(_('Sounds reloaded'))
 
 	############################################################################
+
+	def pageCommand(self):
+		text1 = wx.StaticText(self.command, label=_('Coming soon.'))
+		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox1.AddStretchSpacer(1)
+		hbox1.Add(text1, 0, wx.ALL | wx.EXPAND, 5)
+		hbox1.AddStretchSpacer(1)
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.AddStretchSpacer(1)
+		vbox.Add(hbox1, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.AddStretchSpacer(1)
+		self.command.SetSizer(vbox)
+
+	############################################################################
+
+	def pageSK(self):
+		text1 = wx.StaticText(self.sk, label=_('Coming soon.'))
+		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox1.AddStretchSpacer(1)
+		hbox1.Add(text1, 0, wx.ALL | wx.EXPAND, 5)
+		hbox1.AddStretchSpacer(1)
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.AddStretchSpacer(1)
+		vbox.Add(hbox1, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.AddStretchSpacer(1)
+		self.sk.SetSizer(vbox)
 
 ################################################################################
 

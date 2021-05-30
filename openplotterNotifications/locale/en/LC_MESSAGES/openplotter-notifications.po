@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: openplotter-notifications\n"
-"POT-Creation-Date: 2021-05-24 10:38+0200\n"
-"PO-Revision-Date: 2021-05-24 10:48+0200\n"
+"POT-Creation-Date: 2021-05-30 23:50+0200\n"
+"PO-Revision-Date: 2021-05-30 23:50+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en\n"
@@ -14,3 +14,233 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-SearchPath-0: .\n"
+
+#: data/openplotter-notifications.desktop:3 visual.py:31
+msgid "Notifications"
+msgstr ""
+
+#: data/openplotter-notifications.desktop:5
+msgid "openplotter-notifications"
+msgstr ""
+
+#: notificationsPostInstall.py:33
+msgid "Installing python packages..."
+msgstr ""
+
+#: notificationsPostInstall.py:36 notificationsPostInstall.py:49
+#: notificationsPostInstall.py:57 notificationsPostInstall.py:65
+#: notificationsPostInstall.py:71 notificationsPreUninstall.py:33
+#: notificationsPreUninstall.py:39
+msgid "DONE"
+msgstr ""
+
+#: notificationsPostInstall.py:37 notificationsPostInstall.py:50
+#: notificationsPostInstall.py:58 notificationsPostInstall.py:66
+#: notificationsPostInstall.py:72 notificationsPreUninstall.py:34
+#: notificationsPreUninstall.py:40
+msgid "FAILED: "
+msgstr ""
+
+#: notificationsPostInstall.py:39
+msgid "Installing/Updating signalk-threshold-notifier plugin..."
+msgstr ""
+
+#: notificationsPostInstall.py:48
+msgid "Failed. Please, install Signal K server."
+msgstr ""
+
+#: notificationsPostInstall.py:52
+msgid "Checking access to Signal K server..."
+msgstr ""
+
+#: notificationsPostInstall.py:60
+msgid "Adding openplotter-notifications-read service..."
+msgstr ""
+
+#: notificationsPostInstall.py:68
+msgid "Setting version..."
+msgstr ""
+
+#: notificationsPreUninstall.py:29
+msgid "Removing openplotter-notifications-read services..."
+msgstr ""
+
+#: notificationsPreUninstall.py:36
+msgid "Removing version..."
+msgstr ""
+
+#: openplotterNotifications.py:46
+msgid "Help"
+msgstr ""
+
+#: openplotterNotifications.py:49
+msgid "Settings"
+msgstr ""
+
+#: openplotterNotifications.py:52
+msgid "Approve"
+msgstr ""
+
+#: openplotterNotifications.py:54
+msgid "Allowed"
+msgstr ""
+
+#: openplotterNotifications.py:57
+msgid "Refresh"
+msgstr ""
+
+#: openplotterNotifications.py:73
+msgid "Thresholds"
+msgstr ""
+
+#: openplotterNotifications.py:74
+msgid "Visual"
+msgstr ""
+
+#: openplotterNotifications.py:75
+msgid "Sound"
+msgstr ""
+
+#: openplotterNotifications.py:76
+msgid "Command"
+msgstr ""
+
+#: openplotterNotifications.py:158
+msgid " Press \"Approve\" and then \"Refresh\"."
+msgstr ""
+
+#: openplotterNotifications.py:162
+msgid " Press \"Refresh\"."
+msgstr ""
+
+#: openplotterNotifications.py:164
+msgid " Press \"Allowed\"."
+msgstr ""
+
+#: openplotterNotifications.py:177
+msgid "Edit"
+msgstr ""
+
+#: openplotterNotifications.py:190
+msgid "Please install \"signalk-threshold-notifier\" Signal K app"
+msgstr ""
+
+#: openplotterNotifications.py:194
+msgid "Please install \"Signal K Installer\" OpenPlotter app"
+msgstr ""
+
+#: openplotterNotifications.py:215
+msgid "Failed: signalk-threshold-notifier is disabled"
+msgstr ""
+
+#: openplotterNotifications.py:219
+msgid ""
+"Failed: error reading signalk-threshold-notifier plugin configuration. Is "
+"this Signal K plugin installed and enabled?"
+msgstr ""
+
+#: openplotterNotifications.py:253
+msgid "High threshold: "
+msgstr ""
+
+#: openplotterNotifications.py:256 openplotterNotifications.py:265
+msgid "Message: "
+msgstr ""
+
+#: openplotterNotifications.py:259 openplotterNotifications.py:268
+msgid "Methods: "
+msgstr ""
+
+#: openplotterNotifications.py:262
+msgid "Low threshold: "
+msgstr ""
+
+#: openplotterNotifications.py:273
+msgid "No thresholds found"
+msgstr ""
+
+#: openplotterNotifications.py:280 openplotterNotifications.py:284
+#: openplotterNotifications.py:288 openplotterNotifications.py:292
+#: openplotterNotifications.py:296
+msgid "auto closing"
+msgstr ""
+
+#: openplotterNotifications.py:299 openplotterNotifications.py:454
+msgid "Save"
+msgstr ""
+
+#: openplotterNotifications.py:301 openplotterNotifications.py:456
+msgid "Cancel"
+msgstr ""
+
+#: openplotterNotifications.py:304
+msgid "Close all windows"
+msgstr ""
+
+#: openplotterNotifications.py:399
+msgid "Colours saved"
+msgstr ""
+
+#: openplotterNotifications.py:403
+msgid "Colours reloaded"
+msgstr ""
+
+#: openplotterNotifications.py:408
+msgid "File"
+msgstr ""
+
+#: openplotterNotifications.py:416 openplotterNotifications.py:425
+#: openplotterNotifications.py:433 openplotterNotifications.py:441
+#: openplotterNotifications.py:449
+msgid "Select"
+msgstr ""
+
+#: openplotterNotifications.py:418 openplotterNotifications.py:427
+#: openplotterNotifications.py:435 openplotterNotifications.py:443
+#: openplotterNotifications.py:451
+msgid "auto stop"
+msgstr ""
+
+#: openplotterNotifications.py:459
+msgid "Stop all sounds"
+msgstr ""
+
+#: openplotterNotifications.py:584
+msgid "Failed: Error playing file"
+msgstr ""
+
+#: openplotterNotifications.py:591
+msgid "Choose a file"
+msgstr ""
+
+#: openplotterNotifications.py:592
+msgid "Audio files"
+msgstr ""
+
+#: openplotterNotifications.py:592
+msgid "All files"
+msgstr ""
+
+#: openplotterNotifications.py:608
+msgid "Sounds saved"
+msgstr ""
+
+#: openplotterNotifications.py:612
+msgid "Sounds reloaded"
+msgstr ""
+
+#: openplotterNotifications.py:617 openplotterNotifications.py:631
+msgid "Coming soon."
+msgstr ""
+
+#: startup.py:42
+msgid "Checking Notifications..."
+msgstr ""
+
+#: startup.py:56
+msgid "Access to Signal K server validated"
+msgstr ""
+
+#: visual.py:65
+msgid "Close"
+msgstr ""

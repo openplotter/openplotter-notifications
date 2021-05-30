@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import os
+import os, subprocess
 from openplotterSettings import conf
 from openplotterSettings import language
 
@@ -26,6 +26,12 @@ def main():
 	package = 'openplotter-notifications'
 	language.Language(currentdir, package, currentLanguage)
 
+	print(_('Removing openplotter-notifications-read services...'))
+	try:
+		subprocess.call(['pkill', '-f', 'openplotter-notifications-read'])
+		subprocess.call(['rm', '-f', conf2.home+'/.config/autostart/openplotter-notifications-read.desktop'])
+		print(_('DONE'))
+	except Exception as e: print(_('FAILED: ')+str(e))
 
 	print(_('Removing version...'))
 	try:
