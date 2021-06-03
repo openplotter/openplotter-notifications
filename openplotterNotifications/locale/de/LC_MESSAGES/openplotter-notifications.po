@@ -1,11 +1,11 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: openplotter-notifications\n"
-"POT-Creation-Date: 2021-06-02 20:43+0200\n"
-"PO-Revision-Date: 2021-06-03 18:58+0200\n"
+"Project-Id-Version: openplotter\n"
+"POT-Creation-Date: 2021-05-30 23:50+0200\n"
+"PO-Revision-Date: 2021-06-03 18:59+0200\n"
 "Last-Translator: \n"
-"Language-Team: \n"
-"Language: en\n"
+"Language-Team: German\n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -13,234 +13,237 @@ msgstr ""
 "X-Poedit-Basepath: ../../..\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-SourceCharset: UTF-8\n"
+"X-Crowdin-Project: openplotter\n"
+"X-Crowdin-Project-ID: 289888\n"
+"X-Crowdin-Language: de\n"
+"X-Crowdin-File: openplotter-notifications.po\n"
+"X-Crowdin-File-ID: 32\n"
 "X-Poedit-SearchPath-0: .\n"
 
 #: data/openplotter-notifications.desktop:3 visual.py:31
 msgid "Notifications"
-msgstr ""
+msgstr "Benachrichtigungen"
 
 #: data/openplotter-notifications.desktop:5
 msgid "openplotter-notifications"
-msgstr ""
+msgstr "openplotter-Benachrichtigungen"
 
 #: notificationsPostInstall.py:33
 msgid "Installing python packages..."
-msgstr ""
+msgstr "Python-Pakete werden installiert..."
 
 #: notificationsPostInstall.py:36 notificationsPostInstall.py:49
 #: notificationsPostInstall.py:57 notificationsPostInstall.py:65
 #: notificationsPostInstall.py:71 notificationsPreUninstall.py:33
 #: notificationsPreUninstall.py:39
 msgid "DONE"
-msgstr ""
+msgstr "Fertig"
 
 #: notificationsPostInstall.py:37 notificationsPostInstall.py:50
 #: notificationsPostInstall.py:58 notificationsPostInstall.py:66
 #: notificationsPostInstall.py:72 notificationsPreUninstall.py:34
 #: notificationsPreUninstall.py:40
 msgid "FAILED: "
-msgstr ""
+msgstr "FEHLGESCHLAGEN: "
 
 #: notificationsPostInstall.py:39
 msgid "Installing/Updating signalk-threshold-notifier plugin..."
-msgstr ""
+msgstr "Signalschwellen-Benachrichtigung-Plugin installieren/aktualisieren..."
 
 #: notificationsPostInstall.py:48
 msgid "Failed. Please, install Signal K server."
-msgstr ""
+msgstr "Fehlgeschlagen. Bitte installieren Sie Signal K-Server."
 
 #: notificationsPostInstall.py:52
 msgid "Checking access to Signal K server..."
-msgstr ""
+msgstr "Prüfe Zugriff auf Signal K-Server..."
 
 #: notificationsPostInstall.py:60
 msgid "Adding openplotter-notifications-read service..."
-msgstr ""
+msgstr "openplotter-notifications-read service hinzufügen..."
 
 #: notificationsPostInstall.py:68
 msgid "Setting version..."
-msgstr ""
+msgstr "Setze Version..."
 
 #: notificationsPreUninstall.py:29
 msgid "Removing openplotter-notifications-read services..."
-msgstr ""
+msgstr "Lösche openplotter-Benachrichtigung-Lese-Dienste..."
 
 #: notificationsPreUninstall.py:36
 msgid "Removing version..."
-msgstr ""
+msgstr "Entferne Version..."
 
 #: openplotterNotifications.py:46
 msgid "Help"
-msgstr ""
+msgstr "Hilfe"
 
 #: openplotterNotifications.py:49
 msgid "Settings"
-msgstr ""
+msgstr "Einstellungen"
 
 #: openplotterNotifications.py:52
 msgid "Approve"
-msgstr ""
+msgstr "Bestätigen"
 
 #: openplotterNotifications.py:54
 msgid "Allowed"
-msgstr ""
+msgstr "Zulässig"
 
 #: openplotterNotifications.py:57
 msgid "Refresh"
-msgstr ""
+msgstr "Aktualisieren"
 
 #: openplotterNotifications.py:73
 msgid "Thresholds"
-msgstr ""
+msgstr "Grenzwerte"
 
 #: openplotterNotifications.py:74
 msgid "Visual"
-msgstr ""
+msgstr "Visuell"
 
 #: openplotterNotifications.py:75
 msgid "Sound"
-msgstr ""
+msgstr "Ton"
 
 #: openplotterNotifications.py:76
 msgid "Command"
-msgstr ""
+msgstr "Befehl"
 
 #: openplotterNotifications.py:158
 msgid " Press \"Approve\" and then \"Refresh\"."
-msgstr ""
+msgstr " Drücken Sie \"Genehmigen\" und dann \"Aktualisieren\"."
 
 #: openplotterNotifications.py:162
 msgid " Press \"Refresh\"."
-msgstr ""
+msgstr " Drücke \"Aktualisieren\"."
 
 #: openplotterNotifications.py:164
 msgid " Press \"Allowed\"."
-msgstr ""
+msgstr " Drücke \"Erlaubt\"."
 
 #: openplotterNotifications.py:177
 msgid "Edit"
-msgstr ""
+msgstr "Bearbeiten"
 
 #: openplotterNotifications.py:190
 msgid "Please install \"signalk-threshold-notifier\" Signal K app"
-msgstr ""
+msgstr "Bitte installieren Sie \"Signalschwellen-Benachrichtigung\" Signal K App"
 
 #: openplotterNotifications.py:194
 msgid "Please install \"Signal K Installer\" OpenPlotter app"
-msgstr ""
+msgstr "Bitte installieren Sie die OpenPlotter App \"Signal K Installer\""
 
 #: openplotterNotifications.py:215
 msgid "Failed: signalk-threshold-notifier is disabled"
-msgstr ""
+msgstr "Fehler: Signalschwellen-Notifier ist deaktiviert"
 
 #: openplotterNotifications.py:219
-msgid ""
-"Failed: error reading signalk-threshold-notifier plugin configuration. Is "
-"this Signal K plugin installed and enabled?"
-msgstr ""
+msgid "Failed: error reading signalk-threshold-notifier plugin configuration. Is this Signal K plugin installed and enabled?"
+msgstr "Fehler: Fehler beim Lesen der Signalschwellen-Benachrichtigungs-Plugin. Ist dieses Signal K Plugin installiert und aktiviert?"
 
 #: openplotterNotifications.py:253
 msgid "High threshold: "
-msgstr ""
+msgstr "Hoher Schwellenwert: "
 
 #: openplotterNotifications.py:256 openplotterNotifications.py:265
 msgid "Message: "
-msgstr ""
+msgstr "Nachricht: "
 
 #: openplotterNotifications.py:259 openplotterNotifications.py:268
 msgid "Methods: "
-msgstr ""
+msgstr "Methoden: "
 
 #: openplotterNotifications.py:262
 msgid "Low threshold: "
-msgstr ""
+msgstr "Niedriger Schwellenwert: "
 
 #: openplotterNotifications.py:273
 msgid "No thresholds found"
-msgstr ""
+msgstr "Keine Schwellenwerte gefunden"
 
 #: openplotterNotifications.py:280 openplotterNotifications.py:284
 #: openplotterNotifications.py:288 openplotterNotifications.py:292
 #: openplotterNotifications.py:296
 msgid "auto closing"
-msgstr ""
+msgstr "automatisch schließen"
 
 #: openplotterNotifications.py:299 openplotterNotifications.py:454
 msgid "Save"
-msgstr ""
+msgstr "Speichern"
 
 #: openplotterNotifications.py:301 openplotterNotifications.py:456
 msgid "Cancel"
-msgstr ""
+msgstr "Abbrechen"
 
 #: openplotterNotifications.py:304
 msgid "Close all windows"
-msgstr ""
+msgstr "Alle Fenster schließen"
 
 #: openplotterNotifications.py:399
 msgid "Colours saved"
-msgstr ""
+msgstr "Farben gespeichert"
 
 #: openplotterNotifications.py:403
 msgid "Colours reloaded"
-msgstr ""
+msgstr "Farben neu geladen"
 
 #: openplotterNotifications.py:408
 msgid "File"
-msgstr ""
+msgstr "Datei"
 
 #: openplotterNotifications.py:416 openplotterNotifications.py:425
 #: openplotterNotifications.py:433 openplotterNotifications.py:441
 #: openplotterNotifications.py:449
 msgid "Select"
-msgstr ""
+msgstr "Auswählen"
 
 #: openplotterNotifications.py:418 openplotterNotifications.py:427
 #: openplotterNotifications.py:435 openplotterNotifications.py:443
 #: openplotterNotifications.py:451
 msgid "auto stop"
-msgstr ""
+msgstr "auto stoppen"
 
 #: openplotterNotifications.py:459
 msgid "Stop all sounds"
-msgstr ""
+msgstr "Alle Töne stoppen"
 
 #: openplotterNotifications.py:584
 msgid "Failed: Error playing file"
-msgstr ""
+msgstr "Fehler: Fehler beim Abspielen der Datei"
 
 #: openplotterNotifications.py:591
 msgid "Choose a file"
-msgstr ""
+msgstr "Datei auswählen"
 
 #: openplotterNotifications.py:592
 msgid "Audio files"
-msgstr ""
+msgstr "Audiodateien"
 
 #: openplotterNotifications.py:592
 msgid "All files"
-msgstr ""
+msgstr "Alle Dateien"
 
 #: openplotterNotifications.py:608
 msgid "Sounds saved"
-msgstr ""
+msgstr "Töne gespeichert"
 
 #: openplotterNotifications.py:612
 msgid "Sounds reloaded"
-msgstr ""
+msgstr "Töne neu geladen"
 
 #: openplotterNotifications.py:617 openplotterNotifications.py:631
 msgid "Coming soon."
-msgstr ""
+msgstr "Kommt bald."
 
 #: startup.py:42
 msgid "Checking Notifications..."
-msgstr ""
+msgstr "Überprüfe Benachrichtigungen..."
 
 #: startup.py:56
 msgid "Access to Signal K server validated"
-msgstr ""
+msgstr "Zugriff auf Signal K Server validiert"
 
 #: visual.py:65
 msgid "Close"
-msgstr ""
+msgstr "Schließen"
