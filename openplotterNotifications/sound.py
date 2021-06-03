@@ -60,7 +60,7 @@ def main():
 							if data['value']['timestamp'] != timestamp: break
 				else: break
 			else: break
-		time.sleep(1)
+		time.sleep(5)
 
 if __name__ == '__main__':
 	main()
