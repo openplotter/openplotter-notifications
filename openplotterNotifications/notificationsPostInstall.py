@@ -19,7 +19,6 @@ import os, sys, subprocess
 from openplotterSettings import conf
 from openplotterSettings import language
 from openplotterSettings import platform
-from openplotterSignalkInstaller import connections
 from .version import version
 
 def main():
@@ -32,7 +31,7 @@ def main():
 
 	print(_('Installing python packages...'))
 	try:
-		subprocess.call(['pip3', 'install', 'websocket-client'])
+		subprocess.call(['pip3', 'install', 'websocket-client', '-U'])
 		print(_('DONE'))
 	except Exception as e: print(_('FAILED: ')+str(e))
 
@@ -51,6 +50,7 @@ def main():
 
 	print(_('Checking access to Signal K server...'))
 	try:
+		from openplotterSignalkInstaller import connections
 		skConnections = connections.Connections('NOTIFICATIONS')
 		result = skConnections.checkConnection()
 		if result[1]: print(result[1])
