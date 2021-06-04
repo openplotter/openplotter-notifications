@@ -1,11 +1,6 @@
-openplotter-notifications (2.0.1-alpha) bionic; urgency=medium
+openplotter-notifications (2.0.2-alpha) bionic; urgency=medium
 
-  * add visual and sound features
+  * Alpha
 
- -- Sailoog <info@sailoog.com>  Thu, 03 Jun 2021 19:03:33 +0200
+ -- Sailoog <info@sailoog.com>  Fri, 04 Jun 2021 20:28:53 +0200
 
-openplotter-notifications (2.0.0-alpha) bionic; urgency=medium
-
-  * alpha
-
- -- Sailoog <info@sailoog.com>  Sun, 11 Aug 2019 19:20:18 +0200
