@@ -10,6 +10,6 @@ X-Python3-Version: >= 3.2
 Package: openplotter-notifications
 Architecture: all
 Multi-Arch: foreign
-Depends: ${misc:Depends}, ${python3:Depends}, openplotter-settings (>=2.8.0), openplotter-signalk-installer (>=2.4.1)
+Depends: ${misc:Depends}, ${python3:Depends}, openplotter-settings (>=2.8.0), openplotter-signalk-installer (>=2.4.2)
 Description: OpenPlotter app to manage Signal K notifications
  OpenPlotter app to manage Signal K notifications
