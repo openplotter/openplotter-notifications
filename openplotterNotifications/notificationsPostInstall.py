@@ -62,6 +62,8 @@ def main():
 		autostartFolder = conf2.home+'/.config/autostart'
 		if not os.path.exists(autostartFolder): os.mkdir(autostartFolder)
 		subprocess.call(['cp', '-f', currentdir+'/data/openplotter-notifications-read.desktop', autostartFolder])
+		subprocess.call(['pkill', '-f', 'openplotter-notifications-read'])
+		subprocess.Popen('openplotter-notifications-read')
 		print(_('DONE'))
 	except Exception as e: print(_('FAILED: ')+str(e))
 	
