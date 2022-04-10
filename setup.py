@@ -31,7 +31,6 @@ setup (
 	'Operating System :: POSIX :: Linux',
 	'Programming Language :: Python :: 3'],
 	include_package_data=True,
-	entry_points={'console_scripts': ['openplotter-notifications=openplotterNotifications.openplotterNotifications:main','openplotter-notifications-visual=openplotterNotifications.visual:main','openplotter-notifications-sound=openplotterNotifications.sound:main','notificationsPostInstall=openplotterNotifications.notificationsPostInstall:main','notificationsPreUninstall=openplotterNotifications.notificationsPreUninstall:main','openplotter-notifications-read=openplotterNotifications.openplotterNotificationsRead:main']},
-	data_files=[('share/applications', ['openplotterNotifications/data/openplotter-notifications.desktop']),('share/pixmaps', ['openplotterNotifications/data/openplotter-notifications.png']),],
+	entry_points={'console_scripts': ['openplotter-notifications=openplotterNotifications.openplotterNotifications:main','openplotter-notifications-visual=openplotterNotifications.visual:main','openplotter-notifications-sound=openplotterNotifications.sound:main','notificationsPostInstall=openplotterNotifications.notificationsPostInstall:main','notificationsPreUninstall=openplotterNotifications.notificationsPreUninstall:main','openplotter-notifications-read=openplotterNotifications.openplotterNotificationsRead:main','set-notification=openplotterNotifications.setNotification:main']},
+	data_files=[('share/applications', ['openplotterNotifications/data/openplotter-notifications.desktop']),('share/pixmaps', ['openplotterNotifications/data/openplotter-notifications.png']),('share/sounds/openplotter', ['openplotterNotifications/data/sounds/pup-alert.mp3','openplotterNotifications/data/sounds/nuclear-alarm.ogg',])],
 	)
-

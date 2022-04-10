@@ -35,10 +35,10 @@ def main():
 		print(_('DONE'))
 	except Exception as e: print(_('FAILED: ')+str(e))
 
-	print(_('Installing/Updating signalk-threshold-notifier plugin...'))
+	print(_('Installing/Updating signalk-zones plugin...'))
 	try:
 		if platform2.skDir:
-			subprocess.call(['npm', 'i', '--verbose', 'signalk-threshold-notifier'], cwd = platform2.skDir)
+			subprocess.call(['npm', 'i', '--verbose', '@signalk/zones'], cwd = platform2.skDir)
 			subprocess.call(['chown', '-R', conf2.user, platform2.skDir])
 			subprocess.call(['systemctl', 'stop', 'signalk.service'])
 			subprocess.call(['systemctl', 'stop', 'signalk.socket'])
@@ -57,16 +57,6 @@ def main():
 		else: print(_('DONE'))
 	except Exception as e: print(_('FAILED: ')+str(e))
 
-	print(_('Adding openplotter-notifications-read service...'))
-	try:
-		autostartFolder = conf2.home+'/.config/autostart'
-		if not os.path.exists(autostartFolder): os.mkdir(autostartFolder)
-		subprocess.call(['cp', '-f', currentdir+'/data/openplotter-notifications-read.desktop', autostartFolder])
-		subprocess.call(['pkill', '-f', 'openplotter-notifications-read'])
-		subprocess.Popen('openplotter-notifications-read')
-		print(_('DONE'))
-	except Exception as e: print(_('FAILED: ')+str(e))
-	
 	print(_('Setting version...'))
 	try:
 		conf2.set('APPS', 'notifications', version)

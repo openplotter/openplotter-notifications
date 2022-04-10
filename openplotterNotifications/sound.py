@@ -38,10 +38,10 @@ def main():
 		except: sound = ['/usr/share/sounds/openplotter/Ship_Bell.mp3', True]
 	if state == 'alarm':
 		try: sound = eval(conf.get('NOTIFICATIONS', 'soundAlarm'))
-		except: sound = ['/usr/share/sounds/openplotter/House_Fire_Alarm.mp3', False]
+		except: sound = ['/usr/share/sounds/openplotter/pup-alert.mp3', False]
 	if state == 'emergency':
 		try: sound = eval(conf.get('NOTIFICATIONS', 'soundEmergency'))
-		except: sound = ['/usr/share/sounds/openplotter/Tornado_Siren_II.mp3', False]
+		except: sound = ['/usr/share/sounds/openplotter/nuclear-alarm.ogg', False]
 
 	while True:
 		subprocess.call(['cvlc', '--play-and-exit', sound[0]])

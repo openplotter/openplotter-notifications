@@ -24,18 +24,28 @@ class Start():
 		self.conf = conf
 		currentdir = os.path.dirname(os.path.abspath(__file__))
 		language.Language(currentdir,'openplotter-notifications',currentLanguage)
-		
-		self.initialMessage = '' 
+		self.initialMessage = _('Starting Notifications...')
+
+	def pressed(self,stdscr):
+		stdscr.nodelay(True)
+		return stdscr.getch()
 
 	def start(self): 
 		green = '' 
 		black = '' 
 		red = '' 
+		
+		if self.conf.get('GENERAL', 'rescue') != 'yes':
+			subprocess.call(['pkill', '-f', 'openplotter-notifications-read'])
+			subprocess.Popen('openplotter-notifications-read')
+			time.sleep(1)
+		else: subprocess.call(['pkill', '-f', 'openplotter-notifications-read'])
 
 		return {'green': green,'black': black,'red': red}
 
 class Check():
 	def __init__(self, conf, currentLanguage):
+		self.conf = conf
 		currentdir = os.path.dirname(os.path.abspath(__file__))
 		language.Language(currentdir,'openplotter-notifications',currentLanguage)
 		
@@ -45,6 +55,24 @@ class Check():
 		green = '' 
 		black = ''
 		red = ''
+
+		if self.conf.get('GENERAL', 'rescue') == 'yes':
+			subprocess.call(['pkill', '-f', 'openplotter-notifications-read'])
+			msg = _('Notifications is in rescue mode')
+			if red: red += '\n   '+msg
+			else: red = msg
+		else:
+			test = subprocess.check_output(['ps','aux']).decode(sys.stdin.encoding)
+			if 'openplotter-notifications-read' in test: green = _('running')
+			else:
+				subprocess.Popen('openplotter-notifications-read')
+				time.sleep(1)
+				test = subprocess.check_output(['ps','aux']).decode(sys.stdin.encoding)
+				if 'openplotter-notifications-read' in test: green = _('running')
+				else:
+					msg = _('not running')
+					if red: red += '\n   '+msg
+					else: red = msg
 
 		#access
 		skConnections = connections.Connections('NOTIFICATIONS')
