@@ -26,10 +26,6 @@ class Start():
 		language.Language(currentdir,'openplotter-notifications',currentLanguage)
 		self.initialMessage = _('Starting Notifications...')
 
-	def pressed(self,stdscr):
-		stdscr.nodelay(True)
-		return stdscr.getch()
-
 	def start(self): 
 		green = '' 
 		black = '' 
@@ -39,6 +35,7 @@ class Start():
 			subprocess.call(['pkill', '-f', 'openplotter-notifications-read'])
 			subprocess.Popen('openplotter-notifications-read')
 			time.sleep(1)
+			black = _('Notifications started')
 		else: subprocess.call(['pkill', '-f', 'openplotter-notifications-read'])
 
 		return {'green': green,'black': black,'red': red}
@@ -82,8 +79,8 @@ class Check():
 			else: red+= '\n    '+result[1]
 		if result[0] == 'approved' or result[0] == 'validated':
 			msg = _('Access to Signal K server validated')
-			if not green: green = msg
-			else: green+= ' | '+msg
+			if not black: black = msg
+			else: black+= ' | '+msg
 
 		return {'green': green,'black': black,'red': red}
 

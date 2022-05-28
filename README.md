@@ -14,7 +14,7 @@ Install Notifications from openplotter-settings app.
 
 Install openplotter-notifications dependencies:
 
-`sudo apt install `
+`sudo apt install openplotter-signalk-installer`
 
 Clone the repository:
 

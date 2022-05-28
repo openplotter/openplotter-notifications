@@ -59,7 +59,7 @@ def main():
 	message = ''
 	method = []
 	value = ''
-	if len(sys.argv) < 3: sys.exit('Error: wrong arguments')
+	if len(sys.argv) < 3 and not '-h' in sys.argv and not '--help' in sys.argv: sys.exit('Error: wrong arguments')
 	for idx,i in enumerate(sys.argv):
 		if idx == 0: continue
 		if i == '-h' or i == '--help':

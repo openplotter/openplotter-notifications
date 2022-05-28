@@ -44,10 +44,11 @@ class processActions(threading.Thread):
 							elif module == 'openplotterNotifications' and a['ID'] == 'check':
 								try:
 									path = self.path.replace('.','/')
-									resp = requests.get(self.platform.http+'localhost:'+self.platform.skPort+'/signalk/v1/api/vessels/self/'+path, verify=False)
+									resp = requests.get(self.platform.http+'localhost:'+self.platform.skPort+'/signalk/v1/api/vessels/'+path, verify=False)
 									data = ujson.loads(resp.content)
 								except: data = {}
-								if 'value' in data and 'state' in data['value'] and data['value']['state'] == self.notification['state'] and 'message' in data['value'] and data['value']['message'] == self.notification['message']: pass
+								if self.notification['state'] == 'null' and 'value' in data and not data['value']: pass
+								elif 'value' in data and 'state' in data['value'] and data['value']['state'] == self.notification['state'] and 'message' in data['value'] and data['value']['message'] == self.notification['message']: pass
 								else: return
 							else:
 								actions = False
@@ -95,8 +96,16 @@ def main():
 			except Exception as e:
 				ws = False
 				if debug: print('Error connecting to Signal K server: '+str(e))
+			try:
+				resp = requests.get(platform2.http+'localhost:'+platform2.skPort+'/signalk/v1/api/vessels/self/uuid', verify=False)
+				uuid = resp.content
+				uuid = uuid.decode("utf-8")
+				uuid = uuid.replace('"', '') 
+			except Exception as e:
+				ws = False
+				if debug: print('Error getting Signal K UUID: '+str(e))
 		if ws:
-			try: ws.send('{"context": "vessels.self","subscribe":[{"path":"notifications.*"}]}\n')
+			try: ws.send('{"context": "vessels.*","subscribe":[{"path":"notifications.*"}]}\n')
 			except: 
 				if ws: ws.close()
 				ws = False
@@ -117,16 +126,26 @@ def main():
 									for update in data['updates']:
 										if 'values' in update:
 											for value in update['values']:
-												if 'notifications.' in value['path']: 
+												if 'notifications.' in value['path']:
 													if value['value']:
+														notification = value['value']
 														if 'method' in value['value']:
-															if 'visual' in value['value']['method']: 
-																subprocess.Popen(['openplotter-notifications-visual', value['path'], value['value']['state'], value['value']['message'], value['value']['timestamp']])	
-															if 'sound' in value['value']['method']:
-																subprocess.Popen(['openplotter-notifications-sound', value['path'], value['value']['state'], value['value']['timestamp']])
-
-														if value['path'] in actionsList:
-															thread = processActions(value['path'],actionsList[value['path']],value['value'],debug,currentLanguage,conf2,platform2)
+															if 'context' in data:
+																if data['context'] == 'vessels.'+uuid or data['context'] == 'vessels.self':
+																	if 'visual' in value['value']['method']: 
+																		subprocess.Popen(['openplotter-notifications-visual', value['path'], value['value']['state'], value['value']['message'], value['value']['timestamp']])	
+																	if 'sound' in value['value']['method']:
+																		subprocess.Popen(['openplotter-notifications-sound', value['path'], value['value']['state'], value['value']['timestamp']])
+													else: notification = {'state':'null','message':'','timestamp':'','method':[]}
+													if 'context' in data:
+														actions = ''
+														context = data['context'].replace('vessels.','')
+														if context+'.'+value['path'] in actionsList: actions = actionsList[context+'.'+value['path']]
+														else:
+															if context == uuid:
+																if 'self.'+value['path'] in actionsList: actions = actionsList['self.'+value['path']]
+														if actions:
+															thread = processActions(value['path'],actions,notification,debug,currentLanguage,conf2,platform2)
 															thread.start()
 							except Exception as e: 
 								if debug: print('Error processing notification: '+str(e))

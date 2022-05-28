@@ -682,18 +682,19 @@ class MyFrame(wx.Frame):
 
 	def readSelectedActions(self,keySelected):
 		if keySelected:
-			self.actionsSelected = self.actionsList0[keySelected]
-			self.listActions.DeleteAllItems()
-			self.onListActionsDeselected()
-			self.checking = False
-			for i in self.actionsSelected:
-				index = self.listActions.InsertItem(sys.maxsize, '')
-				self.listActions.SetItem(index, 1, i['state'])
-				self.listActions.SetItem(index, 2, i['message'])
-				self.listActions.SetItem(index, 3, i['name'])
-				self.listActions.SetItem(index, 4, i['data'])
-				if i['enabled']: self.listActions.CheckItem(index)
-			self.checking = True
+			if keySelected in self.actionsList0:
+				self.actionsSelected = self.actionsList0[keySelected]
+				self.listActions.DeleteAllItems()
+				self.onListActionsDeselected()
+				self.checking = False
+				for i in self.actionsSelected:
+					index = self.listActions.InsertItem(sys.maxsize, '')
+					self.listActions.SetItem(index, 1, i['state'])
+					self.listActions.SetItem(index, 2, i['message'])
+					self.listActions.SetItem(index, 3, i['name'])
+					self.listActions.SetItem(index, 4, i['data'])
+					if i['enabled']: self.listActions.CheckItem(index)
+				self.checking = True
 
 	def onListActionsSelected(self, e):
 		selected = self.listActions.GetFirstSelected()
@@ -832,15 +833,18 @@ class editAction(wx.Dialog):
 		panel = wx.Panel(self)
 
 		stateLabel= wx.StaticText(panel, label = _('State'))
-		self.state = wx.ComboBox(panel, choices = [_('any'),'normal','alert','warn','alarm','emergency'], style=wx.CB_READONLY)
+		self.state = wx.ComboBox(panel, choices = [_('any'),'null','normal','alert','warn','alarm','emergency'], style=wx.CB_READONLY)
 		if edit:
 			if edit['state'] == '': self.state.SetSelection(0)
 			else: self.state.SetValue(edit['state'])
 		else: self.state.SetSelection(0)
+		self.Bind(wx.EVT_COMBOBOX, self.onState, self.state)
 
 		messageLabel= wx.StaticText(panel, label = _('Message'))
 		self.message = wx.TextCtrl(panel)
-		if edit: self.message.SetValue(edit['message'])
+		if edit: 
+			if edit['state'] == 'null': self.message.Disable()
+			else: self.message.SetValue(edit['message'])
 
 		notiLabel = wx.StaticText(panel, label = _('Notification'))
 		self.SK = wx.TextCtrl(panel)
@@ -961,12 +965,21 @@ class editAction(wx.Dialog):
 				self.skBtn.Disable()
 				self.help.SetLabel('')
 
+	def onState(self,e=0):
+		selected = self.state.GetSelection()
+		if selected == 1: 
+			self.message.Disable()
+			self.message.SetValue('')
+		else: self.message.Enable()
+
 	def onSKedit(self,e):
-		dlg = selectKey.SelectKey(self.SK.GetValue(),0)
+		dlg = selectKey.SelectKey(self.SK.GetValue(),1)
 		res = dlg.ShowModal()
 		if res == wx.OK:
 			key = dlg.selected_key.replace(':','.')
-			self.SK.SetValue(key)
+			if not 'notifications.' in key: key = 'notifications.'+key
+			vessel = dlg.skvessels.GetValue()
+			self.SK.SetValue(vessel+'.'+key)
 		dlg.Destroy()
 
 	def onAddState(self,e):
@@ -992,10 +1005,14 @@ class editAction(wx.Dialog):
 		if not self.keyResult:
 			wx.MessageBox(_('Notification failed: provide a notification key.'), _('Info'), wx.OK | wx.ICON_INFORMATION)
 			return
-		if not re.match('^[.0-9a-zA-Z]+$', self.keyResult):
+		if not re.match('^[-:.0-9a-zA-Z]+$', self.keyResult):
 			wx.MessageBox(_('Notification failed: characters not allowed.'), _('Info'), wx.OK | wx.ICON_INFORMATION)
 			return
-		if not 'notifications.' in self.keyResult: self.keyResult = 'notifications.'+self.keyResult
+		items = self.keyResult.split('.')
+		if items[0] == 'vessels': del items[0]
+		if items[0] != 'self' and items[0][0:12] != 'urn:mrn:imo:' and items[0][0:16] != 'urn:mrn:signalk:': items.insert(0, 'self')
+		if items[1] != 'notifications': items.insert(1, 'notifications')
+		self.keyResult = '.'.join(items)
 		if self.state.GetSelection() == 0: state = ''
 		else: state = self.state.GetValue()
 		message = self.message.GetValue()
