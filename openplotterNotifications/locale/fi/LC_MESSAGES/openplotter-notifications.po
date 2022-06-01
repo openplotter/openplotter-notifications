@@ -1,26 +1,63 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: openplotter\n"
-"POT-Creation-Date: 2021-05-30 23:50+0200\n"
-"PO-Revision-Date: 2021-11-25 18:05\n"
+"POT-Creation-Date: 2022-05-27 21:57+0200\n"
+"PO-Revision-Date: 2022-06-01 21:28+0200\n"
 "Last-Translator: \n"
 "Language-Team: Finnish\n"
 "Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.4.3\n"
+"X-Generator: Poedit 2.3\n"
 "X-Poedit-Basepath: ../../..\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-SourceCharset: UTF-8\n"
-"X-Poedit-SearchPath-0: .\n"
 "X-Crowdin-Project: openplotter\n"
 "X-Crowdin-Project-ID: 289888\n"
 "X-Crowdin-Language: fi\n"
 "X-Crowdin-File: openplotter-notifications.po\n"
 "X-Crowdin-File-ID: 32\n"
+"X-Poedit-SearchPath-0: .\n"
 
-#: data/openplotter-notifications.desktop:3 visual.py:31
+#: actions.py:29
+msgid "Run command"
+msgstr "Aja komento"
+
+#: actions.py:30
+msgid "Reboot"
+msgstr "Käynnistä uudelleen"
+
+#: actions.py:31
+msgid "Shutdown"
+msgstr "Sammuta"
+
+#: actions.py:32
+msgid "Set notification"
+msgstr "Aseta ilmoitus"
+
+#: actions.py:32
+msgid "Allowed values for state: normal, alert, warn, alarm, emergency"
+msgstr "Tilan sallitut arvot: normaali, huomautus, varoitus, hälytys, hätä"
+
+#: actions.py:33
+msgid "Set Signal K key"
+msgstr "Aseta Signal K tunniste"
+
+#: actions.py:34
+msgid "Wait some seconds"
+msgstr "Odota muutama sekunti"
+
+#: actions.py:34
+msgid "Enter the seconds to wait without quotes"
+msgstr "Anna odotussekunit ilman lainausmerkkejä"
+
+#: actions.py:35
+msgid "Check notification again"
+msgstr "Tarkista ilmoitus uudelleen"
+
+#: data/openplotter-notifications.desktop:3 openplotterNotifications.py:621
+#: visual.py:32
 msgid "Notifications"
 msgstr "Ilmoitukset"
 
@@ -28,151 +65,133 @@ msgstr "Ilmoitukset"
 msgid "openplotter-notifications"
 msgstr "openplotter-ilmoitukset"
 
-#: notificationsPostInstall.py:33
+#: notificationsPostInstall.py:32
 msgid "Installing python packages..."
 msgstr "Asennetaan python paketteja..."
 
-#: notificationsPostInstall.py:36 notificationsPostInstall.py:49
-#: notificationsPostInstall.py:57 notificationsPostInstall.py:65
-#: notificationsPostInstall.py:71 notificationsPreUninstall.py:33
-#: notificationsPreUninstall.py:39
+#: notificationsPostInstall.py:35 notificationsPostInstall.py:48
+#: notificationsPostInstall.py:57 notificationsPostInstall.py:63
+#: notificationsPreUninstall.py:34 notificationsPreUninstall.py:40
 msgid "DONE"
 msgstr "VALMIS"
 
-#: notificationsPostInstall.py:37 notificationsPostInstall.py:50
-#: notificationsPostInstall.py:58 notificationsPostInstall.py:66
-#: notificationsPostInstall.py:72 notificationsPreUninstall.py:34
-#: notificationsPreUninstall.py:40
+#: notificationsPostInstall.py:36 notificationsPostInstall.py:49
+#: notificationsPostInstall.py:58 notificationsPostInstall.py:64
+#: notificationsPreUninstall.py:35 notificationsPreUninstall.py:41
 msgid "FAILED: "
 msgstr "EPÄONNISTUNUT: "
 
-#: notificationsPostInstall.py:39
-msgid "Installing/Updating signalk-threshold-notifier plugin..."
-msgstr "Asennnetaan/Päivitetään signalk-threshold-notifier plugin..."
+#: notificationsPostInstall.py:38
+msgid "Installing/Updating signalk-zones plugin..."
+msgstr "Asennnetaan/Päivitetään signalk-zones plugin..."
 
-#: notificationsPostInstall.py:48
+#: notificationsPostInstall.py:47
 msgid "Failed. Please, install Signal K server."
 msgstr "Epäonnistui. Asenna Signal K serveri."
 
-#: notificationsPostInstall.py:52
+#: notificationsPostInstall.py:51
 msgid "Checking access to Signal K server..."
 msgstr "Tarkistetaan pääsy Signal K serveriin..."
 
 #: notificationsPostInstall.py:60
-msgid "Adding openplotter-notifications-read service..."
-msgstr "Lisätään openplotter-ilmoitusten-luku palvelu..."
-
-#: notificationsPostInstall.py:68
 msgid "Setting version..."
 msgstr "Asetetaan versio..."
 
 #: notificationsPreUninstall.py:29
-msgid "Removing openplotter-notifications-read services..."
-msgstr "Poistetaan openplotter-ilmoitusten-luku palvelu..."
+msgid "Stopping openplotter-notifications-read..."
+msgstr "Poistetaan openplotter-ilmoitusten-luku..."
 
-#: notificationsPreUninstall.py:36
+#: notificationsPreUninstall.py:37
 msgid "Removing version..."
 msgstr "Poistetaan versio..."
 
-#: openplotterNotifications.py:46
+#: openplotterNotifications.py:53
 msgid "Help"
 msgstr "Ohje"
 
-#: openplotterNotifications.py:49
+#: openplotterNotifications.py:56
 msgid "Settings"
 msgstr "Asetukset"
 
-#: openplotterNotifications.py:52
+#: openplotterNotifications.py:59
 msgid "Approve"
 msgstr "Hyväksy"
 
-#: openplotterNotifications.py:54
+#: openplotterNotifications.py:61
 msgid "Allowed"
 msgstr "Sallittu"
 
-#: openplotterNotifications.py:57
-msgid "Refresh"
-msgstr "Päivitä"
-
-#: openplotterNotifications.py:73
-msgid "Thresholds"
-msgstr "Kynnysarvot"
+#: openplotterNotifications.py:64
+msgid "Rescue"
+msgstr "Pelastus"
 
 #: openplotterNotifications.py:74
+msgid "Zones"
+msgstr "Alueet"
+
+#: openplotterNotifications.py:75
 msgid "Visual"
 msgstr "Ulkoasu"
 
-#: openplotterNotifications.py:75
+#: openplotterNotifications.py:76
 msgid "Sound"
 msgstr "Ääni"
 
-#: openplotterNotifications.py:76
-msgid "Command"
-msgstr "Komento"
+#: openplotterNotifications.py:77
+msgid "Actions"
+msgstr "Toimet"
 
-#: openplotterNotifications.py:158
+#: openplotterNotifications.py:165
 msgid " Press \"Approve\" and then \"Refresh\"."
 msgstr " Paina \"Hyväksy\" ja sitten \"Päivitä \"."
 
-#: openplotterNotifications.py:162
+#: openplotterNotifications.py:169
 msgid " Press \"Refresh\"."
 msgstr " Paina \"Päivitä\"."
 
-#: openplotterNotifications.py:164
+#: openplotterNotifications.py:171
 msgid " Press \"Allowed\"."
 msgstr " Paina \"Sallittu\"."
 
-#: openplotterNotifications.py:177
+#: openplotterNotifications.py:190
+msgid "Refresh"
+msgstr "Päivitä"
+
+#: openplotterNotifications.py:193 openplotterNotifications.py:641
 msgid "Edit"
 msgstr "Muokkaa"
 
-#: openplotterNotifications.py:190
-msgid "Please install \"signalk-threshold-notifier\" Signal K app"
-msgstr "Asenna \"signalk-threshold-notifier\" Signal K -sovellus"
+#: openplotterNotifications.py:224
+msgid "Signal K Zones plugin is disabled"
+msgstr "Signal K Zones plugin is estetty"
 
-#: openplotterNotifications.py:194
-msgid "Please install \"Signal K Installer\" OpenPlotter app"
-msgstr "Asenna \"Signal K asennin\" OpenPlotter sovelma"
+#: openplotterNotifications.py:227
+msgid "Error reading Signal K Zones configuration. Is this plugin installed and enabled?"
+msgstr "Signal K Zones konfiguraation luku epäonnistui. Onko tämä Signal K liitännäinen asennettu ja käytössä?"
 
-#: openplotterNotifications.py:215
-msgid "Failed: signalk-threshold-notifier is disabled"
-msgstr "Epäonnistui: signaalin kynnysarvon ilmoittaja pois päältä"
+#: openplotterNotifications.py:238
+msgid "[inactive]"
+msgstr "[inactive]"
 
-#: openplotterNotifications.py:219
-msgid "Failed: error reading signalk-threshold-notifier plugin configuration. Is this Signal K plugin installed and enabled?"
-msgstr "Epäonnistui: signalk-kynnyksen ilmoittaja liitännäisen konfiguraatio. Onko tämä Signal K liitännäinen asennettu ja käytössä?"
+#: openplotterNotifications.py:240
+msgid "[active]"
+msgstr "[active]"
 
-#: openplotterNotifications.py:253
-msgid "High threshold: "
-msgstr "Korkea kynnys: "
+#: openplotterNotifications.py:272
+msgid "No zones found"
+msgstr "Aluetta ei löytynyt"
 
-#: openplotterNotifications.py:256 openplotterNotifications.py:265
-msgid "Message: "
-msgstr "Viesti: "
-
-#: openplotterNotifications.py:259 openplotterNotifications.py:268
-msgid "Methods: "
-msgstr "Menetelmät: "
-
-#: openplotterNotifications.py:262
-msgid "Low threshold: "
-msgstr "Alhainen kynnys: "
-
-#: openplotterNotifications.py:273
-msgid "No thresholds found"
-msgstr "Kynnysarvoja ei löytynyt"
-
-#: openplotterNotifications.py:280 openplotterNotifications.py:284
-#: openplotterNotifications.py:288 openplotterNotifications.py:292
-#: openplotterNotifications.py:296
+#: openplotterNotifications.py:279 openplotterNotifications.py:283
+#: openplotterNotifications.py:287 openplotterNotifications.py:291
+#: openplotterNotifications.py:295
 msgid "auto closing"
 msgstr "automaattinen sulkeminen"
 
-#: openplotterNotifications.py:299 openplotterNotifications.py:454
+#: openplotterNotifications.py:299 openplotterNotifications.py:456
 msgid "Save"
 msgstr "Tallenna"
 
-#: openplotterNotifications.py:301 openplotterNotifications.py:456
+#: openplotterNotifications.py:301 openplotterNotifications.py:458
 msgid "Cancel"
 msgstr "Peru"
 
@@ -180,71 +199,171 @@ msgstr "Peru"
 msgid "Close all windows"
 msgstr "Sulje kaikki ikkunat"
 
-#: openplotterNotifications.py:399
+#: openplotterNotifications.py:400
 msgid "Colours saved"
 msgstr "Värit tallennettu"
 
-#: openplotterNotifications.py:403
+#: openplotterNotifications.py:404
 msgid "Colours reloaded"
 msgstr "Värit ladattu uudelleen"
 
-#: openplotterNotifications.py:408
+#: openplotterNotifications.py:409
 msgid "File"
 msgstr "Tiedosto"
 
-#: openplotterNotifications.py:416 openplotterNotifications.py:425
-#: openplotterNotifications.py:433 openplotterNotifications.py:441
-#: openplotterNotifications.py:449
+#: openplotterNotifications.py:417 openplotterNotifications.py:426
+#: openplotterNotifications.py:434 openplotterNotifications.py:442
+#: openplotterNotifications.py:450
 msgid "Select"
 msgstr "Valitse"
 
-#: openplotterNotifications.py:418 openplotterNotifications.py:427
-#: openplotterNotifications.py:435 openplotterNotifications.py:443
-#: openplotterNotifications.py:451
+#: openplotterNotifications.py:419 openplotterNotifications.py:428
+#: openplotterNotifications.py:436 openplotterNotifications.py:444
+#: openplotterNotifications.py:452
 msgid "auto stop"
 msgstr "automaattinen pysäytys"
 
-#: openplotterNotifications.py:459
+#: openplotterNotifications.py:461
 msgid "Stop all sounds"
 msgstr "Pysäytä kaikki äänet"
 
-#: openplotterNotifications.py:584
+#: openplotterNotifications.py:587
 msgid "Failed: Error playing file"
 msgstr "Tiedoston toistaminen epäonnistui"
 
-#: openplotterNotifications.py:591
+#: openplotterNotifications.py:594
 msgid "Choose a file"
 msgstr "Valitse tiedosto"
 
-#: openplotterNotifications.py:592
+#: openplotterNotifications.py:595
 msgid "Audio files"
 msgstr "Äänitiedostot"
 
-#: openplotterNotifications.py:592
+#: openplotterNotifications.py:595
 msgid "All files"
 msgstr "Kaikki tiedostot"
 
-#: openplotterNotifications.py:608
+#: openplotterNotifications.py:611
 msgid "Sounds saved"
 msgstr "Äänet tallennettu"
 
-#: openplotterNotifications.py:612
+#: openplotterNotifications.py:615
 msgid "Sounds reloaded"
 msgstr "Äänet ladattu uudelleen"
 
-#: openplotterNotifications.py:617 openplotterNotifications.py:631
-msgid "Coming soon."
-msgstr "Tulossa pian."
+#: openplotterNotifications.py:625
+msgid "Enabled"
+msgstr "Käytössä"
 
-#: startup.py:42
+#: openplotterNotifications.py:626 openplotterNotifications.py:835
+msgid "State"
+msgstr "Tila"
+
+#: openplotterNotifications.py:627 openplotterNotifications.py:843
+msgid "Message"
+msgstr "Viesti"
+
+#: openplotterNotifications.py:628 openplotterNotifications.py:858
+msgid "Action"
+msgstr "Toiminto"
+
+#: openplotterNotifications.py:629 openplotterNotifications.py:862
+msgid "Data"
+msgstr "Tiedot"
+
+#: openplotterNotifications.py:638
+msgid "Add"
+msgstr "Lisää"
+
+#: openplotterNotifications.py:643
+msgid "Delete"
+msgstr "Poista"
+
+#: openplotterNotifications.py:646
+msgid "Up"
+msgstr "Ylös"
+
+#: openplotterNotifications.py:648
+msgid "Down"
+msgstr "Alas"
+
+#: openplotterNotifications.py:798
+msgid "Editing Action"
+msgstr "Toimintojen muokkaaminen"
+
+#: openplotterNotifications.py:799
+msgid "Adding Action"
+msgstr "Lisätään toiminto"
+
+#: openplotterNotifications.py:836
+msgid "any"
+msgstr "kaikki"
+
+#: openplotterNotifications.py:849
+msgid "Notification"
+msgstr "Ilmoitus"
+
+#: openplotterNotifications.py:865
+msgid "state"
+msgstr "tila"
+
+#: openplotterNotifications.py:867
+msgid "message"
+msgstr "viesti"
+
+#: openplotterNotifications.py:869
+msgid "timestamp"
+msgstr "aikaleima"
+
+#: openplotterNotifications.py:871
+msgid "Signal K value"
+msgstr "Signal K arvo"
+
+#: openplotterNotifications.py:1006
+msgid "Notification failed: provide a notification key."
+msgstr "Ilmoitus epäonnistui: anna ilmoituksen tunnus."
+
+#: openplotterNotifications.py:1006 openplotterNotifications.py:1009
+#: openplotterNotifications.py:1021
+msgid "Info"
+msgstr "Tiedot"
+
+#: openplotterNotifications.py:1009
+msgid "Notification failed: characters not allowed."
+msgstr "Ilmoitus epäonnistui: merkit eivät ole sallittuja."
+
+#: openplotterNotifications.py:1021
+msgid "Action failed: select an action."
+msgstr "Toimenpide epäonnistui: valitse toimenpide."
+
+#: startup.py:27
+msgid "Starting Notifications..."
+msgstr "Käynnistetään Ilmoitukset..."
+
+#: startup.py:38
+msgid "Notifications started"
+msgstr "Ilmoitukset käynnistetty"
+
+#: startup.py:49
 msgid "Checking Notifications..."
 msgstr "Tarkistetaan Ilmoituksia..."
 
-#: startup.py:56
+#: startup.py:58
+msgid "Notifications is in rescue mode"
+msgstr "Ilmoitukset ovat pelastus tilassa"
+
+#: startup.py:63 startup.py:68
+msgid "running"
+msgstr "käynnissä"
+
+#: startup.py:70
+msgid "not running"
+msgstr "ei käynnissä"
+
+#: startup.py:81
 msgid "Access to Signal K server validated"
 msgstr "Pääsy Signal K palvelimeen vahvistettu"
 
-#: visual.py:65
+#: visual.py:71
 msgid "Close"
 msgstr "Sulje"
-
