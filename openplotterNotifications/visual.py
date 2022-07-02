@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-# This file is part of Openplotter.
-# Copyright (C) 2021 by Sailoog <https://github.com/openplotter/openplotter-notifications>
+# This file is part of OpenPlotter.
+# Copyright (C) 2022 by Sailoog <https://github.com/openplotter/openplotter-notifications>
 #
 # Openplotter is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import wx, sys, os, ujson, requests
+import wx.richtext as rt
 from openplotterSettings import conf
 from openplotterSettings import platform
 from openplotterSettings import language
@@ -28,7 +29,7 @@ class MyFrame(wx.Frame):
 		self.currentdir = os.path.dirname(os.path.abspath(__file__))
 		self.language = language.Language(self.currentdir,'openplotter-notifications',self.currentLanguage)
 
-		wx.Frame.__init__(self, None, title=_('Notifications'), size=(600,250))
+		wx.Frame.__init__(self, None, title=_('Notifications'), size=(400,300))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		icon = wx.Icon(self.currentdir+"/data/openplotter-notifications.png", wx.BITMAP_TYPE_PNG)
 		self.SetIcon(icon)
@@ -39,7 +40,12 @@ class MyFrame(wx.Frame):
 		state = wx.StaticText(panel, label = self.state)
 		self.path = sys.argv[1]
 		path = wx.StaticText(panel, label = self.path)
-		message = wx.StaticText(panel, label = sys.argv[3])
+		message = rt.RichTextCtrl(panel)
+		message.SetMargins((10,10))
+		message.BeginAlignment(wx.TEXT_ALIGNMENT_CENTRE)
+		message.WriteText(sys.argv[3])
+		message.EndAlignment()
+		message.ShowPosition(0)
 		self.timestamp = sys.argv[4]
 		timestamp = wx.StaticText(panel, label = self.timestamp)
 
@@ -67,31 +73,25 @@ class MyFrame(wx.Frame):
 
 		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox1.AddStretchSpacer(1)
-		hbox1.Add(state, 0, wx.ALL | wx.EXPAND, 5)
+		hbox1.Add(state, 0, wx.ALL | wx.EXPAND, 0)
 		hbox1.AddStretchSpacer(1)
 
 		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox2.AddStretchSpacer(1)
-		hbox2.Add(path, 0, wx.ALL | wx.EXPAND, 5)
+		hbox2.Add(path, 0, wx.ALL | wx.EXPAND, 0)
 		hbox2.AddStretchSpacer(1)
 
 		hbox3 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox3.AddStretchSpacer(1)
-		hbox3.Add(message, 0, wx.ALL | wx.EXPAND, 5)
+		hbox3.Add(timestamp, 0, wx.ALL | wx.EXPAND, 0)
 		hbox3.AddStretchSpacer(1)
 
-		hbox4 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox4.AddStretchSpacer(1)
-		hbox4.Add(timestamp, 0, wx.ALL | wx.EXPAND, 5)
-		hbox4.AddStretchSpacer(1)
-
 		vbox = wx.BoxSizer(wx.VERTICAL)
-		vbox.AddStretchSpacer(1)
-		vbox.Add(hbox1, 1, wx.ALL | wx.EXPAND, 5)
-		vbox.Add(hbox2, 1, wx.ALL | wx.EXPAND, 5)
-		vbox.Add(hbox3, 1, wx.ALL | wx.EXPAND, 5)
-		vbox.Add(hbox4, 1, wx.ALL | wx.EXPAND, 5)
-		vbox.AddStretchSpacer(1)
+		vbox.AddSpacer(5)
+		vbox.Add(hbox1, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(hbox2, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(hbox3, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(message, 1, wx.ALL | wx.EXPAND, 5)
 		vbox.Add(close, 0, wx.ALL | wx.EXPAND, 10)
 		panel.SetSizer(vbox)
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-# This file is part of Openplotter.
-# Copyright (C) 2021 by Sailoog <https://github.com/openplotter/openplotter-notifications>
+# This file is part of OpenPlotter.
+# Copyright (C) 2022 by Sailoog <https://github.com/openplotter/openplotter-notifications>
 #
 # Openplotter is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,10 +26,11 @@ def main():
 	package = 'openplotter-notifications'
 	language.Language(currentdir, package, currentLanguage)
 
-	print(_('Removing openplotter-notifications-read services...'))
+	print(_('Stopping openplotter-notifications-read...'))
 	try:
-		subprocess.call(['pkill', '-f', 'openplotter-notifications-read'])
-		subprocess.call(['rm', '-f', conf2.home+'/.config/autostart/openplotter-notifications-read.desktop'])
+		subprocess.call(['pkill','-f','openplotter-notifications-read'])
+		subprocess.call(['pkill','-f','openplotter-notifications-sound'])
+		subprocess.call(['pkill','-f','openplotter-notifications-visual'])
 		print(_('DONE'))
 	except Exception as e: print(_('FAILED: ')+str(e))
 

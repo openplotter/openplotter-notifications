@@ -1,3 +1,15 @@
+openplotter-notifications (3.0.6-stable) bullseye; urgency=medium
+
+  * Stable
+
+ -- Sailoog <info@sailoog.com>  Sat, 02 Jul 2022 20:05:37 +0200
+
+openplotter-notifications (3.0.5-beta) bullseye; urgency=medium
+
+  * Beta
+
+ -- Sailoog <info@sailoog.com>  Mon, 20 Feb 2022 19:16:35 +0100
+
 openplotter-notifications (2.0.2-alpha) bionic; urgency=medium
 
   * Alpha

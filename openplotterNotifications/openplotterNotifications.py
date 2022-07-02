@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-# This file is part of Openplotter.
-# Copyright (C) 2021 by Sailoog <https://github.com/openplotter/openplotter-notifications>
+# This file is part of OpenPlotter.
+# Copyright (C) 2022 by Sailoog <https://github.com/openplotter/openplotter-notifications>
 #
 # Openplotter is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,17 +15,24 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, os, sys, webbrowser, subprocess, time, ujson
+import wx, os, sys, webbrowser, subprocess, time, ujson, re
 import wx.richtext as rt
 from openplotterSettings import conf
 from openplotterSettings import language
 from openplotterSettings import platform
+from openplotterSettings import selectKey
 from openplotterSignalkInstaller import connections
 from .version import version
+from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
+
+class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
+	def __init__(self, parent, height):
+		wx.ListCtrl.__init__(self, parent, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(650, height))
+		CheckListCtrlMixin.__init__(self)
+		ListCtrlAutoWidthMixin.__init__(self)
 
 class MyFrame(wx.Frame):
 	def __init__(self):
-		if not 'openplotter-notifications-read' in subprocess.check_output(['ps','aux']).decode(sys.stdin.encoding): subprocess.Popen('openplotter-notifications-read')
 		self.conf = conf.Conf()
 		self.conf_folder = self.conf.conf_folder
 		self.platform = platform.Platform()
@@ -54,41 +61,31 @@ class MyFrame(wx.Frame):
 		connectionSK = self.toolbar1.AddTool(106, _('Allowed'), wx.Bitmap(self.currentdir+"/data/sk.png"))
 		self.Bind(wx.EVT_TOOL, self.onConnectionSK, connectionSK)
 		self.toolbar1.AddSeparator()
-		refresh = self.toolbar1.AddTool(104, _('Refresh'), wx.Bitmap(self.currentdir+"/data/refresh.png"))
-		self.Bind(wx.EVT_TOOL, self.onRefresh, refresh)
+		toolRescue = self.toolbar1.AddCheckTool(107, _('Rescue'), wx.Bitmap(self.currentdir+"/data/rescue.png"))
+		self.Bind(wx.EVT_TOOL, self.onToolRescue, toolRescue)
+		if self.conf.get('GENERAL', 'rescue') == 'yes': self.toolbar1.ToggleTool(107,True)
 
 		self.notebook = wx.Notebook(self)
 		self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.onTabChange)
 		self.summary = wx.Panel(self.notebook)
 		self.visualMethod = wx.Panel(self.notebook)
 		self.soundMethod = wx.Panel(self.notebook)
-		self.sk = wx.Panel(self.notebook)
-		self.command = wx.Panel(self.notebook)
-		self.gpio = wx.Panel(self.notebook)
-		self.mqtt = wx.Panel(self.notebook)
-		self.mastodon = wx.Panel(self.notebook)
-		self.telegram = wx.Panel(self.notebook)
-		self.sms = wx.Panel(self.notebook)
-		self.email = wx.Panel(self.notebook)
-		self.notebook.AddPage(self.summary, _('Thresholds'))
+		self.actions = wx.Panel(self.notebook)
+		self.notebook.AddPage(self.summary, _('Zones'))
 		self.notebook.AddPage(self.visualMethod, _('Visual'))
 		self.notebook.AddPage(self.soundMethod, _('Sound'))
-		self.notebook.AddPage(self.command, _('Command'))
-		self.notebook.AddPage(self.sk, 'Signal K key')
-		self.notebook.AddPage(self.gpio, 'GPIO')
-		self.notebook.AddPage(self.mqtt, 'MQTT')
-		self.notebook.AddPage(self.mastodon, 'Mastodon')
-		self.notebook.AddPage(self.telegram, 'Telegram')
-		self.notebook.AddPage(self.email, 'Email')
-		self.notebook.AddPage(self.sms, 'SMS')
+		self.notebook.AddPage(self.actions, _('Actions'))
+
 		self.il = wx.ImageList(24, 24)
 		img0 = self.il.Add(wx.Bitmap(self.currentdir+"/data/sk.png", wx.BITMAP_TYPE_PNG))
 		img1 = self.il.Add(wx.Bitmap(self.currentdir+"/data/visual.png", wx.BITMAP_TYPE_PNG))
 		img2 = self.il.Add(wx.Bitmap(self.currentdir+"/data/play.png", wx.BITMAP_TYPE_PNG))
+		img3 = self.il.Add(wx.Bitmap(self.currentdir+"/data/openplotter-24.png", wx.BITMAP_TYPE_PNG))
 		self.notebook.AssignImageList(self.il)
 		self.notebook.SetPageImage(0, img0)
 		self.notebook.SetPageImage(1, img1)
 		self.notebook.SetPageImage(2, img2)
+		self.notebook.SetPageImage(3, img3)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.Add(self.toolbar1, 0, wx.EXPAND)
@@ -98,8 +95,7 @@ class MyFrame(wx.Frame):
 		self.pageSummary()
 		self.pageVisual()
 		self.pageSound()
-		self.pageCommand()
-		self.pageSK()
+		self.pageActions()
 		
 		self.onRefresh()
 
@@ -131,7 +127,7 @@ class MyFrame(wx.Frame):
 		except:pass
 
 	def OnToolHelp(self, event): 
-		url = "/usr/share/openplotter-doc/external/myapp_app.html"
+		url = "/usr/share/openplotter-doc/notifications/notifications_app.html"
 		webbrowser.open(url, new=2)
 
 	def OnToolSettings(self, event=0): 
@@ -147,6 +143,17 @@ class MyFrame(wx.Frame):
 		if self.platform.skPort: 
 			url = self.platform.http+'localhost:'+self.platform.skPort+'/admin/#/security/devices'
 			webbrowser.open(url, new=2)
+
+	def restartRead(self):
+		subprocess.call(['pkill','-f','openplotter-notifications-read'])
+		subprocess.call(['pkill','-f','openplotter-notifications-sound'])
+		subprocess.call(['pkill','-f','openplotter-notifications-visual'])
+		subprocess.Popen('openplotter-notifications-read')
+
+	def onToolRescue(self,e):
+		if self.toolbar1.GetToolState(107): self.conf.set('GENERAL', 'rescue', 'yes')
+		else: self.conf.set('GENERAL', 'rescue', 'no')
+		self.restartRead()
 
 	def onRefresh(self, e=0):
 		self.ShowStatusBarBLACK(' ')
@@ -165,6 +172,11 @@ class MyFrame(wx.Frame):
 		elif result[0] == 'approved':
 			self.ShowStatusBarGREEN(result[1])
 
+		test = subprocess.check_output(['ps','aux']).decode(sys.stdin.encoding)
+		if not 'openplotter-notifications-read' in test:
+			if self.conf.get('GENERAL', 'rescue') != 'yes':
+				subprocess.Popen('openplotter-notifications-read')
+
 		self.OnReadThresholds()
 
 	############################################################################
@@ -173,9 +185,14 @@ class MyFrame(wx.Frame):
 		self.summaryLogger = rt.RichTextCtrl(self.summary, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_DONTWRAP|wx.LC_SORT_ASCENDING)
 		self.summaryLogger.SetMargins((10,10))
 
-		self.toolbar3 = wx.ToolBar(self.summary, style=wx.TB_TEXT | wx.TB_VERTICAL)
-		toolThresholds = self.toolbar3.AddTool(301, _('Edit'), wx.Bitmap(self.currentdir+"/data/sk.png"))
+		self.toolbar3 = wx.ToolBar(self.summary, style= wx.TB_VERTICAL)
+		self.toolbar3.AddSeparator()
+		refresh = self.toolbar3.AddTool(303, _('Refresh'), wx.Bitmap(self.currentdir+"/data/refresh.png"))
+		self.Bind(wx.EVT_TOOL, self.onRefresh, refresh)
+		self.toolbar3.AddSeparator()
+		toolThresholds = self.toolbar3.AddTool(301, _('Edit'), wx.Bitmap(self.currentdir+"/data/edit.png"))
 		self.Bind(wx.EVT_TOOL, self.OnToolThresholds, toolThresholds)
+		self.toolbar3.AddSeparator()
 
 		sizer = wx.BoxSizer(wx.HORIZONTAL)
 		sizer.Add(self.summaryLogger, 1, wx.EXPAND, 0)
@@ -184,15 +201,8 @@ class MyFrame(wx.Frame):
 
 	def OnToolThresholds(self, e):
 		if self.platform.skPort: 
-			if self.platform.isSKpluginInstalled('signalk-threshold-notifier'):
-				url = self.platform.http+'localhost:'+self.platform.skPort+'/admin/#/serverConfiguration/plugins/threshold-notifier'
-			else: 
-				self.ShowStatusBarRED(_('Please install "signalk-threshold-notifier" Signal K app'))
-				url = self.platform.http+'localhost:'+self.platform.skPort+'/admin/#/appstore/apps'
+			url = self.platform.http+'localhost:'+self.platform.skPort+'/admin/#/serverConfiguration/plugins/zones-edit'
 			webbrowser.open(url, new=2)
-		else: 
-			self.ShowStatusBarRED(_('Please install "Signal K Installer" OpenPlotter app'))
-			self.OnToolSettings()
 
 	def OnReadThresholds(self):
 		self.summaryLogger.Clear()
@@ -206,71 +216,60 @@ class MyFrame(wx.Frame):
 		except: visualAlarm = [(206, 92, 0, 255), True]
 		try: visualEmergency = eval(self.conf.get('NOTIFICATIONS', 'visualEmergency'))
 		except: visualEmergency = [(164, 0, 0, 255), True]
-		file = self.platform.skDir+'/plugin-config-data/threshold-notifier.json'
+		file = self.platform.skDir+'/plugin-config-data/zones-edit.json'
 		try:
 			with open(file) as data_file:
 				data = ujson.load(data_file)
 				if not data['enabled']:
-					self.summaryLogger.BeginTextColour((130, 0, 0)) 
-					self.summaryLogger.WriteText(_('Failed: signalk-threshold-notifier is disabled'))
+					self.summaryLogger.WriteText(_('Signal K Zones plugin is disabled'))
 					return
 		except:
-			self.summaryLogger.BeginTextColour((130, 0, 0)) 
-			self.summaryLogger.WriteText(_('Failed: error reading signalk-threshold-notifier plugin configuration. Is this Signal K plugin installed and enabled?'))
+			self.summaryLogger.WriteText(_('Error reading Signal K Zones configuration. Is this plugin installed and enabled?'))
 			return
-		if 'paths' in data['configuration']:
-			skKeys = {}
-			for path in data['configuration']['paths']:
-				if 'enabled' in path['options']:
-					if not path['path'] in skKeys: skKeys[path['path']] = {}
-					if 'value' in path['highthreshold']:
-						if not path['highthreshold']['state'] in skKeys[path['path']]: skKeys[path['path']][path['highthreshold']['state']] = []
-						skKeys[path['path']][path['highthreshold']['state']].append({'highthreshold':path['highthreshold'],'message':path['message']})
-					if 'value' in path['lowthreshold']:
-						if not path['lowthreshold']['state'] in skKeys[path['path']]: skKeys[path['path']][path['lowthreshold']['state']] = []
-						skKeys[path['path']][path['lowthreshold']['state']].append({'lowthreshold':path['lowthreshold'],'message':path['message']})
-				
-			for path in skKeys:
-				self.summaryLogger.BeginTextColour((55, 55, 55))
-				self.summaryLogger.BeginBold()
-				self.summaryLogger.WriteText(path)
-				self.summaryLogger.EndBold()
-				self.summaryLogger.EndTextColour()
-				self.summaryLogger.Newline()
-				for state in skKeys[path]:
-					if state == 'normal': stateColour = visualNormal[0]
-					if state == 'alert': stateColour = visualAlert[0]
-					if state == 'warn': stateColour = visualWarn[0]
-					if state == 'alarm': stateColour = visualAlarm[0]
-					if state == 'emergency': stateColour = visualEmergency[0]
-					self.summaryLogger.BeginTextColour(stateColour)
-					self.summaryLogger.WriteText('      '+state)
-					self.summaryLogger.EndTextColour()
-					self.summaryLogger.Newline()
+		if data['configuration']['zones']:
+			for item in data['configuration']['zones']:
+				if item['key']:
 					self.summaryLogger.BeginTextColour((55, 55, 55))
-					for i in skKeys[path][state]:
-						if 'highthreshold' in i:
-							self.summaryLogger.WriteText('            '+_('High threshold: ')+str(i['highthreshold']['value']))
+					self.summaryLogger.BeginBold()
+					self.summaryLogger.WriteText(item['key'])
+					self.summaryLogger.EndBold()
+					if not item['active']:
+						self.summaryLogger.BeginTextColour((130, 0, 0))
+						self.summaryLogger.WriteText(' '+_('[inactive]'))
+						self.summaryLogger.BeginTextColour((55, 55, 55))
+					else: self.summaryLogger.WriteText(' '+_('[active]'))
+					self.summaryLogger.Newline()
+					if 'zones' in item:
+						for zone in item['zones']:
+							if 'lower' in zone: lower = str(zone['lower'])
+							else: lower = ''
+							if 'upper' in zone: upper = str(zone['upper'])
+							else: upper = ''
+							if 'message' in zone: message = str(zone['message'])
+							else: message = ''
+							state = zone['state']
+							if state == 'normal': stateColour = visualNormal[0]
+							if state == 'alert': stateColour = visualAlert[0]
+							if state == 'warn': stateColour = visualWarn[0]
+							if state == 'alarm': stateColour = visualAlarm[0]
+							if state == 'emergency': stateColour = visualEmergency[0]
+							
+							self.summaryLogger.BeginBold()
+							self.summaryLogger.WriteText('    ↳')
+							self.summaryLogger.EndBold()
+							self.summaryLogger.BeginTextColour(stateColour)
+							self.summaryLogger.BeginBold()
+							self.summaryLogger.WriteText(state)
+							self.summaryLogger.EndBold()
+							self.summaryLogger.BeginTextColour((55, 55, 55))
+							self.summaryLogger.WriteText(' ['+lower+'-'+upper+']')
+							if zone['method']:
+								self.summaryLogger.WriteText(' ['+', '.join(zone['method'])+']')
+							if message: self.summaryLogger.WriteText(' ['+message+']')
 							self.summaryLogger.Newline()
-							if 'message' in i: 
-								self.summaryLogger.WriteText('                  '+_('Message: ')+i['message'])
-								self.summaryLogger.Newline()
-							if i['highthreshold']['method']: 
-								self.summaryLogger.WriteText('                  '+_('Methods: ')+', '.join(i['highthreshold']['method']))
-								self.summaryLogger.Newline()
-						if 'lowthreshold' in i:
-							self.summaryLogger.WriteText('            '+_('Low threshold: ')+str(i['lowthreshold']['value']))
-							self.summaryLogger.Newline()
-							if 'message' in i: 
-								self.summaryLogger.WriteText('                  '+_('Message: ')+i['message'])
-								self.summaryLogger.Newline()
-							if i['lowthreshold']['method']: 
-								self.summaryLogger.WriteText('                  '+_('Methods: ')+', '.join(i['lowthreshold']['method']))
-								self.summaryLogger.Newline()
-				self.summaryLogger.EndTextColour()
 		else:
 			self.summaryLogger.BeginTextColour((55, 55, 55)) 
-			self.summaryLogger.WriteText(_('No thresholds found'))
+			self.summaryLogger.WriteText(_('No zones found'))
 			
 	############################################################################
 
@@ -295,7 +294,8 @@ class MyFrame(wx.Frame):
 		self.visualEmergency= wx.ColourPickerCtrl(self.visualMethod)
 		self.emergencyAuto = wx.CheckBox(self.visualMethod, label=_('auto closing'))
 
-		self.toolbar2 = wx.ToolBar(self.visualMethod, style=wx.TB_TEXT | wx.TB_VERTICAL)
+		self.toolbar2 = wx.ToolBar(self.visualMethod, style= wx.TB_VERTICAL)
+		self.toolbar2.AddSeparator()
 		save2 = self.toolbar2.AddTool(201, _('Save'), wx.Bitmap(self.currentdir+"/data/apply.png"))
 		self.Bind(wx.EVT_TOOL, self.onSave2, save2)
 		cancel2 = self.toolbar2.AddTool(202, _('Cancel'), wx.Bitmap(self.currentdir+"/data/cancel.png"))
@@ -303,6 +303,7 @@ class MyFrame(wx.Frame):
 		self.toolbar2.AddSeparator()
 		stopvisual = self.toolbar2.AddTool(203, _('Close all windows'), wx.Bitmap(self.currentdir+"/data/stop.png"))
 		self.Bind(wx.EVT_TOOL, self.onStopAllVisual, stopvisual)
+		self.toolbar2.AddSeparator()
 
 		names = wx.BoxSizer(wx.VERTICAL)
 		names.AddSpacer(35)
@@ -450,7 +451,8 @@ class MyFrame(wx.Frame):
 		emergencySelect.Bind(wx.EVT_BUTTON, self.OnFile)
 		self.emergencyStop = wx.CheckBox(self.soundMethod, label=_('auto stop'))
 
-		self.toolbar5 = wx.ToolBar(self.soundMethod, style=wx.TB_TEXT | wx.TB_VERTICAL)
+		self.toolbar5 = wx.ToolBar(self.soundMethod, style= wx.TB_VERTICAL)
+		self.toolbar5.AddSeparator()
 		save2 = self.toolbar5.AddTool(501, _('Save'), wx.Bitmap(self.currentdir+"/data/apply.png"))
 		self.Bind(wx.EVT_TOOL, self.onSave3, save2)
 		cancel2 = self.toolbar5.AddTool(502, _('Cancel'), wx.Bitmap(self.currentdir+"/data/cancel.png"))
@@ -458,6 +460,7 @@ class MyFrame(wx.Frame):
 		self.toolbar5.AddSeparator()
 		stopsounds = self.toolbar5.AddTool(503, _('Stop all sounds'), wx.Bitmap(self.currentdir+"/data/stop.png"))
 		self.Bind(wx.EVT_TOOL, self.onStopAllSounds, stopsounds)
+		self.toolbar5.AddSeparator()
 
 		names = wx.BoxSizer(wx.VERTICAL)
 		names.AddSpacer(35)
@@ -556,7 +559,7 @@ class MyFrame(wx.Frame):
 
 		try: soundAlarm = eval(self.conf.get('NOTIFICATIONS', 'soundAlarm'))
 		except: 
-			soundAlarm = ['/usr/share/sounds/openplotter/House_Fire_Alarm.mp3', False]
+			soundAlarm = ['/usr/share/sounds/openplotter/pup-alert.mp3', False]
 			self.conf.set('NOTIFICATIONS', 'soundAlarm', str(soundAlarm))
 		try: 
 			self.soundAlarm.SetValue(soundAlarm[0])
@@ -565,7 +568,7 @@ class MyFrame(wx.Frame):
 
 		try: soundEmergency = eval(self.conf.get('NOTIFICATIONS', 'soundEmergency'))
 		except: 
-			soundEmergency = ['/usr/share/sounds/openplotter/Tornado_Siren_II.mp3', False]
+			soundEmergency = ['/usr/share/sounds/openplotter/nuclear-alarm.ogg', False]
 			self.conf.set('NOTIFICATIONS', 'soundEmergency', str(soundEmergency))
 		try: 
 			self.soundEmergency.SetValue(soundEmergency[0])
@@ -613,31 +616,417 @@ class MyFrame(wx.Frame):
 
 	############################################################################
 
-	def pageCommand(self):
-		text1 = wx.StaticText(self.command, label=_('Coming soon.'))
-		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox1.AddStretchSpacer(1)
-		hbox1.Add(text1, 0, wx.ALL | wx.EXPAND, 5)
-		hbox1.AddStretchSpacer(1)
-		vbox = wx.BoxSizer(wx.VERTICAL)
-		vbox.AddStretchSpacer(1)
-		vbox.Add(hbox1, 0, wx.ALL | wx.EXPAND, 5)
-		vbox.AddStretchSpacer(1)
-		self.command.SetSizer(vbox)
+	def pageActions(self):
 
-	############################################################################
+		self.key = wx.ComboBox(self.actions, 705, _('Notifications'), choices=[], style=wx.CB_DROPDOWN | wx.CB_READONLY)
+		self.Bind(wx.EVT_COMBOBOX, self.onKey, self.key)
 
-	def pageSK(self):
-		text1 = wx.StaticText(self.sk, label=_('Coming soon.'))
+		self.listActions = CheckListCtrl(self.actions, 152)
+		self.listActions.InsertColumn(0, _('Enabled'), width=70)
+		self.listActions.InsertColumn(1, _('State'), width=90)
+		self.listActions.InsertColumn(2, _('Message'), width=180)
+		self.listActions.InsertColumn(3, _('Action'), width=180)
+		self.listActions.InsertColumn(4, _('Data'), width=100)
+		self.listActions.Bind(wx.EVT_LIST_ITEM_SELECTED, self.onListActionsSelected)
+		self.listActions.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.onListActionsDeselected)
+		self.listActions.OnCheckItem = self.OnCheckItem
+		self.checking = False
+		self.listActions.SetTextColour(wx.BLACK)
+
+		self.toolbar7 = wx.ToolBar(self.actions, style=wx.TB_VERTICAL)
+		self.toolbar7.AddSeparator()
+		addAction = self.toolbar7.AddTool(705, _('Add'), wx.Bitmap(self.currentdir+"/data/add.png"))
+		self.Bind(wx.EVT_TOOL, self.onAddAction, addAction)
+		self.toolbar7.AddSeparator()
+		toolEdit = self.toolbar7.AddTool(701, _('Edit'), wx.Bitmap(self.currentdir+"/data/edit.png"))
+		self.Bind(wx.EVT_TOOL, self.onEditAction, toolEdit)
+		toolDelete = self.toolbar7.AddTool(702, _('Delete'), wx.Bitmap(self.currentdir+"/data/cancel.png"))
+		self.Bind(wx.EVT_TOOL, self.onDeleteAction, toolDelete)
+		self.toolbar7.AddSeparator()
+		toolUp = self.toolbar7.AddTool(703, _('Up'), wx.Bitmap(self.currentdir+"/data/up.png"))
+		self.Bind(wx.EVT_TOOL, self.onToolUp, toolUp)
+		toolDown = self.toolbar7.AddTool(704, _('Down'), wx.Bitmap(self.currentdir+"/data/down.png"))
+		self.Bind(wx.EVT_TOOL, self.onToolDown, toolDown)
+		self.toolbar7.AddSeparator()
+
 		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox1.AddStretchSpacer(1)
-		hbox1.Add(text1, 0, wx.ALL | wx.EXPAND, 5)
-		hbox1.AddStretchSpacer(1)
+		hbox1.Add(self.listActions , 1, wx.ALL | wx.EXPAND, 0)
+		hbox1.Add(self.toolbar7 , 0, wx.EXPAND, 0)
+
 		vbox = wx.BoxSizer(wx.VERTICAL)
-		vbox.AddStretchSpacer(1)
-		vbox.Add(hbox1, 0, wx.ALL | wx.EXPAND, 5)
-		vbox.AddStretchSpacer(1)
-		self.sk.SetSizer(vbox)
+		vbox.Add(self.key, 0, wx.ALL |  wx.EXPAND, 10)
+		vbox.Add(hbox1, 1, wx.EXPAND, 0)
+		self.actions.SetSizer(vbox)
+
+		self.readNotifications()
+
+	def readNotifications(self):
+		self.keysList = []
+		try: self.actionsList0 = eval(self.conf.get('NOTIFICATIONS', 'actions'))
+		except: self.actionsList0 = {}
+		for i in self.actionsList0:
+			self.keysList.append(i)
+		self.key.Clear()
+		self.listActions.DeleteAllItems()
+		self.onListActionsDeselected()
+		self.key.AppendItems(self.keysList)
+		self.key.SetSelection(0)
+		key = self.key.GetValue()
+		self.readSelectedActions(key)
+
+	def onKey(self,e=0):
+		selected = self.key.GetSelection()
+		if selected != -1:
+			keySelected = self.key.GetValue()
+			self.readSelectedActions(keySelected)
+
+	def readSelectedActions(self,keySelected):
+		if keySelected:
+			if keySelected in self.actionsList0:
+				self.actionsSelected = self.actionsList0[keySelected]
+				self.listActions.DeleteAllItems()
+				self.onListActionsDeselected()
+				self.checking = False
+				for i in self.actionsSelected:
+					index = self.listActions.InsertItem(sys.maxsize, '')
+					self.listActions.SetItem(index, 1, i['state'])
+					self.listActions.SetItem(index, 2, i['message'])
+					self.listActions.SetItem(index, 3, i['name'])
+					self.listActions.SetItem(index, 4, i['data'])
+					if i['enabled']: self.listActions.CheckItem(index)
+				self.checking = True
+
+	def onListActionsSelected(self, e):
+		selected = self.listActions.GetFirstSelected()
+		if selected == -1: return
+		self.toolbar7.EnableTool(701,True)
+		self.toolbar7.EnableTool(702,True)
+		if selected == 0: self.toolbar7.EnableTool(703,False)
+		else: self.toolbar7.EnableTool(703,True)
+		c = self.listActions.GetItemCount()
+		if selected == c-1: self.toolbar7.EnableTool(704,False)
+		else: self.toolbar7.EnableTool(704,True)
+
+	def onListActionsDeselected(self, event=0):
+		self.toolbar7.EnableTool(701,False)
+		self.toolbar7.EnableTool(702,False)
+		self.toolbar7.EnableTool(703,False)
+		self.toolbar7.EnableTool(704,False)
+
+	def OnCheckItem(self, index, flag):
+		if self.checking:
+			key = self.key.GetValue()
+			if flag: self.actionsList0[key][index]['enabled'] = True
+			else: self.actionsList0[key][index]['enabled'] = False
+			self.conf.set('NOTIFICATIONS', 'actions', str(self.actionsList0))
+			self.readSelectedActions(key)
+			self.restartRead()
+
+	def onAddAction(self,e):
+		edit = {}
+		self.setAction(edit)
+
+	def onToolUp(self,e):
+		selected = self.listActions.GetFirstSelected()
+		if selected == -1 or selected == 0: return
+		key = self.key.GetValue()
+		self.actionsList0[key][selected],self.actionsList0[key][selected-1] = self.actionsList0[key][selected-1],self.actionsList0[key][selected]
+		self.conf.set('NOTIFICATIONS', 'actions', str(self.actionsList0))
+		self.readSelectedActions(key)
+		self.restartRead()
+
+	def onToolDown(self,e):
+		c = self.listActions.GetItemCount()
+		selected = self.listActions.GetFirstSelected()
+		if selected == -1 or selected == c-1: return
+		key = self.key.GetValue()
+		self.actionsList0[key][selected],self.actionsList0[key][selected+1] = self.actionsList0[key][selected+1],self.actionsList0[key][selected]
+		self.conf.set('NOTIFICATIONS', 'actions', str(self.actionsList0))
+		self.readSelectedActions(key)
+		self.restartRead()
+
+	def onEditAction(self,e):
+		selected = self.listActions.GetFirstSelected()
+		if selected == -1: return
+		key = self.key.GetValue()
+		state = self.actionsSelected[selected]['state']
+		message = self.actionsSelected[selected]['message']
+		module = self.actionsSelected[selected]['module']
+		ID = self.actionsSelected[selected]['ID']
+		data = self.actionsSelected[selected]['data']
+		edit = {'key':key,'selected':selected,'state':state,'message':message,'module':module,'ID':ID,'data':data}
+		self.setAction(edit)
+
+	def setAction(self,edit):
+		dlg = editAction(edit)
+		res = dlg.ShowModal()
+		if res == wx.ID_OK:
+			key = dlg.keyResult
+			action = dlg.actionResult
+			if key in self.actionsList0:
+				if not edit: self.actionsList0[key].append(action)
+				else: self.actionsList0[key][edit['selected']] = action
+			else: self.actionsList0[key] = [action]
+			self.conf.set('NOTIFICATIONS', 'actions', str(self.actionsList0))
+			self.readNotifications()
+			self.key.SetValue(key)
+			self.readSelectedActions(key)
+		dlg.Destroy()
+		self.restartRead()
+
+	def onDeleteAction(self,e):
+		selected = self.listActions.GetFirstSelected()
+		if selected == -1: return
+		key = self.key.GetValue()
+		del self.actionsList0[key][selected]
+		deleted = False
+		if len(self.actionsList0[key]) == 0:
+			deleted = True
+			del self.actionsList0[key]
+		self.conf.set('NOTIFICATIONS', 'actions', str(self.actionsList0))
+		self.readNotifications()
+		if not deleted:
+			self.key.SetValue(key)
+			self.readSelectedActions(key)
+		self.restartRead()
+
+################################################################################
+
+class editAction(wx.Dialog):
+
+	def __init__(self,edit):
+		if edit: title = _('Editing Action')
+		else: title = _('Adding Action')
+
+		from openplotterSettings import appsList
+		import importlib
+
+		self.conf = conf.Conf()
+		self.currentLanguage = self.conf.get('GENERAL', 'lang')
+		if self.conf.get('GENERAL', 'debug') == 'yes': self.debug = True
+		else: self.debug = False
+
+		self.availableActions = []
+		self.appsList = appsList.AppsList()
+		appsDict = self.appsList.appsDict
+		for i in appsDict:
+			name = i['module']
+			if name:
+				actions = False
+				try:
+					actions = importlib.import_module(name+'.actions')
+					if actions: 
+						target = actions.Actions(self.conf,self.currentLanguage)
+						available = target.available
+						if available:
+							for i in available:
+								self.availableActions.append(i)
+				except Exception as e: 
+					if self.debug: print(str(e))
+
+		self.actions = []
+		for i in self.availableActions:
+			self.actions.append(i['name'])
+
+		wx.Dialog.__init__(self, None, title=title, size=(600, 445))
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+		panel = wx.Panel(self)
+
+		stateLabel= wx.StaticText(panel, label = _('State'))
+		self.state = wx.ComboBox(panel, choices = [_('any'),'null','normal','alert','warn','alarm','emergency'], style=wx.CB_READONLY)
+		if edit:
+			if edit['state'] == '': self.state.SetSelection(0)
+			else: self.state.SetValue(edit['state'])
+		else: self.state.SetSelection(0)
+		self.Bind(wx.EVT_COMBOBOX, self.onState, self.state)
+
+		messageLabel= wx.StaticText(panel, label = _('Message'))
+		self.message = wx.TextCtrl(panel)
+		if edit: 
+			if edit['state'] == 'null': self.message.Disable()
+			else: self.message.SetValue(edit['message'])
+
+		notiLabel = wx.StaticText(panel, label = _('Notification'))
+		self.SK = wx.TextCtrl(panel)
+		SKedit = wx.Button(panel, label='Signal K key')
+		SKedit.Bind(wx.EVT_BUTTON, self.onSKedit)
+		if edit:
+			self.SK.SetValue(edit['key'])
+			self.SK.Disable()
+			SKedit.Disable()
+
+		actionLabel= wx.StaticText(panel, label = _('Action'))
+		self.actionsList = wx.ComboBox(panel, choices = self.actions, style=wx.CB_READONLY)
+		self.Bind(wx.EVT_COMBOBOX, self.onActionsList, self.actionsList)
+
+		dataLabel= wx.StaticText(panel, label = _('Data'))
+		self.data = wx.TextCtrl(panel,style= wx.TE_MULTILINE)
+
+		self.stateBtn = wx.Button(panel, label='< '+_('state'))
+		self.stateBtn.Bind(wx.EVT_BUTTON, self.onAddState)
+		self.messageBtn = wx.Button(panel, label='< '+_('message'))
+		self.messageBtn.Bind(wx.EVT_BUTTON, self.onAddMessage)
+		self.timestampBtn = wx.Button(panel, label='< '+_('timestamp'))
+		self.timestampBtn.Bind(wx.EVT_BUTTON, self.onAddTimestamp)
+		self.skBtn = wx.Button(panel, label='< '+_('Signal K value'))
+		self.skBtn.Bind(wx.EVT_BUTTON, self.onAddsk)
+
+		self.help= wx.StaticText(panel, label = '')
+
+		self.data.Disable()
+		self.stateBtn.Disable()
+		self.messageBtn.Disable()
+		self.timestampBtn.Disable()
+		self.skBtn.Disable()
+		self.help.SetLabel('')
+
+		if edit: 
+			for i in self.availableActions:
+				if i['module'] == edit['module']:
+					if i['ID'] == edit['ID']:
+						self.actionsList.SetValue(i['name'])
+						if i['data']:
+							self.data.Enable()
+							self.stateBtn.Enable()
+							self.messageBtn.Enable()
+							self.timestampBtn.Enable()
+							self.skBtn.Enable()
+							self.data.SetValue(edit['data'])
+							self.help.SetLabel(i['help'])		
+
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
+		okBtn = wx.Button(panel, wx.ID_OK)
+		okBtn.Bind(wx.EVT_BUTTON, self.ok)
+
+		v1 = wx.BoxSizer(wx.VERTICAL)
+		v1.Add(stateLabel, 0, wx.ALL | wx.EXPAND, 5)
+		v1.Add(self.state, 0, wx.ALL | wx.EXPAND, 5)
+
+		v2 = wx.BoxSizer(wx.VERTICAL)
+		v2.Add(messageLabel, 0, wx.ALL | wx.EXPAND, 5)
+		v2.Add(self.message, 0, wx.ALL | wx.EXPAND, 5)
+
+		h1 = wx.BoxSizer(wx.HORIZONTAL)
+		h1.Add(v1, 1, wx.ALL | wx.EXPAND, 0)
+		h1.Add(v2, 1, wx.ALL | wx.EXPAND, 0)
+
+		h3 = wx.BoxSizer(wx.HORIZONTAL)
+		h3.Add(self.SK, 1, wx.ALL | wx.EXPAND, 5)
+		h3.Add(SKedit, 0, wx.ALL | wx.EXPAND, 5)
+
+		v3 = wx.BoxSizer(wx.VERTICAL)
+		v3.Add(self.stateBtn, 0, wx.ALL | wx.EXPAND, 3)
+		v3.Add(self.messageBtn, 0, wx.ALL | wx.EXPAND, 3)
+		v3.Add(self.timestampBtn, 0, wx.ALL | wx.EXPAND, 3)
+		v3.Add(self.skBtn, 0, wx.ALL | wx.EXPAND, 3)
+
+		h4 = wx.BoxSizer(wx.HORIZONTAL)
+		h4.Add(self.data, 1, wx.ALL  | wx.EXPAND, 5)
+		h4.Add(v3, 0, wx.ALL | wx.EXPAND, 0)
+
+		actionbox = wx.BoxSizer(wx.HORIZONTAL)
+		actionbox.AddStretchSpacer(1)
+		actionbox.Add(cancelBtn, 0, wx.LEFT | wx.EXPAND, 10)
+		actionbox.Add(okBtn, 0, wx.LEFT | wx.EXPAND, 10)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(notiLabel, 0, wx.ALL  | wx.EXPAND, 5)
+		vbox.Add(h3, 0, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(h1, 0, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(actionLabel, 0, wx.ALL  | wx.EXPAND, 5)
+		vbox.Add(self.actionsList , 0, wx.ALL  | wx.EXPAND, 5)
+		vbox.Add(dataLabel, 0, wx.ALL  | wx.EXPAND, 5)
+		vbox.Add(h4, 1, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(self.help, 0, wx.LEFT | wx.EXPAND, 5)
+		vbox.Add(actionbox, 0, wx.ALL | wx.EXPAND, 10)
+
+		panel.SetSizer(vbox)
+		self.panel = panel
+
+		self.Centre() 
+
+	def onActionsList(self,e=0):
+		selected = self.actionsList.GetSelection()
+		if selected != -1:
+			if self.availableActions[selected]['data']:
+				self.data.Enable()
+				self.stateBtn.Enable()
+				self.messageBtn.Enable()
+				self.timestampBtn.Enable()
+				self.skBtn.Enable()
+				self.data.SetValue(self.availableActions[selected]['default'])
+				self.help.SetLabel(self.availableActions[selected]['help'])
+			else: 
+				self.data.SetValue('')
+				self.data.Disable()
+				self.stateBtn.Disable()
+				self.messageBtn.Disable()
+				self.timestampBtn.Disable()
+				self.skBtn.Disable()
+				self.help.SetLabel('')
+
+	def onState(self,e=0):
+		selected = self.state.GetSelection()
+		if selected == 1: 
+			self.message.Disable()
+			self.message.SetValue('')
+		else: self.message.Enable()
+
+	def onSKedit(self,e):
+		dlg = selectKey.SelectKey(self.SK.GetValue(),1)
+		res = dlg.ShowModal()
+		if res == wx.OK:
+			key = dlg.selected_key.replace(':','.')
+			if not 'notifications.' in key: key = 'notifications.'+key
+			vessel = dlg.skvessels.GetValue()
+			self.SK.SetValue(vessel+'.'+key)
+		dlg.Destroy()
+
+	def onAddState(self,e):
+		self.data.AppendText('<|s|>')
+
+	def onAddMessage(self,e):
+		self.data.AppendText('<|m|>')
+
+	def onAddTimestamp(self,e):
+		self.data.AppendText('<|t|>')
+
+	def onAddsk(self,e):
+		dlg = selectKey.SelectKey('',1)
+		res = dlg.ShowModal()
+		if res == wx.OK:
+			key = dlg.selected_key.replace(':','.')
+			vessel = dlg.skvessels.GetValue()
+			self.data.AppendText('<|'+vessel+'||'+key+'|>')
+		dlg.Destroy()
+
+	def ok(self,e):
+		self.keyResult = self.SK.GetValue()
+		if not self.keyResult:
+			wx.MessageBox(_('Notification failed: provide a notification key.'), _('Info'), wx.OK | wx.ICON_INFORMATION)
+			return
+		if not re.match('^[-:.0-9a-zA-Z]+$', self.keyResult):
+			wx.MessageBox(_('Notification failed: characters not allowed.'), _('Info'), wx.OK | wx.ICON_INFORMATION)
+			return
+		items = self.keyResult.split('.')
+		if items[0] == 'vessels': del items[0]
+		if items[0] != 'self' and items[0][0:12] != 'urn:mrn:imo:' and items[0][0:16] != 'urn:mrn:signalk:': items.insert(0, 'self')
+		if items[1] != 'notifications': items.insert(1, 'notifications')
+		self.keyResult = '.'.join(items)
+		if self.state.GetSelection() == 0: state = ''
+		else: state = self.state.GetValue()
+		message = self.message.GetValue()
+		selected = self.actionsList.GetSelection()
+		if selected == -1:
+			wx.MessageBox(_('Action failed: select an action.'), _('Info'), wx.OK | wx.ICON_INFORMATION)
+			return
+		name = self.availableActions[selected]['name']
+		module = self.availableActions[selected]['module']
+		ID = self.availableActions[selected]['ID']
+		name = self.availableActions[selected]['name']
+		data = self.data.GetValue()
+		self.actionResult = {'enabled': True,'state':state,'message':message,'name':name,'module':module,'ID':ID,'data':data}
+		self.EndModal(wx.ID_OK)
 
 ################################################################################
 

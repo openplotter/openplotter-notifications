@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-# This file is part of Openplotter.
-# Copyright (C) 2021 by Sailoog <https://github.com/openplotter/openplotter-notifications>
+# This file is part of OpenPlotter.
+# Copyright (C) 2022 by Sailoog <https://github.com/openplotter/openplotter-notifications>
 #
 # Openplotter is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,10 +38,10 @@ def main():
 		except: sound = ['/usr/share/sounds/openplotter/Ship_Bell.mp3', True]
 	if state == 'alarm':
 		try: sound = eval(conf.get('NOTIFICATIONS', 'soundAlarm'))
-		except: sound = ['/usr/share/sounds/openplotter/House_Fire_Alarm.mp3', False]
+		except: sound = ['/usr/share/sounds/openplotter/pup-alert.mp3', False]
 	if state == 'emergency':
 		try: sound = eval(conf.get('NOTIFICATIONS', 'soundEmergency'))
-		except: sound = ['/usr/share/sounds/openplotter/Tornado_Siren_II.mp3', False]
+		except: sound = ['/usr/share/sounds/openplotter/nuclear-alarm.ogg', False]
 
 	while True:
 		subprocess.call(['cvlc', '--play-and-exit', sound[0]])
