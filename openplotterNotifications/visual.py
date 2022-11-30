@@ -98,7 +98,7 @@ class MyFrame(wx.Frame):
 		if color[1]:
 			self.timer = wx.Timer(self)
 			self.Bind(wx.EVT_TIMER, self.refresh, self.timer)
-			self.timer.Start(5000)
+			self.timer.Start(3000)
 		else: self.timer = False
 
 		self.Centre()

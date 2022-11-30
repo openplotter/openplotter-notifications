@@ -29,7 +29,7 @@ class Actions:
 		self.available.append({'ID':'command','name':_('Run command'),"module": "openplotterNotifications",'data':True,'default':'echo "Hello World"','help':''})
 		self.available.append({'ID':'reboot','name':_('Reboot'),"module": "openplotterNotifications",'data':False,'default':'','help':''})
 		self.available.append({'ID':'shutdown','name':_('Shutdown'),"module": "openplotterNotifications",'data':False,'default':'','help':''})
-		self.available.append({'ID':'notification','name':_('Set notification'),"module": "openplotterNotifications",'data':True,'default':'Signal_K_key=foo.bar\nnull=no\nstate=normal\nmessage=Hello World\nsound=no\nvisual=yes','help':_('Allowed values for state: normal, alert, warn, alarm, emergency')})
+		self.available.append({'ID':'notification','name':_('Set notification'),"module": "openplotterNotifications",'data':True,'default':'Signal_K_key=foo.bar\nnull=no\nstate=normal\nmessage=Hello World\nsound=no\nvisual=yes','help':_('Allowed values for state:')+' normal, alert, warn, alarm, emergency'})
 		self.available.append({'ID':'sk','name':_('Set Signal K key'),"module": "openplotterNotifications",'data':True,'default':'Signal_K_key=foo.bar\nvalue=5','help':''})
 		self.available.append({'ID':'sleep','name':_('Wait some seconds'),"module": "openplotterNotifications",'data':True,'default':'2','help':_('Enter the seconds to wait without quotes')})
 		self.available.append({'ID':'check','name':_('Check notification again'),"module": "openplotterNotifications",'data':False,'default':'','help':''})
@@ -73,7 +73,7 @@ class Actions:
 					process2 = subprocess.Popen(['set-notification','-s','-v','notifications.openplotter.actions','alert', err], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 					out2, err2 = process2.communicate()
 					if err2:
-						if self.debug: print('Error setting notification: '+str(err2.decode()))
+						if self.debug: print('Error setting notification: '+str(err2))
 			elif action == 'sk':
 				from openplotterSettings import platform
 				from websocket import create_connection

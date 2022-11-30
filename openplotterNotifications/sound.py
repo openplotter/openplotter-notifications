@@ -28,19 +28,19 @@ def main():
 	timestamp = sys.argv[3]
 
 	if state == 'normal':
-		try: sound = eval(conf.get('NOTIFICATIONS', 'soundNormal'))
+		try: sound = eval(conf2.get('NOTIFICATIONS', 'soundNormal'))
 		except: sound = ['/usr/share/sounds/openplotter/Bleep.mp3', True]
 	if state == 'alert':
-		try: sound = eval(conf.get('NOTIFICATIONS', 'soundAlert'))
+		try: sound = eval(conf2.get('NOTIFICATIONS', 'soundAlert'))
 		except: sound = ['/usr/share/sounds/openplotter/Store_Door_Chime.mp3', True]
 	if state == 'warn':
-		try: sound = eval(conf.get('NOTIFICATIONS', 'soundWarn'))
+		try: sound = eval(conf2.get('NOTIFICATIONS', 'soundWarn'))
 		except: sound = ['/usr/share/sounds/openplotter/Ship_Bell.mp3', True]
 	if state == 'alarm':
-		try: sound = eval(conf.get('NOTIFICATIONS', 'soundAlarm'))
+		try: sound = eval(conf2.get('NOTIFICATIONS', 'soundAlarm'))
 		except: sound = ['/usr/share/sounds/openplotter/pup-alert.mp3', False]
 	if state == 'emergency':
-		try: sound = eval(conf.get('NOTIFICATIONS', 'soundEmergency'))
+		try: sound = eval(conf2.get('NOTIFICATIONS', 'soundEmergency'))
 		except: sound = ['/usr/share/sounds/openplotter/nuclear-alarm.ogg', False]
 
 	while True:
@@ -60,7 +60,7 @@ def main():
 							if data['value']['timestamp'] != timestamp: break
 				else: break
 			else: break
-		time.sleep(5)
+		time.sleep(3)
 
 if __name__ == '__main__':
 	main()

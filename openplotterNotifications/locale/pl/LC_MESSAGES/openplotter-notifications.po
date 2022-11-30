@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: openplotter\n"
-"POT-Creation-Date: 2022-05-27 21:57+0200\n"
-"PO-Revision-Date: 2022-07-02 20:03+0200\n"
+"POT-Creation-Date: 2022-11-30 19:25+0100\n"
+"PO-Revision-Date: 2022-11-30 19:29+0100\n"
 "Last-Translator: \n"
 "Language-Team: Polish\n"
 "Language: pl\n"
@@ -37,7 +37,7 @@ msgid "Set notification"
 msgstr "Ustaw powiadomienie"
 
 #: actions.py:32
-msgid "Allowed values for state: normal, alert, warn, alarm, emergency"
+msgid "Allowed values for state:"
 msgstr ""
 
 #: actions.py:33
@@ -83,7 +83,7 @@ msgstr "NIEPOWODZENIE: "
 
 #: notificationsPostInstall.py:38
 msgid "Installing/Updating signalk-zones plugin..."
-msgstr ""
+msgstr "Instalacja/aktualizacja wtyczki signal-zones..."
 
 #: notificationsPostInstall.py:47
 msgid "Failed. Please, install Signal K server."
@@ -273,11 +273,11 @@ msgstr ""
 
 #: openplotterNotifications.py:638
 msgid "Add"
-msgstr ""
+msgstr "Dodaj"
 
 #: openplotterNotifications.py:643
 msgid "Delete"
-msgstr ""
+msgstr "Usuń"
 
 #: openplotterNotifications.py:646
 msgid "Up"
