@@ -1,3 +1,12 @@
+openplotter-notifications (3.0.9-stable) bullseye; urgency=medium
+
+  * Fix error in action "set notification"
+  * Fix error in sound autostop for alarm and emergency
+  * Reduce to 3s the autocheck time for visual and sound
+  * Update translations
+
+ -- Sailoog <info@sailoog.com>  Wed, 30 Nov 2022 19:05:24 +0100
+
 openplotter-notifications (3.0.6-stable) bullseye; urgency=medium
 
   * Stable
