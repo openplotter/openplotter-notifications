@@ -60,7 +60,7 @@ class MyFrame(wx.Frame):
 		self.toolbar1.AddSeparator()
 		aproveSK = self.toolbar1.AddTool(105, _('Approve'), wx.Bitmap(self.currentdir+"/data/sk.png"))
 		self.Bind(wx.EVT_TOOL, self.onAproveSK, aproveSK)
-		connectionSK = self.toolbar1.AddTool(106, _('Allowed'), wx.Bitmap(self.currentdir+"/data/sk.png"))
+		connectionSK = self.toolbar1.AddTool(106, _('Reconnect'), wx.Bitmap(self.currentdir+"/data/sk.png"))
 		self.Bind(wx.EVT_TOOL, self.onConnectionSK, connectionSK)
 		self.toolbar1.AddSeparator()
 		refresh = self.toolbar1.AddTool(103, _('Refresh'), wx.Bitmap(self.currentdir+"/data/refresh.png"))
@@ -152,9 +152,9 @@ class MyFrame(wx.Frame):
 			webbrowser.open(url, new=2)
 
 	def onConnectionSK(self,e):
-		if self.platform.skPort: 
-			url = self.platform.http+'localhost:'+self.platform.skPort+'/admin/#/security/devices'
-			webbrowser.open(url, new=2)
+		self.conf.set('NOTIFICATIONS', 'href', '')
+		self.conf.set('NOTIFICATIONS', 'token', '')
+		self.onRefresh()
 
 	def restartRead(self):
 		subprocess.call(['pkill','-f','openplotter-notifications-read'])
@@ -182,11 +182,11 @@ class MyFrame(wx.Frame):
 			self.toolbar1.EnableTool(105,True)
 			self.ShowStatusBarYELLOW(result[1]+_(' Press "Approve" and then "Refresh".'))
 		elif result[0] == 'error':
-			self.ShowStatusBarRED(result[1])
+			self.ShowStatusBarRED(result[1]+_(' Try "Reconnect".'))
 		elif result[0] == 'repeat':
 			self.ShowStatusBarYELLOW(result[1]+_(' Press "Refresh".'))
 		elif result[0] == 'permissions':
-			self.ShowStatusBarYELLOW(result[1]+_(' Press "Allowed".'))
+			self.ShowStatusBarYELLOW(result[1])
 		elif result[0] == 'approved':
 			self.ShowStatusBarGREEN(result[1])
 
@@ -1215,7 +1215,7 @@ class editCustom(wx.Dialog):
 		if self.conf.get('GENERAL', 'debug') == 'yes': self.debug = True
 		else: self.debug = False
 
-		wx.Dialog.__init__(self, None, title=title, size=(450, 300))
+		wx.Dialog.__init__(self, None, title=title, size=(450, 280))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		panel = wx.Panel(self)
 
@@ -1278,7 +1278,7 @@ class editCustom(wx.Dialog):
 		vbox.Add(h1, 0, wx.ALL | wx.EXPAND, 0)
 		vbox.Add(methodLabel, 0, wx.ALL  | wx.EXPAND, 5)
 		vbox.Add(h4, 0, wx.ALL, 0)
-		actionbox.AddStretchSpacer(1)
+		vbox.AddStretchSpacer(1)
 		vbox.Add(actionbox, 0, wx.ALL | wx.EXPAND, 10)
 
 		panel.SetSizer(vbox)
