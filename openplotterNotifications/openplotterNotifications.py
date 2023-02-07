@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import wx, os, sys, webbrowser, subprocess, time, ujson, re
+import wx, os, sys, webbrowser, subprocess, time, ujson, re, requests, ujson
 import wx.richtext as rt
 from openplotterSettings import conf
 from openplotterSettings import language
@@ -35,6 +35,8 @@ class MyFrame(wx.Frame):
 	def __init__(self):
 		self.conf = conf.Conf()
 		self.conf_folder = self.conf.conf_folder
+		if self.conf.get('GENERAL', 'debug') == 'yes': self.debug = True
+		else: self.debug = False
 		self.platform = platform.Platform()
 		self.currentdir = os.path.dirname(os.path.abspath(__file__))
 		self.currentLanguage = self.conf.get('GENERAL', 'lang')
@@ -61,6 +63,9 @@ class MyFrame(wx.Frame):
 		connectionSK = self.toolbar1.AddTool(106, _('Allowed'), wx.Bitmap(self.currentdir+"/data/sk.png"))
 		self.Bind(wx.EVT_TOOL, self.onConnectionSK, connectionSK)
 		self.toolbar1.AddSeparator()
+		refresh = self.toolbar1.AddTool(103, _('Refresh'), wx.Bitmap(self.currentdir+"/data/refresh.png"))
+		self.Bind(wx.EVT_TOOL, self.onRefresh, refresh)
+		self.toolbar1.AddSeparator()
 		toolRescue = self.toolbar1.AddCheckTool(107, _('Rescue'), wx.Bitmap(self.currentdir+"/data/rescue.png"))
 		self.Bind(wx.EVT_TOOL, self.onToolRescue, toolRescue)
 		if self.conf.get('GENERAL', 'rescue') == 'yes': self.toolbar1.ToggleTool(107,True)
@@ -71,32 +76,38 @@ class MyFrame(wx.Frame):
 		self.visualMethod = wx.Panel(self.notebook)
 		self.soundMethod = wx.Panel(self.notebook)
 		self.actions = wx.Panel(self.notebook)
+		self.custom = wx.Panel(self.notebook)
+		self.notebook.AddPage(self.custom, _('Send'))
 		self.notebook.AddPage(self.summary, _('Zones'))
+		self.notebook.AddPage(self.actions, _('Actions'))
 		self.notebook.AddPage(self.visualMethod, _('Visual'))
 		self.notebook.AddPage(self.soundMethod, _('Sound'))
-		self.notebook.AddPage(self.actions, _('Actions'))
 
 		self.il = wx.ImageList(24, 24)
-		img0 = self.il.Add(wx.Bitmap(self.currentdir+"/data/sk.png", wx.BITMAP_TYPE_PNG))
-		img1 = self.il.Add(wx.Bitmap(self.currentdir+"/data/visual.png", wx.BITMAP_TYPE_PNG))
-		img2 = self.il.Add(wx.Bitmap(self.currentdir+"/data/play.png", wx.BITMAP_TYPE_PNG))
-		img3 = self.il.Add(wx.Bitmap(self.currentdir+"/data/openplotter-24.png", wx.BITMAP_TYPE_PNG))
+		img0 = self.il.Add(wx.Bitmap(self.currentdir+"/data/notifications.png", wx.BITMAP_TYPE_PNG))
+		img1 = self.il.Add(wx.Bitmap(self.currentdir+"/data/sk.png", wx.BITMAP_TYPE_PNG))
+		img2 = self.il.Add(wx.Bitmap(self.currentdir+"/data/openplotter-24.png", wx.BITMAP_TYPE_PNG))
+		img3 = self.il.Add(wx.Bitmap(self.currentdir+"/data/visual.png", wx.BITMAP_TYPE_PNG))
+		img4 = self.il.Add(wx.Bitmap(self.currentdir+"/data/play.png", wx.BITMAP_TYPE_PNG))
+
 		self.notebook.AssignImageList(self.il)
 		self.notebook.SetPageImage(0, img0)
 		self.notebook.SetPageImage(1, img1)
 		self.notebook.SetPageImage(2, img2)
 		self.notebook.SetPageImage(3, img3)
+		self.notebook.SetPageImage(4, img4)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.Add(self.toolbar1, 0, wx.EXPAND)
 		vbox.Add(self.notebook, 1, wx.EXPAND)
 		self.SetSizer(vbox)
 
+		self.pageCustom()
 		self.pageSummary()
+		self.pageActions()
 		self.pageVisual()
 		self.pageSound()
-		self.pageActions()
-		
+
 		self.onRefresh()
 
 		maxi = self.conf.get('GENERAL', 'maximize')
@@ -104,6 +115,7 @@ class MyFrame(wx.Frame):
 
 		self.Centre()
 
+		self.readCustom() #force
 
 	def ShowStatusBar(self, w_msg, colour):
 		self.GetStatusBar().SetForegroundColour(colour)
@@ -156,6 +168,12 @@ class MyFrame(wx.Frame):
 		self.restartRead()
 
 	def onRefresh(self, e=0):
+		self.readCustom()
+		self.OnReadThresholds()
+		self.readNotifications()
+		self.readColours()
+		self.readSounds()
+
 		self.ShowStatusBarBLACK(' ')
 		self.toolbar1.EnableTool(105,False)
 		skConnections = connections.Connections('NOTIFICATIONS')
@@ -177,7 +195,172 @@ class MyFrame(wx.Frame):
 			if self.conf.get('GENERAL', 'rescue') != 'yes':
 				subprocess.Popen('openplotter-notifications-read')
 
-		self.OnReadThresholds()
+	############################################################################
+
+	def pageCustom(self):
+		self.listCustom = wx.ListCtrl(self.custom, -1, style=wx.LC_REPORT | wx.LC_SINGLE_SEL | wx.LC_HRULES, size=(-1,200))
+		self.listCustom.InsertColumn(0, _('Notification'), width=320)
+		self.listCustom.InsertColumn(1, _('State'), width=90)
+		self.listCustom.InsertColumn(2, _('Method'), width=125)
+		self.listCustom.InsertColumn(3, _('Message'), width=220)
+		self.listCustom.Bind(wx.EVT_LIST_ITEM_SELECTED, self.onListCustomSelected)
+		self.listCustom.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.onlistCustomDeselected)
+		self.listCustom.SetTextColour(wx.BLACK)
+
+		self.toolbar8 = wx.ToolBar(self.custom, style=wx.TB_VERTICAL)
+		self.toolbar8.AddSeparator()
+		startCustom = self.toolbar8.AddTool(804, _('Trigger'), wx.Bitmap(self.currentdir+"/data/start.png"))
+		self.Bind(wx.EVT_TOOL, self.onStartCustom, startCustom)
+		stopCustom = self.toolbar8.AddTool(805, _('Stop'), wx.Bitmap(self.currentdir+"/data/stop.png"))
+		self.Bind(wx.EVT_TOOL, self.onStopCustom, stopCustom)
+		self.toolbar8.AddSeparator()
+		addCustom = self.toolbar8.AddTool(801, _('Add'), wx.Bitmap(self.currentdir+"/data/add.png"))
+		self.Bind(wx.EVT_TOOL, self.onAddCustom, addCustom)
+		toolEdit = self.toolbar8.AddTool(802, _('Edit'), wx.Bitmap(self.currentdir+"/data/edit.png"))
+		self.Bind(wx.EVT_TOOL, self.onEditCustom, toolEdit)
+		toolDelete = self.toolbar8.AddTool(803, _('Delete'), wx.Bitmap(self.currentdir+"/data/cancel.png"))
+		self.Bind(wx.EVT_TOOL, self.onDeleteCustom, toolDelete)
+		self.toolbar8.AddSeparator()
+
+		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox1.Add(self.listCustom , 1, wx.ALL | wx.EXPAND, 0)
+		hbox1.Add(self.toolbar8 , 0, wx.EXPAND, 0)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(hbox1, 1, wx.EXPAND, 0)
+		self.custom.SetSizer(vbox)
+
+	def getColour(self, state):
+		if state == 'normal': return self.visualNormal.GetColour()
+		elif state == 'alert': return self.visualAlert.GetColour()
+		elif state == 'warn': return self.visualWarn.GetColour()
+		elif state == 'alarm': return self.visualAlarm.GetColour()
+		elif state == 'emergency': return self.visualEmergency.GetColour()
+
+	def readCustom(self):
+		self.onlistCustomDeselected()
+		self.listCustom.DeleteAllItems()
+		try: self.customList = eval(self.conf.get('NOTIFICATIONS', 'customNot'))
+		except: self.customList = []
+		#[{'key':'notifications.xxx','state':'alarm','method':['visual'],'message':'dfgsdfgsdfg'}]
+		for i in self.customList:
+			self.listCustom.Append([i['key'],i['state'],str(i['method']),i['message']])
+
+		listCount = range(self.listCustom.GetItemCount())
+		for i in listCount:
+			try:
+				path = self.listCustom.GetItemText(i, 0)
+				state = self.listCustom.GetItemText(i, 1)
+				message = self.listCustom.GetItemText(i, 3)
+				path = path.replace('.','/')
+				resp = requests.get(self.platform.http+'localhost:'+self.platform.skPort+'/signalk/v1/api/vessels/self/'+path+'/value', verify=False)
+				result = ujson.loads(resp.content)
+				if 'state' in result:
+					if result['state'] == state:
+						if 'message' in result:
+							if result['message'] == message:
+								self.listCustom.SetItemTextColour(i,self.getColour(state))
+			except: pass
+
+	def onListCustomSelected(self, e):
+		self.onlistCustomDeselected()
+		selected = self.listCustom.GetFirstSelected()
+		if selected == -1: return
+		index = self.listCustom.GetItemText(selected, 0)
+		self.toolbar8.EnableTool(802,True)
+		self.toolbar8.EnableTool(803,True)
+		self.toolbar8.EnableTool(804,True)
+		self.toolbar8.EnableTool(805,True)
+
+	def onlistCustomDeselected(self, event=0):
+		self.toolbar8.EnableTool(802,False)
+		self.toolbar8.EnableTool(803,False)
+		self.toolbar8.EnableTool(804,False)
+		self.toolbar8.EnableTool(805,False)
+
+	def onAddCustom(self,e):
+		edit = {}
+		self.setCustom(edit)
+
+	def setCustom(self,edit):
+		dlg = editCustom(edit)
+		res = dlg.ShowModal()
+		if res == wx.ID_OK:
+			key = dlg.keyResult
+			state = dlg.state.GetValue()
+			message = dlg.message.GetValue()
+			visual = dlg.visual.GetValue()
+			sound = dlg.sound.GetValue()
+			method = []
+			if visual: method.append('visual')
+			if sound: method.append('sound')
+			if edit:
+				self.customList[edit['selected']] = {'key':key,'state':state,'method':str(method),'message':message}
+			else:
+				self.customList.append({'key':key,'state':state,'method':str(method),'message':message})
+			self.conf.set('NOTIFICATIONS', 'customNot', str(self.customList))
+			self.onRefresh()
+		dlg.Destroy()
+
+	def onEditCustom(self,e):
+		selected = self.listCustom.GetFirstSelected()
+		if selected == -1: return
+		key = self.listCustom.GetItemText(selected, 0)
+		state = self.listCustom.GetItemText(selected, 1)
+		method = eval(self.listCustom.GetItemText(selected, 2))
+		message = self.listCustom.GetItemText(selected, 3)
+		edit = {'selected':selected,'key':key,'state':state,'method':method,'message':message}
+		self.setCustom(edit)
+
+	def onDeleteCustom(self,e):
+		selected = self.listCustom.GetFirstSelected()
+		if selected == -1: return
+		del self.customList[selected]
+		self.conf.set('NOTIFICATIONS', 'customNot', str(self.customList))
+		self.onRefresh()
+
+	def onStartCustom(self,e):
+		selected = self.listCustom.GetFirstSelected()
+		if selected == -1: return
+		key = self.listCustom.GetItemText(selected, 0)
+		state = self.listCustom.GetItemText(selected, 1)
+		message = self.listCustom.GetItemText(selected, 3)
+		sound = False
+		visual = False
+		try: method = eval(self.listCustom.GetItemText(selected, 2))
+		except: method = []
+		if 'visual' in method: visual = True
+		if 'sound' in method: sound = True
+		command = ['set-notification']
+		if sound: command.append('-s')
+		if visual: command.append('-v')
+		command.append(key)
+		command.append(state)
+		command.append(message)
+		process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		out, err = process.communicate()
+		if err:
+			if self.debug:
+				err = err.decode()
+				err = err.replace('\n','')
+				print('Error setting notification: '+str(err))
+		self.onRefresh()
+
+	def onStopCustom(self,e):
+		selected = self.listCustom.GetFirstSelected()
+		if selected == -1: return
+		key = self.listCustom.GetItemText(selected, 0)
+		command = ['set-notification']
+		command.append('-n')
+		command.append(key)
+		process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		out, err = process.communicate()
+		if err:
+			if self.debug:
+				err = err.decode()
+				err = err.replace('\n','')
+				print('Error setting notification: '+str(err))
+		self.onRefresh()
 
 	############################################################################
 
@@ -186,9 +369,6 @@ class MyFrame(wx.Frame):
 		self.summaryLogger.SetMargins((10,10))
 
 		self.toolbar3 = wx.ToolBar(self.summary, style= wx.TB_VERTICAL)
-		self.toolbar3.AddSeparator()
-		refresh = self.toolbar3.AddTool(303, _('Refresh'), wx.Bitmap(self.currentdir+"/data/refresh.png"))
-		self.Bind(wx.EVT_TOOL, self.onRefresh, refresh)
 		self.toolbar3.AddSeparator()
 		toolThresholds = self.toolbar3.AddTool(301, _('Edit'), wx.Bitmap(self.currentdir+"/data/edit.png"))
 		self.Bind(wx.EVT_TOOL, self.OnToolThresholds, toolThresholds)
@@ -226,7 +406,7 @@ class MyFrame(wx.Frame):
 		except:
 			self.summaryLogger.WriteText(_('Error reading Signal K Zones configuration. Is this plugin installed and enabled?'))
 			return
-		if data['configuration']['zones']:
+		if 'zones' in data['configuration']:
 			for item in data['configuration']['zones']:
 				if item['key']:
 					self.summaryLogger.BeginTextColour((55, 55, 55))
@@ -339,8 +519,6 @@ class MyFrame(wx.Frame):
 		sizer.Add(auto, 0, wx.ALL | wx.EXPAND, 10)
 		sizer.Add(self.toolbar2, 0,  wx.EXPAND, 0)
 		self.visualMethod.SetSizer(sizer)
-
-		self.readColours()
 
 	def readColours(self):
 		try: visualNormal = eval(self.conf.get('NOTIFICATIONS', 'visualNormal'))
@@ -527,8 +705,6 @@ class MyFrame(wx.Frame):
 		sizer.Add(self.toolbar5, 0,  wx.EXPAND, 0)
 		self.soundMethod.SetSizer(sizer)
 
-		self.readSounds()
-
 	def readSounds(self):
 		try: soundNormal = eval(self.conf.get('NOTIFICATIONS', 'soundNormal'))
 		except: 
@@ -657,8 +833,6 @@ class MyFrame(wx.Frame):
 		vbox.Add(self.key, 0, wx.ALL |  wx.EXPAND, 10)
 		vbox.Add(hbox1, 1, wx.EXPAND, 0)
 		self.actions.SetSizer(vbox)
-
-		self.readNotifications()
 
 	def readNotifications(self):
 		self.keysList = []
@@ -1026,6 +1200,109 @@ class editAction(wx.Dialog):
 		name = self.availableActions[selected]['name']
 		data = self.data.GetValue()
 		self.actionResult = {'enabled': True,'state':state,'message':message,'name':name,'module':module,'ID':ID,'data':data}
+		self.EndModal(wx.ID_OK)
+
+################################################################################
+
+class editCustom(wx.Dialog):
+
+	def __init__(self,edit):
+		if edit: title = _('Editing notification')
+		else: title = _('Adding notification')
+
+		self.conf = conf.Conf()
+		self.currentLanguage = self.conf.get('GENERAL', 'lang')
+		if self.conf.get('GENERAL', 'debug') == 'yes': self.debug = True
+		else: self.debug = False
+
+		wx.Dialog.__init__(self, None, title=title, size=(450, 300))
+		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+		panel = wx.Panel(self)
+
+		stateLabel= wx.StaticText(panel, label = _('State'))
+		self.state = wx.ComboBox(panel, choices = ['normal','alert','warn','alarm','emergency'], style=wx.CB_READONLY)
+		if edit:
+			if edit['state'] == '': self.state.SetSelection(0)
+			else: self.state.SetValue(edit['state'])
+		else: self.state.SetSelection(0)
+
+		messageLabel= wx.StaticText(panel, label = _('Message'))
+		self.message = wx.TextCtrl(panel)
+		if edit: self.message.SetValue(edit['message'])
+
+		notiLabel = wx.StaticText(panel, label = _('Notification'))
+		self.SK = wx.TextCtrl(panel)
+		SKedit = wx.Button(panel, label='Signal K key')
+		SKedit.Bind(wx.EVT_BUTTON, self.onSKedit)
+		if edit: self.SK.SetValue(edit['key'])
+
+		methodLabel = wx.StaticText(panel, label = _('Method'))
+		self.visual = wx.CheckBox(panel, label='visual')
+		self.sound = wx.CheckBox(panel, label='sound')
+		if edit:
+			if 'visual' in edit['method']: self.visual.SetValue(True)
+			if 'sound' in edit['method']: self.sound.SetValue(True)
+
+		cancelBtn = wx.Button(panel, wx.ID_CANCEL)
+		okBtn = wx.Button(panel, wx.ID_OK)
+		okBtn.Bind(wx.EVT_BUTTON, self.ok)
+
+		v1 = wx.BoxSizer(wx.VERTICAL)
+		v1.Add(stateLabel, 0, wx.ALL | wx.EXPAND, 5)
+		v1.Add(self.state, 0, wx.ALL | wx.EXPAND, 5)
+
+		v2 = wx.BoxSizer(wx.VERTICAL)
+		v2.Add(messageLabel, 0, wx.ALL | wx.EXPAND, 5)
+		v2.Add(self.message, 0, wx.ALL | wx.EXPAND, 5)
+
+		h1 = wx.BoxSizer(wx.HORIZONTAL)
+		h1.Add(v1, 0, wx.ALL | wx.EXPAND, 0)
+		h1.Add(v2, 1, wx.ALL | wx.EXPAND, 0)
+
+		h3 = wx.BoxSizer(wx.HORIZONTAL)
+		h3.Add(self.SK, 1, wx.ALL | wx.EXPAND, 5)
+		h3.Add(SKedit, 0, wx.ALL | wx.EXPAND, 5)
+
+		h4 = wx.BoxSizer(wx.HORIZONTAL)
+		h4.Add(self.visual, 0, wx.ALL, 5)
+		h4.Add(self.sound, 0, wx.ALL, 5)
+
+		actionbox = wx.BoxSizer(wx.HORIZONTAL)
+		actionbox.AddStretchSpacer(1)
+		actionbox.Add(cancelBtn, 0, wx.LEFT | wx.EXPAND, 10)
+		actionbox.Add(okBtn, 0, wx.LEFT | wx.EXPAND, 10)
+
+		vbox = wx.BoxSizer(wx.VERTICAL)
+		vbox.Add(notiLabel, 0, wx.ALL  | wx.EXPAND, 5)
+		vbox.Add(h3, 0, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(h1, 0, wx.ALL | wx.EXPAND, 0)
+		vbox.Add(methodLabel, 0, wx.ALL  | wx.EXPAND, 5)
+		vbox.Add(h4, 0, wx.ALL, 0)
+		actionbox.AddStretchSpacer(1)
+		vbox.Add(actionbox, 0, wx.ALL | wx.EXPAND, 10)
+
+		panel.SetSizer(vbox)
+		self.panel = panel
+
+		self.Centre() 
+
+	def onSKedit(self,e):
+		dlg = selectKey.SelectKey(self.SK.GetValue(),0)
+		res = dlg.ShowModal()
+		if res == wx.OK:
+			key = dlg.selected_key.replace(':','.')
+			self.SK.SetValue(key)
+		dlg.Destroy()
+
+	def ok(self,e):
+		self.keyResult = self.SK.GetValue()
+		if not self.keyResult:
+			wx.MessageBox(_('Notification failed: provide a notification key.'), _('Info'), wx.OK | wx.ICON_INFORMATION)
+			return
+		if not re.match('^[-:.0-9a-zA-Z]+$', self.keyResult):
+			wx.MessageBox(_('Notification failed: characters not allowed.'), _('Info'), wx.OK | wx.ICON_INFORMATION)
+			return
+		if not 'notifications.' in self.keyResult: self.keyResult = 'notifications.'+self.keyResult 
 		self.EndModal(wx.ID_OK)
 
 ################################################################################
