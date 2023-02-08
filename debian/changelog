@@ -1,3 +1,11 @@
+openplotter-notifications (3.1.0-stable) bullseye; urgency=medium
+
+  * Add tool to send notifications
+  * Add SK reconnection
+  * Update translations
+
+ -- Sailoog <info@sailoog.com>  Fri, 02 Dec 2022 13:34:27 +0100
+
 openplotter-notifications (3.0.9-stable) bullseye; urgency=medium
 
   * Fix error in action "set notification"

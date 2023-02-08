@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: openplotter\n"
-"POT-Creation-Date: 2022-11-30 19:25+0100\n"
-"PO-Revision-Date: 2022-11-30 19:29+0100\n"
+"POT-Creation-Date: 2023-02-07 20:50+0100\n"
+"PO-Revision-Date: 2023-02-08 20:09+0100\n"
 "Last-Translator: \n"
 "Language-Team: Finnish\n"
 "Language: fi\n"
@@ -38,7 +38,7 @@ msgstr "Aseta ilmoitus"
 
 #: actions.py:32
 msgid "Allowed values for state:"
-msgstr ""
+msgstr "Sallitut arvot tilalle:"
 
 #: actions.py:33
 msgid "Set Signal K key"
@@ -56,7 +56,7 @@ msgstr "Anna odotussekunit ilman lainausmerkkejä"
 msgid "Check notification again"
 msgstr "Tarkista ilmoitus uudelleen"
 
-#: data/openplotter-notifications.desktop:3 openplotterNotifications.py:621
+#: data/openplotter-notifications.desktop:3 openplotterNotifications.py:797
 #: visual.py:32
 msgid "Notifications"
 msgstr "Ilmoitukset"
@@ -105,236 +105,265 @@ msgstr "Poistetaan openplotter-ilmoitusten-luku..."
 msgid "Removing version..."
 msgstr "Poistetaan versio..."
 
-#: openplotterNotifications.py:53
+#: openplotterNotifications.py:55
 msgid "Help"
 msgstr "Ohje"
 
-#: openplotterNotifications.py:56
+#: openplotterNotifications.py:58
 msgid "Settings"
 msgstr "Asetukset"
 
-#: openplotterNotifications.py:59
+#: openplotterNotifications.py:61
 msgid "Approve"
 msgstr "Hyväksy"
 
-#: openplotterNotifications.py:61
-msgid "Allowed"
-msgstr "Sallittu"
+#: openplotterNotifications.py:63
+msgid "Reconnect"
+msgstr ""
 
-#: openplotterNotifications.py:64
-msgid "Rescue"
-msgstr "Pelastus"
-
-#: openplotterNotifications.py:74
-msgid "Zones"
-msgstr "Alueet"
-
-#: openplotterNotifications.py:75
-msgid "Visual"
-msgstr "Ulkoasu"
-
-#: openplotterNotifications.py:76
-msgid "Sound"
-msgstr "Ääni"
-
-#: openplotterNotifications.py:77
-msgid "Actions"
-msgstr "Toimet"
-
-#: openplotterNotifications.py:165
-msgid " Press \"Approve\" and then \"Refresh\"."
-msgstr " Paina \"Hyväksy\" ja sitten \"Päivitä \"."
-
-#: openplotterNotifications.py:169
-msgid " Press \"Refresh\"."
-msgstr " Paina \"Päivitä\"."
-
-#: openplotterNotifications.py:171
-msgid " Press \"Allowed\"."
-msgstr " Paina \"Sallittu\"."
-
-#: openplotterNotifications.py:190
+#: openplotterNotifications.py:66
 msgid "Refresh"
 msgstr "Päivitä"
 
-#: openplotterNotifications.py:193 openplotterNotifications.py:641
-msgid "Edit"
-msgstr "Muokkaa"
+#: openplotterNotifications.py:69
+msgid "Rescue"
+msgstr "Pelastus"
 
-#: openplotterNotifications.py:224
-msgid "Signal K Zones plugin is disabled"
-msgstr "Signal K Zones plugin is estetty"
+#: openplotterNotifications.py:80
+msgid "Send"
+msgstr ""
 
-#: openplotterNotifications.py:227
-msgid "Error reading Signal K Zones configuration. Is this plugin installed and enabled?"
-msgstr "Signal K Zones konfiguraation luku epäonnistui. Onko tämä Signal K liitännäinen asennettu ja käytössä?"
+#: openplotterNotifications.py:81
+msgid "Zones"
+msgstr "Alueet"
 
-#: openplotterNotifications.py:238
-msgid "[inactive]"
-msgstr "[inactive]"
+#: openplotterNotifications.py:82
+msgid "Actions"
+msgstr "Toimet"
 
-#: openplotterNotifications.py:240
-msgid "[active]"
-msgstr "[active]"
+#: openplotterNotifications.py:83
+msgid "Visual"
+msgstr "Ulkoasu"
 
-#: openplotterNotifications.py:272
-msgid "No zones found"
-msgstr "Aluetta ei löytynyt"
+#: openplotterNotifications.py:84
+msgid "Sound"
+msgstr "Ääni"
 
-#: openplotterNotifications.py:279 openplotterNotifications.py:283
-#: openplotterNotifications.py:287 openplotterNotifications.py:291
-#: openplotterNotifications.py:295
-msgid "auto closing"
-msgstr "automaattinen sulkeminen"
+#: openplotterNotifications.py:183
+msgid " Press \"Approve\" and then \"Refresh\"."
+msgstr " Paina \"Hyväksy\" ja sitten \"Päivitä \"."
 
-#: openplotterNotifications.py:299 openplotterNotifications.py:456
-msgid "Save"
-msgstr "Tallenna"
+#: openplotterNotifications.py:185
+msgid " Try \"Reconnect\"."
+msgstr ""
 
-#: openplotterNotifications.py:301 openplotterNotifications.py:458
-msgid "Cancel"
-msgstr "Peru"
+#: openplotterNotifications.py:187
+msgid " Press \"Refresh\"."
+msgstr " Paina \"Päivitä\"."
 
-#: openplotterNotifications.py:304
-msgid "Close all windows"
-msgstr "Sulje kaikki ikkunat"
-
-#: openplotterNotifications.py:400
-msgid "Colours saved"
-msgstr "Värit tallennettu"
-
-#: openplotterNotifications.py:404
-msgid "Colours reloaded"
-msgstr "Värit ladattu uudelleen"
-
-#: openplotterNotifications.py:409
-msgid "File"
-msgstr "Tiedosto"
-
-#: openplotterNotifications.py:417 openplotterNotifications.py:426
-#: openplotterNotifications.py:434 openplotterNotifications.py:442
-#: openplotterNotifications.py:450
-msgid "Select"
-msgstr "Valitse"
-
-#: openplotterNotifications.py:419 openplotterNotifications.py:428
-#: openplotterNotifications.py:436 openplotterNotifications.py:444
-#: openplotterNotifications.py:452
-msgid "auto stop"
-msgstr "automaattinen pysäytys"
-
-#: openplotterNotifications.py:461
-msgid "Stop all sounds"
-msgstr "Pysäytä kaikki äänet"
-
-#: openplotterNotifications.py:587
-msgid "Failed: Error playing file"
-msgstr "Tiedoston toistaminen epäonnistui"
-
-#: openplotterNotifications.py:594
-msgid "Choose a file"
-msgstr "Valitse tiedosto"
-
-#: openplotterNotifications.py:595
-msgid "Audio files"
-msgstr "Äänitiedostot"
-
-#: openplotterNotifications.py:595
-msgid "All files"
-msgstr "Kaikki tiedostot"
-
-#: openplotterNotifications.py:611
-msgid "Sounds saved"
-msgstr "Äänet tallennettu"
-
-#: openplotterNotifications.py:615
-msgid "Sounds reloaded"
-msgstr "Äänet ladattu uudelleen"
-
-#: openplotterNotifications.py:625
-msgid "Enabled"
-msgstr "Käytössä"
-
-#: openplotterNotifications.py:626 openplotterNotifications.py:835
-msgid "State"
-msgstr "Tila"
-
-#: openplotterNotifications.py:627 openplotterNotifications.py:843
-msgid "Message"
-msgstr "Viesti"
-
-#: openplotterNotifications.py:628 openplotterNotifications.py:858
-msgid "Action"
-msgstr "Toiminto"
-
-#: openplotterNotifications.py:629 openplotterNotifications.py:862
-msgid "Data"
-msgstr "Tiedot"
-
-#: openplotterNotifications.py:638
-msgid "Add"
-msgstr "Lisää"
-
-#: openplotterNotifications.py:643
-msgid "Delete"
-msgstr "Poista"
-
-#: openplotterNotifications.py:646
-msgid "Up"
-msgstr "Ylös"
-
-#: openplotterNotifications.py:648
-msgid "Down"
-msgstr "Alas"
-
-#: openplotterNotifications.py:798
-msgid "Editing Action"
-msgstr "Toimintojen muokkaaminen"
-
-#: openplotterNotifications.py:799
-msgid "Adding Action"
-msgstr "Lisätään toiminto"
-
-#: openplotterNotifications.py:836
-msgid "any"
-msgstr "kaikki"
-
-#: openplotterNotifications.py:849
+#: openplotterNotifications.py:202 openplotterNotifications.py:1023
+#: openplotterNotifications.py:1233
 msgid "Notification"
 msgstr "Ilmoitus"
 
-#: openplotterNotifications.py:865
+#: openplotterNotifications.py:203 openplotterNotifications.py:802
+#: openplotterNotifications.py:1009 openplotterNotifications.py:1222
+msgid "State"
+msgstr "Tila"
+
+#: openplotterNotifications.py:204 openplotterNotifications.py:1239
+msgid "Method"
+msgstr ""
+
+#: openplotterNotifications.py:205 openplotterNotifications.py:803
+#: openplotterNotifications.py:1017 openplotterNotifications.py:1229
+msgid "Message"
+msgstr "Viesti"
+
+#: openplotterNotifications.py:212
+msgid "Trigger"
+msgstr ""
+
+#: openplotterNotifications.py:214
+msgid "Stop"
+msgstr ""
+
+#: openplotterNotifications.py:217 openplotterNotifications.py:814
+msgid "Add"
+msgstr "Lisää"
+
+#: openplotterNotifications.py:219 openplotterNotifications.py:373
+#: openplotterNotifications.py:817
+msgid "Edit"
+msgstr "Muokkaa"
+
+#: openplotterNotifications.py:221 openplotterNotifications.py:819
+msgid "Delete"
+msgstr "Poista"
+
+#: openplotterNotifications.py:404
+msgid "Signal K Zones plugin is disabled"
+msgstr "Signal K Zones plugin is estetty"
+
+#: openplotterNotifications.py:407
+msgid "Error reading Signal K Zones configuration. Is this plugin installed and enabled?"
+msgstr "Signal K Zones konfiguraation luku epäonnistui. Onko tämä Signal K liitännäinen asennettu ja käytössä?"
+
+#: openplotterNotifications.py:418
+msgid "[inactive]"
+msgstr "[inactive]"
+
+#: openplotterNotifications.py:420
+msgid "[active]"
+msgstr "[active]"
+
+#: openplotterNotifications.py:452
+msgid "No zones found"
+msgstr "Aluetta ei löytynyt"
+
+#: openplotterNotifications.py:459 openplotterNotifications.py:463
+#: openplotterNotifications.py:467 openplotterNotifications.py:471
+#: openplotterNotifications.py:475
+msgid "auto closing"
+msgstr "automaattinen sulkeminen"
+
+#: openplotterNotifications.py:479 openplotterNotifications.py:634
+msgid "Save"
+msgstr "Tallenna"
+
+#: openplotterNotifications.py:481 openplotterNotifications.py:636
+msgid "Cancel"
+msgstr "Peru"
+
+#: openplotterNotifications.py:484
+msgid "Close all windows"
+msgstr "Sulje kaikki ikkunat"
+
+#: openplotterNotifications.py:578
+msgid "Colours saved"
+msgstr "Värit tallennettu"
+
+#: openplotterNotifications.py:582
+msgid "Colours reloaded"
+msgstr "Värit ladattu uudelleen"
+
+#: openplotterNotifications.py:587
+msgid "File"
+msgstr "Tiedosto"
+
+#: openplotterNotifications.py:595 openplotterNotifications.py:604
+#: openplotterNotifications.py:612 openplotterNotifications.py:620
+#: openplotterNotifications.py:628
+msgid "Select"
+msgstr "Valitse"
+
+#: openplotterNotifications.py:597 openplotterNotifications.py:606
+#: openplotterNotifications.py:614 openplotterNotifications.py:622
+#: openplotterNotifications.py:630
+msgid "auto stop"
+msgstr "automaattinen pysäytys"
+
+#: openplotterNotifications.py:639
+msgid "Stop all sounds"
+msgstr "Pysäytä kaikki äänet"
+
+#: openplotterNotifications.py:763
+msgid "Failed: Error playing file"
+msgstr "Tiedoston toistaminen epäonnistui"
+
+#: openplotterNotifications.py:770
+msgid "Choose a file"
+msgstr "Valitse tiedosto"
+
+#: openplotterNotifications.py:771
+msgid "Audio files"
+msgstr "Äänitiedostot"
+
+#: openplotterNotifications.py:771
+msgid "All files"
+msgstr "Kaikki tiedostot"
+
+#: openplotterNotifications.py:787
+msgid "Sounds saved"
+msgstr "Äänet tallennettu"
+
+#: openplotterNotifications.py:791
+msgid "Sounds reloaded"
+msgstr "Äänet ladattu uudelleen"
+
+#: openplotterNotifications.py:801
+msgid "Enabled"
+msgstr "Käytössä"
+
+#: openplotterNotifications.py:804 openplotterNotifications.py:1032
+msgid "Action"
+msgstr "Toiminto"
+
+#: openplotterNotifications.py:805 openplotterNotifications.py:1036
+msgid "Data"
+msgstr "Tiedot"
+
+#: openplotterNotifications.py:822
+msgid "Up"
+msgstr "Ylös"
+
+#: openplotterNotifications.py:824
+msgid "Down"
+msgstr "Alas"
+
+#: openplotterNotifications.py:972
+msgid "Editing Action"
+msgstr "Toimintojen muokkaaminen"
+
+#: openplotterNotifications.py:973
+msgid "Adding Action"
+msgstr "Lisätään toiminto"
+
+#: openplotterNotifications.py:1010
+msgid "any"
+msgstr "kaikki"
+
+#: openplotterNotifications.py:1039
 msgid "state"
 msgstr "tila"
 
-#: openplotterNotifications.py:867
+#: openplotterNotifications.py:1041
 msgid "message"
 msgstr "viesti"
 
-#: openplotterNotifications.py:869
+#: openplotterNotifications.py:1043
 msgid "timestamp"
 msgstr "aikaleima"
 
-#: openplotterNotifications.py:871
+#: openplotterNotifications.py:1045
 msgid "Signal K value"
 msgstr "Signal K arvo"
 
-#: openplotterNotifications.py:1006
+#: openplotterNotifications.py:1180 openplotterNotifications.py:1300
 msgid "Notification failed: provide a notification key."
 msgstr "Ilmoitus epäonnistui: anna ilmoituksen tunnus."
 
-#: openplotterNotifications.py:1006 openplotterNotifications.py:1009
-#: openplotterNotifications.py:1021
+#: openplotterNotifications.py:1180 openplotterNotifications.py:1183
+#: openplotterNotifications.py:1195 openplotterNotifications.py:1300
+#: openplotterNotifications.py:1303
 msgid "Info"
 msgstr "Tiedot"
 
-#: openplotterNotifications.py:1009
+#: openplotterNotifications.py:1183 openplotterNotifications.py:1303
 msgid "Notification failed: characters not allowed."
 msgstr "Ilmoitus epäonnistui: merkit eivät ole sallittuja."
 
-#: openplotterNotifications.py:1021
+#: openplotterNotifications.py:1195
 msgid "Action failed: select an action."
 msgstr "Toimenpide epäonnistui: valitse toimenpide."
+
+#: openplotterNotifications.py:1210
+msgid "Editing notification"
+msgstr ""
+
+#: openplotterNotifications.py:1211
+msgid "Adding notification"
+msgstr ""
 
 #: startup.py:27
 msgid "Starting Notifications..."
