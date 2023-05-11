@@ -33,6 +33,9 @@ class Actions:
 		self.available.append({'ID':'sk','name':_('Set Signal K key'),"module": "openplotterNotifications",'data':True,'default':'Signal_K_key=foo.bar\nvalue=5','help':''})
 		self.available.append({'ID':'sleep','name':_('Wait some seconds'),"module": "openplotterNotifications",'data':True,'default':'2','help':_('Enter the seconds to wait without quotes')})
 		self.available.append({'ID':'check','name':_('Check notification again'),"module": "openplotterNotifications",'data':False,'default':'','help':''})
+		if os.path.exists('/usr/share/applications/openplotter-brightness.desktop'):
+			self.available.append({'ID':'backlight','name':_('Set backlight'),"module": "openplotterNotifications",'data':True,'default':'50','help':_('Enter a value between 0 and 100')})
+
 
 	def run(self,action,data):
 		try:
@@ -103,5 +106,11 @@ class Actions:
 							if self.debug: print('Error connecting to Signal K server: '+str(e))
 				else:
 					if self.debug: print('Error getting NOTIFICATIONS credentials')
+			elif action == 'backlight':
+				if os.path.exists('/usr/share/applications/openplotter-brightness.desktop'):
+					from rpi_backlight import Backlight
+					backlight = Backlight()
+					with backlight.fade(duration=1):
+						backlight.brightness = int(data)
 		except Exception as e: 
 			if self.debug: print('Error processing openplotter-notifications actions: '+str(e))
