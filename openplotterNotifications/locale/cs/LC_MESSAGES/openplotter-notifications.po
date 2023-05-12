@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: openplotter\n"
-"POT-Creation-Date: 2023-02-07 20:50+0100\n"
-"PO-Revision-Date: 2023-02-08 20:09+0100\n"
+"POT-Creation-Date: 2023-05-11 12:30+0200\n"
+"PO-Revision-Date: 2023-05-12 11:58+0200\n"
 "Last-Translator: \n"
 "Language-Team: Czech\n"
 "Language: cs\n"
@@ -22,11 +22,11 @@ msgstr ""
 
 #: actions.py:29
 msgid "Run command"
-msgstr "Spustit příkaz"
+msgstr ""
 
 #: actions.py:30
 msgid "Reboot"
-msgstr "Restartovat"
+msgstr ""
 
 #: actions.py:31
 msgid "Shutdown"
@@ -34,40 +34,48 @@ msgstr "Vypnout"
 
 #: actions.py:32
 msgid "Set notification"
-msgstr "Nastavit oznámení"
+msgstr ""
 
 #: actions.py:32
 msgid "Allowed values for state:"
-msgstr "Přípustné hodnoty pro stav:"
+msgstr ""
 
 #: actions.py:33
 msgid "Set Signal K key"
-msgstr "Vyberte Signal K klíč"
+msgstr ""
 
 #: actions.py:34
 msgid "Wait some seconds"
-msgstr "Prosím čekejte několik sekund"
+msgstr ""
 
 #: actions.py:34
 msgid "Enter the seconds to wait without quotes"
-msgstr "Zadejte sekundy pro čekání bez uvozovek"
+msgstr ""
 
 #: actions.py:35
 msgid "Check notification again"
-msgstr "Znovu zkontrolujte oznámení"
+msgstr ""
 
-#: data/openplotter-notifications.desktop:3 openplotterNotifications.py:797
+#: actions.py:37
+msgid "Set backlight"
+msgstr ""
+
+#: actions.py:37
+msgid "Enter a value between 0 and 100"
+msgstr ""
+
+#: data/openplotter-notifications.desktop:3 openplotterNotifications.py:796
 #: visual.py:32
 msgid "Notifications"
 msgstr "Oznámení"
 
 #: data/openplotter-notifications.desktop:5
 msgid "openplotter-notifications"
-msgstr "openplotter-oznámení"
+msgstr ""
 
 #: notificationsPostInstall.py:32
 msgid "Installing python packages..."
-msgstr "Instalování balíčků pro Python..."
+msgstr ""
 
 #: notificationsPostInstall.py:35 notificationsPostInstall.py:48
 #: notificationsPostInstall.py:57 notificationsPostInstall.py:63
@@ -83,27 +91,27 @@ msgstr "Chyba: "
 
 #: notificationsPostInstall.py:38
 msgid "Installing/Updating signalk-zones plugin..."
-msgstr "Instalace/aktualizace signalk-zones pluginu..."
+msgstr ""
 
 #: notificationsPostInstall.py:47
 msgid "Failed. Please, install Signal K server."
-msgstr "Chyba. Nainstalujte prosím server Signal K."
+msgstr ""
 
 #: notificationsPostInstall.py:51
 msgid "Checking access to Signal K server..."
-msgstr "Kontrola přístupu k serveru Signal K..."
+msgstr ""
 
 #: notificationsPostInstall.py:60
 msgid "Setting version..."
-msgstr "Nastavuji verzi..."
+msgstr ""
 
 #: notificationsPreUninstall.py:29
 msgid "Stopping openplotter-notifications-read..."
-msgstr "Zastavování služby openplotter-notifications-read..."
+msgstr ""
 
 #: notificationsPreUninstall.py:37
 msgid "Removing version..."
-msgstr "Odstraňuji verzi..."
+msgstr ""
 
 #: openplotterNotifications.py:55
 msgid "Help"
@@ -115,7 +123,7 @@ msgstr "Nastavení"
 
 #: openplotterNotifications.py:61
 msgid "Approve"
-msgstr "Schválit"
+msgstr ""
 
 #: openplotterNotifications.py:63
 msgid "Reconnect"
@@ -135,23 +143,23 @@ msgstr ""
 
 #: openplotterNotifications.py:81
 msgid "Zones"
-msgstr "Zóny"
+msgstr ""
 
 #: openplotterNotifications.py:82
 msgid "Actions"
-msgstr "Akce"
+msgstr ""
 
 #: openplotterNotifications.py:83
 msgid "Visual"
-msgstr "Zobrazení"
+msgstr ""
 
 #: openplotterNotifications.py:84
 msgid "Sound"
-msgstr "Zvuk"
+msgstr ""
 
 #: openplotterNotifications.py:183
 msgid " Press \"Approve\" and then \"Refresh\"."
-msgstr " Stiskněte \"Schválit\" a pak \"Obnovit\"."
+msgstr ""
 
 #: openplotterNotifications.py:185
 msgid " Try \"Reconnect\"."
@@ -159,26 +167,26 @@ msgstr ""
 
 #: openplotterNotifications.py:187
 msgid " Press \"Refresh\"."
-msgstr " Stiskněte Aktualizovat."
+msgstr ""
 
-#: openplotterNotifications.py:202 openplotterNotifications.py:1023
-#: openplotterNotifications.py:1233
+#: openplotterNotifications.py:202 openplotterNotifications.py:1022
+#: openplotterNotifications.py:1232
 msgid "Notification"
-msgstr "Oznámení"
+msgstr ""
 
-#: openplotterNotifications.py:203 openplotterNotifications.py:802
-#: openplotterNotifications.py:1009 openplotterNotifications.py:1222
+#: openplotterNotifications.py:203 openplotterNotifications.py:801
+#: openplotterNotifications.py:1008 openplotterNotifications.py:1221
 msgid "State"
-msgstr "Stav"
+msgstr ""
 
-#: openplotterNotifications.py:204 openplotterNotifications.py:1239
+#: openplotterNotifications.py:204 openplotterNotifications.py:1238
 msgid "Method"
 msgstr ""
 
-#: openplotterNotifications.py:205 openplotterNotifications.py:803
-#: openplotterNotifications.py:1017 openplotterNotifications.py:1229
+#: openplotterNotifications.py:205 openplotterNotifications.py:802
+#: openplotterNotifications.py:1016 openplotterNotifications.py:1228
 msgid "Message"
-msgstr "Zpráva"
+msgstr ""
 
 #: openplotterNotifications.py:212
 msgid "Trigger"
@@ -188,210 +196,210 @@ msgstr ""
 msgid "Stop"
 msgstr ""
 
-#: openplotterNotifications.py:217 openplotterNotifications.py:814
+#: openplotterNotifications.py:217 openplotterNotifications.py:813
 msgid "Add"
-msgstr "Přidat"
+msgstr ""
 
-#: openplotterNotifications.py:219 openplotterNotifications.py:373
-#: openplotterNotifications.py:817
+#: openplotterNotifications.py:219 openplotterNotifications.py:372
+#: openplotterNotifications.py:816
 msgid "Edit"
-msgstr "Upravit"
+msgstr ""
 
-#: openplotterNotifications.py:221 openplotterNotifications.py:819
+#: openplotterNotifications.py:221 openplotterNotifications.py:818
 msgid "Delete"
-msgstr "Smazat"
+msgstr ""
 
-#: openplotterNotifications.py:404
+#: openplotterNotifications.py:403
 msgid "Signal K Zones plugin is disabled"
-msgstr "Doplněk Signal K Zones je zakázán"
+msgstr ""
 
-#: openplotterNotifications.py:407
+#: openplotterNotifications.py:406
 msgid "Error reading Signal K Zones configuration. Is this plugin installed and enabled?"
-msgstr "Chyba při čtení konfigurace pluginu Signal K Zones. Je tento modul nainstalován a povolen?"
+msgstr ""
 
-#: openplotterNotifications.py:418
+#: openplotterNotifications.py:417
 msgid "[inactive]"
-msgstr "[inactive]"
+msgstr ""
 
-#: openplotterNotifications.py:420
+#: openplotterNotifications.py:419
 msgid "[active]"
-msgstr "[active]"
+msgstr ""
 
-#: openplotterNotifications.py:452
+#: openplotterNotifications.py:451
 msgid "No zones found"
-msgstr "Nebyly nalezeny žádné zóny"
+msgstr ""
 
-#: openplotterNotifications.py:459 openplotterNotifications.py:463
-#: openplotterNotifications.py:467 openplotterNotifications.py:471
-#: openplotterNotifications.py:475
+#: openplotterNotifications.py:458 openplotterNotifications.py:462
+#: openplotterNotifications.py:466 openplotterNotifications.py:470
+#: openplotterNotifications.py:474
 msgid "auto closing"
-msgstr "automatické zavření"
+msgstr ""
 
-#: openplotterNotifications.py:479 openplotterNotifications.py:634
+#: openplotterNotifications.py:478 openplotterNotifications.py:633
 msgid "Save"
 msgstr "Uložit"
 
-#: openplotterNotifications.py:481 openplotterNotifications.py:636
+#: openplotterNotifications.py:480 openplotterNotifications.py:635
 msgid "Cancel"
 msgstr "Storno"
 
-#: openplotterNotifications.py:484
+#: openplotterNotifications.py:483
 msgid "Close all windows"
-msgstr "Zavřít všechna okna"
+msgstr ""
 
-#: openplotterNotifications.py:578
+#: openplotterNotifications.py:577
 msgid "Colours saved"
-msgstr "Barvy uloženy"
+msgstr ""
 
-#: openplotterNotifications.py:582
+#: openplotterNotifications.py:581
 msgid "Colours reloaded"
-msgstr "Barvy znovu načteny"
+msgstr ""
 
-#: openplotterNotifications.py:587
+#: openplotterNotifications.py:586
 msgid "File"
-msgstr "Soubor"
+msgstr ""
 
-#: openplotterNotifications.py:595 openplotterNotifications.py:604
-#: openplotterNotifications.py:612 openplotterNotifications.py:620
-#: openplotterNotifications.py:628
+#: openplotterNotifications.py:594 openplotterNotifications.py:603
+#: openplotterNotifications.py:611 openplotterNotifications.py:619
+#: openplotterNotifications.py:627
 msgid "Select"
-msgstr "Vybrat"
+msgstr ""
 
-#: openplotterNotifications.py:597 openplotterNotifications.py:606
-#: openplotterNotifications.py:614 openplotterNotifications.py:622
-#: openplotterNotifications.py:630
+#: openplotterNotifications.py:596 openplotterNotifications.py:605
+#: openplotterNotifications.py:613 openplotterNotifications.py:621
+#: openplotterNotifications.py:629
 msgid "auto stop"
-msgstr "automatické zastavení"
+msgstr ""
 
-#: openplotterNotifications.py:639
+#: openplotterNotifications.py:638
 msgid "Stop all sounds"
-msgstr "Zastavit všechny zvuky"
+msgstr ""
 
-#: openplotterNotifications.py:763
+#: openplotterNotifications.py:762
 msgid "Failed: Error playing file"
-msgstr "Chyba: Chyba při přehrávání souboru"
+msgstr ""
 
-#: openplotterNotifications.py:770
+#: openplotterNotifications.py:769
 msgid "Choose a file"
 msgstr "Vybrat soubor"
 
-#: openplotterNotifications.py:771
+#: openplotterNotifications.py:770
 msgid "Audio files"
 msgstr "Zvukové soubory"
 
-#: openplotterNotifications.py:771
+#: openplotterNotifications.py:770
 msgid "All files"
 msgstr "Všechny soubory"
 
-#: openplotterNotifications.py:787
+#: openplotterNotifications.py:786
 msgid "Sounds saved"
-msgstr "Zvuky uloženy"
+msgstr ""
 
-#: openplotterNotifications.py:791
+#: openplotterNotifications.py:790
 msgid "Sounds reloaded"
-msgstr "Zvuky znovu načteny"
+msgstr ""
 
-#: openplotterNotifications.py:801
+#: openplotterNotifications.py:800
 msgid "Enabled"
-msgstr "Povoleno"
+msgstr ""
 
-#: openplotterNotifications.py:804 openplotterNotifications.py:1032
+#: openplotterNotifications.py:803 openplotterNotifications.py:1031
 msgid "Action"
-msgstr "Action"
+msgstr ""
 
-#: openplotterNotifications.py:805 openplotterNotifications.py:1036
+#: openplotterNotifications.py:804 openplotterNotifications.py:1035
 msgid "Data"
-msgstr "Data"
+msgstr ""
 
-#: openplotterNotifications.py:822
+#: openplotterNotifications.py:821
 msgid "Up"
-msgstr "Nahoru"
+msgstr ""
 
-#: openplotterNotifications.py:824
+#: openplotterNotifications.py:823
 msgid "Down"
-msgstr "Dolů"
+msgstr ""
+
+#: openplotterNotifications.py:971
+msgid "Editing Action"
+msgstr ""
 
 #: openplotterNotifications.py:972
-msgid "Editing Action"
-msgstr "Upravuji akci"
-
-#: openplotterNotifications.py:973
 msgid "Adding Action"
-msgstr "Přidávám akci"
+msgstr ""
 
-#: openplotterNotifications.py:1010
+#: openplotterNotifications.py:1009
 msgid "any"
-msgstr "jakýkoliv"
+msgstr ""
 
-#: openplotterNotifications.py:1039
+#: openplotterNotifications.py:1038
 msgid "state"
-msgstr "stav"
+msgstr ""
 
-#: openplotterNotifications.py:1041
+#: openplotterNotifications.py:1040
 msgid "message"
-msgstr "zpráva"
+msgstr ""
 
-#: openplotterNotifications.py:1043
+#: openplotterNotifications.py:1042
 msgid "timestamp"
-msgstr "časové razítko"
+msgstr ""
 
-#: openplotterNotifications.py:1045
+#: openplotterNotifications.py:1044
 msgid "Signal K value"
-msgstr "Hodnota v Signal K"
+msgstr ""
 
-#: openplotterNotifications.py:1180 openplotterNotifications.py:1300
+#: openplotterNotifications.py:1179 openplotterNotifications.py:1299
 msgid "Notification failed: provide a notification key."
-msgstr "Oznámení se nezdařilo: zadejte oznamovací klíč."
+msgstr ""
 
-#: openplotterNotifications.py:1180 openplotterNotifications.py:1183
-#: openplotterNotifications.py:1195 openplotterNotifications.py:1300
-#: openplotterNotifications.py:1303
+#: openplotterNotifications.py:1179 openplotterNotifications.py:1182
+#: openplotterNotifications.py:1194 openplotterNotifications.py:1299
+#: openplotterNotifications.py:1302
 msgid "Info"
 msgstr "Info"
 
-#: openplotterNotifications.py:1183 openplotterNotifications.py:1303
+#: openplotterNotifications.py:1182 openplotterNotifications.py:1302
 msgid "Notification failed: characters not allowed."
-msgstr "Oznámení se nezdařilo: znaky nejsou povoleny."
+msgstr ""
 
-#: openplotterNotifications.py:1195
+#: openplotterNotifications.py:1194
 msgid "Action failed: select an action."
-msgstr "Akce se nezdařila: vyberte akci."
+msgstr ""
 
-#: openplotterNotifications.py:1210
+#: openplotterNotifications.py:1209
 msgid "Editing notification"
 msgstr ""
 
-#: openplotterNotifications.py:1211
+#: openplotterNotifications.py:1210
 msgid "Adding notification"
 msgstr ""
 
 #: startup.py:27
 msgid "Starting Notifications..."
-msgstr "Spouštění oznámení..."
+msgstr ""
 
 #: startup.py:38
 msgid "Notifications started"
-msgstr "Oznámení byla spuštěna"
+msgstr ""
 
 #: startup.py:49
 msgid "Checking Notifications..."
-msgstr "Kontrola oznámení..."
+msgstr ""
 
 #: startup.py:58
 msgid "Notifications is in rescue mode"
-msgstr "Oznámení jsou v záchranném režimu"
+msgstr ""
 
 #: startup.py:63 startup.py:68
 msgid "running"
-msgstr "běží"
+msgstr ""
 
 #: startup.py:70
 msgid "not running"
-msgstr "neběží"
+msgstr ""
 
 #: startup.py:81
 msgid "Access to Signal K server validated"
-msgstr "Přístup k serveru Signal K byl ověřen"
+msgstr ""
 
 #: visual.py:71
 msgid "Close"
