@@ -1006,7 +1006,7 @@ class editAction(wx.Dialog):
 		for i in self.availableActions:
 			self.actions.append(i['name'])
 
-		wx.Dialog.__init__(self, None, title=title, size=(600, 440))
+		wx.Dialog.__init__(self, None, title=title, size=(600, 460))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		panel = wx.Panel(self)
 
@@ -1077,20 +1077,20 @@ class editAction(wx.Dialog):
 		okBtn.Bind(wx.EVT_BUTTON, self.ok)
 
 		v1 = wx.BoxSizer(wx.VERTICAL)
-		v1.Add(stateLabel, 0, wx.ALL | wx.EXPAND, 5)
-		v1.Add(self.state, 0, wx.ALL | wx.EXPAND, 5)
+		v1.Add(stateLabel, 0, wx.ALL | wx.EXPAND, 3)
+		v1.Add(self.state, 0, wx.ALL | wx.EXPAND, 3)
 
 		v2 = wx.BoxSizer(wx.VERTICAL)
-		v2.Add(messageLabel, 0, wx.ALL | wx.EXPAND, 5)
-		v2.Add(self.message, 0, wx.ALL | wx.EXPAND, 5)
+		v2.Add(messageLabel, 0, wx.ALL | wx.EXPAND, 3)
+		v2.Add(self.message, 0, wx.ALL | wx.EXPAND, 3)
 
 		h1 = wx.BoxSizer(wx.HORIZONTAL)
-		h1.Add(v1, 1, wx.ALL | wx.EXPAND, 0)
+		h1.Add(v1, 0, wx.ALL | wx.EXPAND, 0)
 		h1.Add(v2, 1, wx.ALL | wx.EXPAND, 0)
 
 		h3 = wx.BoxSizer(wx.HORIZONTAL)
-		h3.Add(self.SK, 1, wx.ALL | wx.EXPAND, 5)
-		h3.Add(SKedit, 0, wx.ALL | wx.EXPAND, 5)
+		h3.Add(self.SK, 1, wx.ALL, 3)
+		h3.Add(SKedit, 0, wx.ALL, 3)
 
 		v3 = wx.BoxSizer(wx.VERTICAL)
 		v3.Add(self.stateBtn, 0, wx.ALL | wx.EXPAND, 3)
@@ -1099,7 +1099,7 @@ class editAction(wx.Dialog):
 		v3.Add(self.skBtn, 0, wx.ALL | wx.EXPAND, 3)
 
 		h4 = wx.BoxSizer(wx.HORIZONTAL)
-		h4.Add(self.data, 1, wx.ALL  | wx.EXPAND, 5)
+		h4.Add(self.data, 1, wx.ALL  | wx.EXPAND, 3)
 		h4.Add(v3, 0, wx.ALL | wx.EXPAND, 0)
 
 		actionbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -1108,14 +1108,14 @@ class editAction(wx.Dialog):
 		actionbox.Add(okBtn, 0, wx.LEFT | wx.EXPAND, 10)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
-		vbox.Add(notiLabel, 0, wx.ALL  | wx.EXPAND, 5)
+		vbox.Add(notiLabel, 0, wx.ALL  | wx.EXPAND, 3)
 		vbox.Add(h3, 0, wx.ALL | wx.EXPAND, 0)
 		vbox.Add(h1, 0, wx.ALL | wx.EXPAND, 0)
-		vbox.Add(actionLabel, 0, wx.ALL  | wx.EXPAND, 5)
-		vbox.Add(self.actionsList , 0, wx.ALL  | wx.EXPAND, 5)
-		vbox.Add(dataLabel, 0, wx.ALL  | wx.EXPAND, 5)
+		vbox.Add(actionLabel, 0, wx.ALL  | wx.EXPAND, 3)
+		vbox.Add(self.actionsList , 0, wx.ALL  | wx.EXPAND, 3)
+		vbox.Add(dataLabel, 0, wx.ALL  | wx.EXPAND, 3)
 		vbox.Add(h4, 1, wx.ALL | wx.EXPAND, 0)
-		vbox.Add(self.help, 0, wx.LEFT | wx.EXPAND, 5)
+		vbox.Add(self.help, 0, wx.LEFT | wx.EXPAND, 3)
 		vbox.Add(actionbox, 0, wx.ALL | wx.EXPAND, 10)
 
 		panel.SetSizer(vbox)
@@ -1219,7 +1219,7 @@ class editCustom(wx.Dialog):
 		if self.conf.get('GENERAL', 'debug') == 'yes': self.debug = True
 		else: self.debug = False
 
-		wx.Dialog.__init__(self, None, title=title, size=(450, 280))
+		wx.Dialog.__init__(self, None, title=title, size=(450, 320))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		panel = wx.Panel(self)
 
@@ -1264,8 +1264,8 @@ class editCustom(wx.Dialog):
 		h1.Add(v2, 1, wx.ALL | wx.EXPAND, 0)
 
 		h3 = wx.BoxSizer(wx.HORIZONTAL)
-		h3.Add(self.SK, 1, wx.ALL | wx.EXPAND, 5)
-		h3.Add(SKedit, 0, wx.ALL | wx.EXPAND, 5)
+		h3.Add(self.SK, 1, wx.ALL, 5)
+		h3.Add(SKedit, 0, wx.ALL, 5)
 
 		h4 = wx.BoxSizer(wx.HORIZONTAL)
 		h4.Add(self.visual, 0, wx.ALL, 5)
