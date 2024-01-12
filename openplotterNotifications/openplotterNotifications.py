@@ -23,13 +23,6 @@ from openplotterSettings import platform
 from openplotterSettings import selectKey
 from openplotterSignalkInstaller import connections
 from .version import version
-from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
-
-class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
-	def __init__(self, parent, height):
-		wx.ListCtrl.__init__(self, parent, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(650, height))
-		CheckListCtrlMixin.__init__(self)
-		ListCtrlAutoWidthMixin.__init__(self)
 
 class MyFrame(wx.Frame):
 	def __init__(self):
@@ -796,7 +789,7 @@ class MyFrame(wx.Frame):
 		self.key = wx.ComboBox(self.actions, 705, _('Notifications'), choices=[], style=wx.CB_DROPDOWN | wx.CB_READONLY)
 		self.Bind(wx.EVT_COMBOBOX, self.onKey, self.key)
 
-		self.listActions = CheckListCtrl(self.actions, 152)
+		self.listActions = wx.ListCtrl(self.actions, 152, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
 		self.listActions.InsertColumn(0, _('Enabled'), width=70)
 		self.listActions.InsertColumn(1, _('State'), width=90)
 		self.listActions.InsertColumn(2, _('Message'), width=180)
@@ -804,7 +797,10 @@ class MyFrame(wx.Frame):
 		self.listActions.InsertColumn(4, _('Data'), width=100)
 		self.listActions.Bind(wx.EVT_LIST_ITEM_SELECTED, self.onListActionsSelected)
 		self.listActions.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.onListActionsDeselected)
-		self.listActions.OnCheckItem = self.OnCheckItem
+		self.listActions.EnableCheckBoxes(True)
+		self.listActions.Bind(wx.EVT_LIST_ITEM_CHECKED, self.OnCheckItem)
+		self.listActions.Bind(wx.EVT_LIST_ITEM_UNCHECKED, self.OnUnCheckItem)
+
 		self.checking = False
 		self.listActions.SetTextColour(wx.BLACK)
 
@@ -886,11 +882,20 @@ class MyFrame(wx.Frame):
 		self.toolbar7.EnableTool(703,False)
 		self.toolbar7.EnableTool(704,False)
 
-	def OnCheckItem(self, index, flag):
+	def OnCheckItem(self, index):
 		if self.checking:
+			i = index.GetIndex()
 			key = self.key.GetValue()
-			if flag: self.actionsList0[key][index]['enabled'] = True
-			else: self.actionsList0[key][index]['enabled'] = False
+			self.actionsList0[key][i]['enabled'] = True
+			self.conf.set('NOTIFICATIONS', 'actions', str(self.actionsList0))
+			self.readSelectedActions(key)
+			self.restartRead()
+
+	def OnUnCheckItem(self, index):
+		if self.checking:
+			i = index.GetIndex()
+			key = self.key.GetValue()
+			self.actionsList0[key][i]['enabled'] = False
 			self.conf.set('NOTIFICATIONS', 'actions', str(self.actionsList0))
 			self.readSelectedActions(key)
 			self.restartRead()

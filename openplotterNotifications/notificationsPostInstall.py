@@ -29,12 +29,6 @@ def main():
 	language.Language(currentdir, package, currentLanguage)
 	platform2 = platform.Platform()
 
-	print(_('Installing python packages...'))
-	try:
-		subprocess.call(['pip3', 'install', 'websocket-client', '-U'])
-		print(_('DONE'))
-	except Exception as e: print(_('FAILED: ')+str(e))
-
 	print(_('Installing/Updating signalk-zones plugin...'))
 	try:
 		if platform2.skDir:
