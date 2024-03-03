@@ -195,7 +195,7 @@ class MyFrame(wx.Frame):
 		self.listCustom.InsertColumn(0, _('Notification'), width=320)
 		self.listCustom.InsertColumn(1, _('State'), width=90)
 		self.listCustom.InsertColumn(2, _('Method'), width=125)
-		self.listCustom.InsertColumn(3, _('Message'), width=220)
+		self.listCustom.InsertColumn(3, _('Message'), width=210)
 		self.listCustom.Bind(wx.EVT_LIST_ITEM_SELECTED, self.onListCustomSelected)
 		self.listCustom.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.onlistCustomDeselected)
 		self.listCustom.SetTextColour(wx.BLACK)
@@ -478,19 +478,15 @@ class MyFrame(wx.Frame):
 		self.toolbar2.AddSeparator()
 
 		names = wx.BoxSizer(wx.VERTICAL)
-		names.AddSpacer(35)
+		names.AddSpacer(5)
 		names.Add(normalLabel, 0, wx.ALL | wx.EXPAND, 10)
-		names.AddSpacer(5)
 		names.Add(alertLabel, 0, wx.ALL | wx.EXPAND, 10)
-		names.AddSpacer(5)
 		names.Add(warnLabel, 0, wx.ALL | wx.EXPAND, 10)
-		names.AddSpacer(5)
 		names.Add(alarmLabel, 0, wx.ALL | wx.EXPAND, 10)
-		names.AddSpacer(5)
 		names.Add(emergencyLabel, 0, wx.ALL | wx.EXPAND, 10)
 
 		colours = wx.BoxSizer(wx.VERTICAL)
-		colours.AddSpacer(30)
+		colours.AddSpacer(5)
 		colours.Add(self.visualNormal, 0, wx.ALL | wx.EXPAND, 5)
 		colours.Add(self.visualAlert, 0, wx.ALL | wx.EXPAND, 5)
 		colours.Add(self.visualWarn, 0, wx.ALL | wx.EXPAND, 5)
@@ -498,7 +494,7 @@ class MyFrame(wx.Frame):
 		colours.Add(self.visualEmergency, 0, wx.ALL | wx.EXPAND, 5)
 
 		auto = wx.BoxSizer(wx.VERTICAL)
-		auto.AddSpacer(30)
+		auto.AddSpacer(5)
 		auto.Add(self.normalAuto, 0, wx.ALL | wx.EXPAND, 10)
 		auto.Add(self.alertAuto, 0, wx.ALL | wx.EXPAND, 10)
 		auto.Add(self.warnAuto, 0, wx.ALL | wx.EXPAND, 10)
@@ -576,7 +572,6 @@ class MyFrame(wx.Frame):
 	############################################################################
 
 	def pageSound(self):
-		filesLabel = wx.StaticText(self.soundMethod, label=_('File'))
 
 		playButtonImg = wx.Bitmap(self.currentdir+"/data/play.png", wx.BITMAP_TYPE_ANY)
 
@@ -628,24 +623,17 @@ class MyFrame(wx.Frame):
 		cancel2 = self.toolbar5.AddTool(502, _('Cancel'), wx.Bitmap(self.currentdir+"/data/cancel.png"))
 		self.Bind(wx.EVT_TOOL, self.onCancel3, cancel2)
 		self.toolbar5.AddSeparator()
-		stopsounds = self.toolbar5.AddTool(503, _('Stop all sounds'), wx.Bitmap(self.currentdir+"/data/stop.png"))
+		stopsounds = self.toolbar5.AddTool(503, _('Stop all sounds'), wx.Bitmap(self.currentdir+"/data/sound-stop.png"))
 		self.Bind(wx.EVT_TOOL, self.onStopAllSounds, stopsounds)
 		self.toolbar5.AddSeparator()
 
 		names = wx.BoxSizer(wx.VERTICAL)
-		names.AddSpacer(35)
-		names.Add(normalLabel, 0, wx.ALL | wx.EXPAND, 10)
-		names.AddSpacer(5)
-		names.Add(alertLabel, 0, wx.ALL | wx.EXPAND, 10)
-		names.AddSpacer(5)
-		names.Add(warnLabel, 0, wx.ALL | wx.EXPAND, 10)
-		names.AddSpacer(5)
-		names.Add(alarmLabel, 0, wx.ALL | wx.EXPAND, 10)
-		names.AddSpacer(5)
-		names.Add(emergencyLabel, 0, wx.ALL | wx.EXPAND, 10)
-
-		title = wx.BoxSizer(wx.HORIZONTAL)
-		title.Add(filesLabel, 1, wx.ALL | wx.EXPAND, 5)
+		names.AddSpacer(10)
+		names.Add(normalLabel, 0, wx.ALL | wx.EXPAND, 11)
+		names.Add(alertLabel, 0, wx.ALL | wx.EXPAND, 11)
+		names.Add(warnLabel, 0, wx.ALL | wx.EXPAND, 11)
+		names.Add(alarmLabel, 0, wx.ALL | wx.EXPAND, 11)
+		names.Add(emergencyLabel, 0, wx.ALL | wx.EXPAND, 11)
 
 		normal = wx.BoxSizer(wx.HORIZONTAL)
 		normal.Add(self.soundNormal, 1, wx.ALL | wx.EXPAND, 5)
@@ -678,8 +666,6 @@ class MyFrame(wx.Frame):
 		emergency.Add(self.emergencyStop, 0, wx.ALL | wx.EXPAND, 5)
 
 		sounds = wx.BoxSizer(wx.VERTICAL)
-		sounds.AddSpacer(5)
-		sounds.Add(title, 0, wx.EXPAND, 0)
 		sounds.AddSpacer(5)
 		sounds.Add(normal, 0, wx.EXPAND, 0)
 		sounds.AddSpacer(5)
@@ -1019,13 +1005,13 @@ class editAction(wx.Dialog):
 		self.Bind(wx.EVT_COMBOBOX, self.onState, self.state)
 
 		messageLabel= wx.StaticText(panel, label = _('Message'))
-		self.message = wx.TextCtrl(panel)
+		self.message = wx.TextCtrl(panel,size=(-1, 25))
 		if edit: 
 			if edit['state'] == 'null': self.message.Disable()
 			else: self.message.SetValue(edit['message'])
 
 		notiLabel = wx.StaticText(panel, label = _('Notification'))
-		self.SK = wx.TextCtrl(panel)
+		self.SK = wx.TextCtrl(panel,size=(-1, 25))
 		SKedit = wx.Button(panel, label='Signal K key')
 		SKedit.Bind(wx.EVT_BUTTON, self.onSKedit)
 		if edit:
@@ -1235,7 +1221,7 @@ class editCustom(wx.Dialog):
 		if edit: self.message.SetValue(edit['message'])
 
 		notiLabel = wx.StaticText(panel, label = _('Notification'))
-		self.SK = wx.TextCtrl(panel)
+		self.SK = wx.TextCtrl(panel,size=(-1, 25))
 		SKedit = wx.Button(panel, label='Signal K key')
 		SKedit.Bind(wx.EVT_BUTTON, self.onSKedit)
 		if edit: self.SK.SetValue(edit['key'])
@@ -1257,7 +1243,7 @@ class editCustom(wx.Dialog):
 
 		v2 = wx.BoxSizer(wx.VERTICAL)
 		v2.Add(messageLabel, 0, wx.ALL | wx.EXPAND, 5)
-		v2.Add(self.message, 0, wx.ALL | wx.EXPAND, 5)
+		v2.Add(self.message, 1, wx.ALL | wx.EXPAND, 5)
 
 		h1 = wx.BoxSizer(wx.HORIZONTAL)
 		h1.Add(v1, 0, wx.ALL | wx.EXPAND, 0)
