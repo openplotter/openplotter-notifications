@@ -78,11 +78,13 @@ class Actions:
 					if err2:
 						if self.debug: print('Error setting notification: '+str(err2))
 			elif action == 'sk':
+				from openplotterSignalkInstaller import connections
 				from openplotterSettings import platform
 				from websocket import create_connection
 				import ssl
 				platform2 = platform.Platform()
-				token = self.conf.get('NOTIFICATIONS', 'token')
+				skConnections = connections.Connections('NOTIFICATIONS')
+				token = skConnections.token
 				uri = platform2.ws+'localhost:'+platform2.skPort+'/signalk/v1/stream?subscribe=none'
 				if token:
 					headers = {'Authorization': 'Bearer '+token}

@@ -19,6 +19,7 @@ import sys, ssl, time, ujson, subprocess, threading, importlib, requests, re
 from openplotterSettings import conf
 from openplotterSettings import platform
 from websocket import create_connection
+from openplotterSignalkInstaller import connections
 
 class processActions(threading.Thread):
 	def __init__(self, path, actions, notification,debug,currentLanguage,conf,platform):
@@ -87,7 +88,8 @@ def main():
 			currentLanguage = conf2.get('GENERAL', 'lang')
 			try: actionsList = eval(conf2.get('NOTIFICATIONS', 'actions'))
 			except: actionsList = {}
-			token = conf2.get('NOTIFICATIONS', 'token')
+			skConnections = connections.Connections('NOTIFICATIONS')
+			token = skConnections.token
 			try:
 				uri = platform2.ws+'localhost:'+platform2.skPort+'/signalk/v1/stream?subscribe=none'
 				if token:

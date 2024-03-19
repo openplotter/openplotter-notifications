@@ -21,7 +21,6 @@ from openplotterSettings import conf
 from openplotterSettings import language
 from openplotterSettings import platform
 from openplotterSettings import selectKey
-from openplotterSignalkInstaller import connections
 from .version import version
 
 class MyFrame(wx.Frame):
@@ -50,11 +49,6 @@ class MyFrame(wx.Frame):
 		if not self.platform.isInstalled('openplotter-doc'): self.toolbar1.EnableTool(101,False)
 		toolSettings = self.toolbar1.AddTool(102, _('Settings'), wx.Bitmap(self.currentdir+"/data/settings.png"))
 		self.Bind(wx.EVT_TOOL, self.OnToolSettings, toolSettings)
-		self.toolbar1.AddSeparator()
-		aproveSK = self.toolbar1.AddTool(105, _('Approve'), wx.Bitmap(self.currentdir+"/data/sk.png"))
-		self.Bind(wx.EVT_TOOL, self.onAproveSK, aproveSK)
-		connectionSK = self.toolbar1.AddTool(106, _('Reconnect'), wx.Bitmap(self.currentdir+"/data/sk.png"))
-		self.Bind(wx.EVT_TOOL, self.onConnectionSK, connectionSK)
 		self.toolbar1.AddSeparator()
 		refresh = self.toolbar1.AddTool(103, _('Refresh'), wx.Bitmap(self.currentdir+"/data/refresh.png"))
 		self.Bind(wx.EVT_TOOL, self.onRefresh, refresh)
@@ -139,16 +133,6 @@ class MyFrame(wx.Frame):
 		subprocess.call(['pkill', '-f', 'openplotter-settings'])
 		subprocess.Popen('openplotter-settings')
 
-	def onAproveSK(self,e):
-		if self.platform.skPort: 
-			url = self.platform.http+'localhost:'+self.platform.skPort+'/admin/#/security/access/requests'
-			webbrowser.open(url, new=2)
-
-	def onConnectionSK(self,e):
-		self.conf.set('NOTIFICATIONS', 'href', '')
-		self.conf.set('NOTIFICATIONS', 'token', '')
-		self.onRefresh()
-
 	def restartRead(self):
 		subprocess.call(['pkill','-f','openplotter-notifications-read'])
 		subprocess.call(['pkill','-f','openplotter-notifications-sound'])
@@ -168,20 +152,6 @@ class MyFrame(wx.Frame):
 		self.readSounds()
 
 		self.ShowStatusBarBLACK(' ')
-		self.toolbar1.EnableTool(105,False)
-		skConnections = connections.Connections('NOTIFICATIONS')
-		result = skConnections.checkConnection()
-		if result[0] == 'pending':
-			self.toolbar1.EnableTool(105,True)
-			self.ShowStatusBarYELLOW(result[1]+_(' Press "Approve" and then "Refresh".'))
-		elif result[0] == 'error':
-			self.ShowStatusBarRED(result[1]+_(' Try "Reconnect".'))
-		elif result[0] == 'repeat':
-			self.ShowStatusBarYELLOW(result[1]+_(' Press "Refresh".'))
-		elif result[0] == 'permissions':
-			self.ShowStatusBarYELLOW(result[1])
-		elif result[0] == 'approved':
-			self.ShowStatusBarGREEN(result[1])
 
 		test = subprocess.check_output(['ps','aux']).decode(sys.stdin.encoding)
 		if not 'openplotter-notifications-read' in test:

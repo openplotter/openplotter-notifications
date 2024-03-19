@@ -74,10 +74,10 @@ class Check():
 		#access
 		skConnections = connections.Connections('NOTIFICATIONS')
 		result = skConnections.checkConnection()
-		if result[0] == 'pending' or result[0] == 'error' or result[0] == 'repeat' or result[0] == 'permissions':
+		if result[0] =='error':
 			if not red: red = result[1]
 			else: red+= '\n    '+result[1]
-		if result[0] == 'approved' or result[0] == 'validated':
+		if result[0] =='validated':
 			msg = _('Access to Signal K server validated')
 			if not black: black = msg
 			else: black+= ' | '+msg

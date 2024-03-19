@@ -16,7 +16,6 @@
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
 import sys, ssl, re, datetime
-from openplotterSettings import conf
 from openplotterSettings import platform
 from websocket import create_connection
 from openplotterSignalkInstaller import connections
@@ -24,12 +23,12 @@ from openplotterSignalkInstaller import connections
 def checkConn():
 	skConnections = connections.Connections('NOTIFICATIONS')
 	result = skConnections.checkConnection()
-	if result[0] == 'pending' or result[0] == 'error' or result[0] == 'repeat' or result[0] == 'permissions': sys.exit(str(result))
+	if result[0] == 'error': sys.exit(str(result))
 
 def send(sk,value):
 	platform2 = platform.Platform()
-	conf2 = conf.Conf()
-	token = conf2.get('NOTIFICATIONS', 'token')
+	skConnections = connections.Connections('NOTIFICATIONS')
+	token = skConnections.token
 	uri = platform2.ws+'localhost:'+platform2.skPort+'/signalk/v1/stream?subscribe=none'
 	if token:
 		headers = {'Authorization': 'Bearer '+token}

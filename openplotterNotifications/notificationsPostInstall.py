@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import os, sys, subprocess
+import os, subprocess
 from openplotterSettings import conf
 from openplotterSettings import language
 from openplotterSettings import platform
@@ -40,15 +40,6 @@ def main():
 			subprocess.call(['systemctl', 'start', 'signalk.service'])
 		else: print(_('Failed. Please, install Signal K server.'))
 		print(_('DONE'))
-	except Exception as e: print(_('FAILED: ')+str(e))
-
-	print(_('Checking access to Signal K server...'))
-	try:
-		from openplotterSignalkInstaller import connections
-		skConnections = connections.Connections('NOTIFICATIONS')
-		result = skConnections.checkConnection()
-		if result[1]: print(result[1])
-		else: print(_('DONE'))
 	except Exception as e: print(_('FAILED: ')+str(e))
 
 	print(_('Setting version...'))
