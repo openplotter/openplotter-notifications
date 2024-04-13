@@ -69,91 +69,106 @@ class processActions(threading.Thread):
 												data2 = ujson.loads(resp.content)
 												data = data.replace('<|'+i+'|>',str(data2['value']))
 											except Exception as e:
-												if self.debug: print('Error processing keys in action data: '+str(e))
+												if self.debug: 
+													print('Error processing keys in action data: '+str(e))
+													sys.stdout.flush()
 										target.run(ID,data)
 								except Exception as e:
-									if self.debug: print('Error processing action data: '+str(e))
+									if self.debug: 
+										print('Error processing action data: '+str(e))
+										sys.stdout.flush()
 		except Exception as e:
-			if self.debug: print('Error processing actions: '+str(e))
+			if self.debug: 
+				print('Error processing actions: '+str(e))
+				sys.stdout.flush()
 
 def main():
-	ws = False
-	while True:
-		if not ws:
-			platform2 = platform.Platform()
-			conf2 = conf.Conf()
-			if conf2.get('GENERAL', 'debug') == 'yes': debug = True
-			else: debug = False
-			if conf2.get('GENERAL', 'rescue') == 'yes': sys.exit('Notifications in rescue mode')
-			currentLanguage = conf2.get('GENERAL', 'lang')
-			try: actionsList = eval(conf2.get('NOTIFICATIONS', 'actions'))
-			except: actionsList = {}
-			skConnections = connections.Connections('NOTIFICATIONS')
-			token = skConnections.token
-			try:
-				uri = platform2.ws+'localhost:'+platform2.skPort+'/signalk/v1/stream?subscribe=none'
-				if token:
-					headers = {'Authorization': 'Bearer '+token}
-					ws = create_connection(uri, header=headers, sslopt={"cert_reqs": ssl.CERT_NONE})
-			except Exception as e:
-				ws = False
-				if debug: print('Error connecting to Signal K server: '+str(e))
-			try:
-				resp = requests.get(platform2.http+'localhost:'+platform2.skPort+'/signalk/v1/api/vessels/self/uuid', verify=False)
-				uuid = resp.content
-				uuid = uuid.decode("utf-8")
-				uuid = uuid.replace('"', '') 
-			except Exception as e:
-				ws = False
-				if debug: print('Error getting Signal K UUID: '+str(e))
-		if ws:
-			try: ws.send('{"context": "vessels.*","subscribe":[{"path":"notifications.*"}]}\n')
-			except: 
-				if ws: ws.close()
-				ws = False
-			else:
-				while True:
-					try:
-						try: 
-							if ws: result = ws.recv()
-							else: break
-						except: 
-							if ws: ws.close()
-							ws = False
-							break
-						else:
-							try:
-								data = ujson.loads(result)
-								if 'updates' in data:
-									for update in data['updates']:
-										if 'values' in update:
-											for value in update['values']:
-												if 'notifications.' in value['path']:
-													if value['value']:
-														notification = value['value']
-														if 'method' in value['value']:
-															if 'context' in data:
-																if data['context'] == 'vessels.'+uuid or data['context'] == 'vessels.self':
-																	if 'visual' in value['value']['method']: 
-																		subprocess.Popen(['openplotter-notifications-visual', value['path'], value['value']['state'], value['value']['message'], value['value']['timestamp']])	
-																	if 'sound' in value['value']['method']:
-																		subprocess.Popen(['openplotter-notifications-sound', value['path'], value['value']['state'], value['value']['timestamp']])
-													else: notification = {'state':'null','message':'','timestamp':'','method':[]}
-													if 'context' in data:
-														actions = ''
-														context = data['context'].replace('vessels.','')
-														if context+'.'+value['path'] in actionsList: actions = actionsList[context+'.'+value['path']]
-														else:
-															if context == uuid:
-																if 'self.'+value['path'] in actionsList: actions = actionsList['self.'+value['path']]
-														if actions:
-															thread = processActions(value['path'],actions,notification,debug,currentLanguage,conf2,platform2)
-															thread.start()
-							except Exception as e: 
-								if debug: print('Error processing notification: '+str(e))
-					except Exception as e: 
-						if debug: print('Error reading Signal K notifications: '+str(e))
-		time.sleep(5)
+	if sys.argv[1] != '1':
+		ws = False
+		while True:
+			if not ws:
+				platform2 = platform.Platform()
+				conf2 = conf.Conf()
+				if conf2.get('GENERAL', 'debug') == 'yes': debug = True
+				else: debug = False
+				if conf2.get('GENERAL', 'rescue') == 'yes': sys.exit('Notifications in rescue mode')
+				currentLanguage = conf2.get('GENERAL', 'lang')
+				try: actionsList = eval(conf2.get('NOTIFICATIONS', 'actions'))
+				except: actionsList = {}
+				skConnections = connections.Connections('NOTIFICATIONS')
+				token = skConnections.token
+				try:
+					uri = platform2.ws+'localhost:'+platform2.skPort+'/signalk/v1/stream?subscribe=none'
+					if token:
+						headers = {'Authorization': 'Bearer '+token}
+						ws = create_connection(uri, header=headers, sslopt={"cert_reqs": ssl.CERT_NONE})
+				except Exception as e:
+					ws = False
+					if debug: 
+						print('Error connecting to Signal K server: '+str(e))
+						sys.stdout.flush()
+				try:
+					resp = requests.get(platform2.http+'localhost:'+platform2.skPort+'/signalk/v1/api/vessels/self/uuid', verify=False)
+					uuid = resp.content
+					uuid = uuid.decode("utf-8")
+					uuid = uuid.replace('"', '') 
+				except Exception as e:
+					ws = False
+					if debug: 
+						print('Error getting Signal K UUID: '+str(e))
+						sys.stdout.flush()
+			if ws:
+				try: ws.send('{"context": "vessels.*","subscribe":[{"path":"notifications.*"}]}\n')
+				except: 
+					if ws: ws.close()
+					ws = False
+				else:
+					while True:
+						try:
+							try: 
+								if ws: result = ws.recv()
+								else: break
+							except: 
+								if ws: ws.close()
+								ws = False
+								break
+							else:
+								try:
+									data = ujson.loads(result)
+									if 'updates' in data:
+										for update in data['updates']:
+											if 'values' in update:
+												for value in update['values']:
+													if 'notifications.' in value['path']:
+														if value['value']:
+															notification = value['value']
+															if 'method' in value['value']:
+																if 'context' in data:
+																	if data['context'] == 'vessels.'+uuid or data['context'] == 'vessels.self':
+																		if 'visual' in value['value']['method']: 
+																			subprocess.Popen(['openplotter-notifications-visual', value['path'], value['value']['state'], value['value']['message'], value['value']['timestamp']])	
+																		if 'sound' in value['value']['method']:
+																			subprocess.Popen(['openplotter-notifications-sound', value['path'], value['value']['state'], value['value']['timestamp']])
+														else: notification = {'state':'null','message':'','timestamp':'','method':[]}
+														if 'context' in data:
+															actions = ''
+															context = data['context'].replace('vessels.','')
+															if context+'.'+value['path'] in actionsList: actions = actionsList[context+'.'+value['path']]
+															else:
+																if context == uuid:
+																	if 'self.'+value['path'] in actionsList: actions = actionsList['self.'+value['path']]
+															if actions:
+																thread = processActions(value['path'],actions,notification,debug,currentLanguage,conf2,platform2)
+																thread.start()
+								except Exception as e: 
+									if debug: 
+										print('Error processing notification: '+str(e))
+										sys.stdout.flush()
+						except Exception as e: 
+							if debug: 
+								print('Error reading Signal K notifications: '+str(e))
+								sys.stdout.flush()
+			time.sleep(5)
 
 if __name__ == '__main__':
 	main()

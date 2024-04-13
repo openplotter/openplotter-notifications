@@ -52,10 +52,6 @@ class MyFrame(wx.Frame):
 		self.toolbar1.AddSeparator()
 		refresh = self.toolbar1.AddTool(103, _('Refresh'), wx.Bitmap(self.currentdir+"/data/refresh.png"))
 		self.Bind(wx.EVT_TOOL, self.onRefresh, refresh)
-		self.toolbar1.AddSeparator()
-		toolRescue = self.toolbar1.AddCheckTool(107, _('Rescue'), wx.Bitmap(self.currentdir+"/data/rescue.png"))
-		self.Bind(wx.EVT_TOOL, self.onToolRescue, toolRescue)
-		if self.conf.get('GENERAL', 'rescue') == 'yes': self.toolbar1.ToggleTool(107,True)
 
 		self.notebook = wx.Notebook(self)
 		self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.onTabChange)
@@ -134,15 +130,8 @@ class MyFrame(wx.Frame):
 		subprocess.Popen('openplotter-settings')
 
 	def restartRead(self):
-		subprocess.call(['pkill','-f','openplotter-notifications-read'])
-		subprocess.call(['pkill','-f','openplotter-notifications-sound'])
-		subprocess.call(['pkill','-f','openplotter-notifications-visual'])
-		subprocess.Popen('openplotter-notifications-read')
-
-	def onToolRescue(self,e):
-		if self.toolbar1.GetToolState(107): self.conf.set('GENERAL', 'rescue', 'yes')
-		else: self.conf.set('GENERAL', 'rescue', 'no')
-		self.restartRead()
+		subprocess.call(['systemctl', '--user', 'restart', 'openplotter-notifications-read.service'])
+		self.ShowStatusBarGREEN(_('Notifications service restarted'))
 
 	def onRefresh(self, e=0):
 		self.readCustom()
@@ -152,11 +141,6 @@ class MyFrame(wx.Frame):
 		self.readSounds()
 
 		self.ShowStatusBarBLACK(' ')
-
-		test = subprocess.check_output(['ps','aux']).decode(sys.stdin.encoding)
-		if not 'openplotter-notifications-read' in test:
-			if self.conf.get('GENERAL', 'rescue') != 'yes':
-				subprocess.Popen('openplotter-notifications-read')
 
 	############################################################################
 
@@ -1271,7 +1255,7 @@ def main():
 	try:
 		platform2 = platform.Platform()
 		if not platform2.postInstall(version,'notifications'):
-			subprocess.Popen(['openplotterPostInstall', platform2.admin+' notificationsPostInstall'])
+			subprocess.Popen(['openplotterPostInstall', 'notificationsPostInstall'])
 			return
 	except: pass
 

@@ -26,17 +26,14 @@ class Start():
 		language.Language(currentdir,'openplotter-notifications',currentLanguage)
 		self.initialMessage = _('Starting Notifications...')
 
-	def start(self): 
-		green = '' 
-		black = '' 
-		red = '' 
-		
-		if self.conf.get('GENERAL', 'rescue') != 'yes':
-			subprocess.call(['pkill', '-f', 'openplotter-notifications-read'])
-			subprocess.Popen('openplotter-notifications-read')
-			time.sleep(1)
-			black = _('Notifications started')
-		else: subprocess.call(['pkill', '-f', 'openplotter-notifications-read'])
+
+	def start(self):
+		green = ''
+		black = ''
+		red = ''
+
+		subprocess.call(['systemctl', '--user', 'restart', 'openplotter-notifications-read.service'])
+		black = _('Notifications started')
 
 		return {'green': green,'black': black,'red': red}
 
@@ -53,23 +50,16 @@ class Check():
 		black = ''
 		red = ''
 
-		if self.conf.get('GENERAL', 'rescue') == 'yes':
-			subprocess.call(['pkill', '-f', 'openplotter-notifications-read'])
-			msg = _('Notifications is in rescue mode')
+		#service
+		try:
+			subprocess.check_output(['systemctl', '--user', 'is-active', 'openplotter-notifications-read.service']).decode(sys.stdin.encoding)
+			msg = _('service running')
+			if not green: green = msg
+			else: green+= ' | '+msg
+		except: 
+			msg = _('service not running')
 			if red: red += '\n   '+msg
 			else: red = msg
-		else:
-			test = subprocess.check_output(['ps','aux']).decode(sys.stdin.encoding)
-			if 'openplotter-notifications-read' in test: green = _('running')
-			else:
-				subprocess.Popen('openplotter-notifications-read')
-				time.sleep(1)
-				test = subprocess.check_output(['ps','aux']).decode(sys.stdin.encoding)
-				if 'openplotter-notifications-read' in test: green = _('running')
-				else:
-					msg = _('not running')
-					if red: red += '\n   '+msg
-					else: red = msg
 
 		#access
 		skConnections = connections.Connections('NOTIFICATIONS')

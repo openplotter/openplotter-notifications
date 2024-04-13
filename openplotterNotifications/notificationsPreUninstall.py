@@ -26,11 +26,11 @@ def main():
 	package = 'openplotter-notifications'
 	language.Language(currentdir, package, currentLanguage)
 
-	print(_('Stopping openplotter-notifications-read...'))
+	print(_('Removing services...'))
 	try:
-		subprocess.call(['pkill','-f','openplotter-notifications-read'])
-		subprocess.call(['pkill','-f','openplotter-notifications-sound'])
-		subprocess.call(['pkill','-f','openplotter-notifications-visual'])
+		subprocess.call(['systemctl', '--user', 'stop', 'openplotter-notifications-read'])
+		subprocess.call(['rm', '-f', conf2.home+'/.config/systemd/user/openplotter-notifications-read.service'])
+		subprocess.call(['systemctl', '--user', 'daemon-reload'])
 		print(_('DONE'))
 	except Exception as e: print(_('FAILED: ')+str(e))
 

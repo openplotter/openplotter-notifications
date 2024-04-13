@@ -33,12 +33,19 @@ def main():
 	try:
 		if platform2.skDir:
 			subprocess.call(['npm', 'i', '--verbose', '@signalk/zones'], cwd = platform2.skDir)
-			subprocess.call(['chown', '-R', conf2.user, platform2.skDir])
-			subprocess.call(['systemctl', 'stop', 'signalk.service'])
-			subprocess.call(['systemctl', 'stop', 'signalk.socket'])
-			subprocess.call(['systemctl', 'start', 'signalk.socket'])
-			subprocess.call(['systemctl', 'start', 'signalk.service'])
 		else: print(_('Failed. Please, install Signal K server.'))
+		print(_('DONE'))
+	except Exception as e: print(_('FAILED: ')+str(e))
+
+	print(_('Creating services...'))
+	try:
+		if not os.path.exists(conf2.home+'/.config'): os.mkdir(conf2.home+'/.config')
+		if not os.path.exists(conf2.home+'/.config/systemd'): os.mkdir(conf2.home+'/.config/systemd')
+		if not os.path.exists(conf2.home+'/.config/systemd/user'): os.mkdir(conf2.home+'/.config/systemd/user')
+		fo = open(conf2.home+'/.config/systemd/user/openplotter-notifications-read.service', "w")
+		fo.write( '[Unit]\nPartOf=graphical-session.target\nAfter=graphical-session.target\n[Service]\nEnvironment=OPrescue=0\nEnvironmentFile=/boot/firmware/config.txt\nExecStart=openplotter-notifications-read $OPrescue\nRestart=always\nRestartSec=3\n[Install]\nWantedBy=graphical-session.target')
+		fo.close()
+		subprocess.call(['systemctl', '--user','daemon-reload'])
 		print(_('DONE'))
 	except Exception as e: print(_('FAILED: ')+str(e))
 
