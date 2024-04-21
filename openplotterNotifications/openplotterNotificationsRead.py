@@ -22,7 +22,7 @@ from websocket import create_connection
 from openplotterSignalkInstaller import connections
 
 class processActions(threading.Thread):
-	def __init__(self, path, actions, notification,debug,currentLanguage,conf,platform):
+	def __init__(self, path, actions, notification,debug,currentLanguage,conf,platform,timestamp):
 		threading.Thread.__init__(self)
 		self.path = path
 		self.actions = actions
@@ -31,6 +31,7 @@ class processActions(threading.Thread):
 		self.currentLanguage = currentLanguage
 		self.conf = conf
 		self.platform = platform
+		self.timestamp = timestamp
 
 	def run(self):
 		try:
@@ -59,7 +60,7 @@ class processActions(threading.Thread):
 										target = actions.Actions(self.conf,self.currentLanguage)
 										data = data.replace('<|s|>',self.notification['state'])
 										data = data.replace('<|m|>',self.notification['message'])
-										data = data.replace('<|t|>',self.notification['timestamp'])
+										data = data.replace('<|t|>',self.timestamp)
 										result = re.findall(r'<\|(.*?)\|>', data, re.DOTALL)
 										for i in result:
 											items = i.split('||')
@@ -146,9 +147,9 @@ def main():
 																if 'context' in data:
 																	if data['context'] == 'vessels.'+uuid or data['context'] == 'vessels.self':
 																		if 'visual' in value['value']['method']: 
-																			subprocess.Popen(['openplotter-notifications-visual', value['path'], value['value']['state'], value['value']['message'], value['value']['timestamp']])	
+																			subprocess.Popen(['openplotter-notifications-visual', value['path'], value['value']['state'], value['value']['message'], update['timestamp']])	
 																		if 'sound' in value['value']['method']:
-																			subprocess.Popen(['openplotter-notifications-sound', value['path'], value['value']['state'], value['value']['timestamp']])
+																			subprocess.Popen(['openplotter-notifications-sound', value['path'], value['value']['state'], update['timestamp']])
 														else: notification = {'state':'null','message':'','timestamp':'','method':[]}
 														if 'context' in data:
 															actions = ''
@@ -158,7 +159,7 @@ def main():
 																if context == uuid:
 																	if 'self.'+value['path'] in actionsList: actions = actionsList['self.'+value['path']]
 															if actions:
-																thread = processActions(value['path'],actions,notification,debug,currentLanguage,conf2,platform2)
+																thread = processActions(value['path'],actions,notification,debug,currentLanguage,conf2,platform2,update['timestamp'])
 																thread.start()
 								except Exception as e: 
 									if debug: 

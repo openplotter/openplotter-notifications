@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import sys, ssl, re, datetime
+import sys, ssl, re
 from openplotterSettings import platform
 from websocket import create_connection
 from openplotterSignalkInstaller import connections
@@ -81,10 +81,7 @@ def main():
 	if state == 'normal' or state == 'alert' or state == 'warn' or state == 'alarm' or state == 'emergency': value = '{"state":"'+state+'",'
 	else: sys.exit('Error: wrong state')
 	value += '"message":"'+message.replace('"', "'")+'",'
-	value += '"method":'+str(method).replace("'", '"')+','
-	now = datetime.datetime.utcnow()
-	now = now.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-	value += '"timestamp":"'+now+'"}'
+	value += '"method":'+str(method).replace("'", '"')+'}'
 	send(sk,value)
 	return
 

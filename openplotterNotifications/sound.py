@@ -30,16 +30,16 @@ def main():
 	if state == 'normal':
 		try: sound = eval(conf2.get('NOTIFICATIONS', 'soundNormal'))
 		except: sound = ['/usr/share/sounds/openplotter/Bleep.mp3', True]
-	if state == 'alert':
+	elif state == 'alert':
 		try: sound = eval(conf2.get('NOTIFICATIONS', 'soundAlert'))
 		except: sound = ['/usr/share/sounds/openplotter/Store_Door_Chime.mp3', True]
-	if state == 'warn':
+	elif state == 'warn':
 		try: sound = eval(conf2.get('NOTIFICATIONS', 'soundWarn'))
 		except: sound = ['/usr/share/sounds/openplotter/Ship_Bell.mp3', True]
-	if state == 'alarm':
+	elif state == 'alarm':
 		try: sound = eval(conf2.get('NOTIFICATIONS', 'soundAlarm'))
 		except: sound = ['/usr/share/sounds/openplotter/pup-alert.mp3', False]
-	if state == 'emergency':
+	elif state == 'emergency':
 		try: sound = eval(conf2.get('NOTIFICATIONS', 'soundEmergency'))
 		except: sound = ['/usr/share/sounds/openplotter/nuclear-alarm.ogg', False]
 
@@ -56,8 +56,9 @@ def main():
 				elif 'state' in data['value']:
 					if data['value']['state'] != state: break
 					else:
-						if 'timestamp' in data['value']:
-							if data['value']['timestamp'] != timestamp: break
+						if 'timestamp' in data:
+							if data['timestamp'] != timestamp: break
+						else: break
 				else: break
 			else: break
 		time.sleep(3)

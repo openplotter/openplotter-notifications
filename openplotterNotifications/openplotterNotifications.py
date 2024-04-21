@@ -946,7 +946,7 @@ class editAction(wx.Dialog):
 		for i in self.availableActions:
 			self.actions.append(i['name'])
 
-		wx.Dialog.__init__(self, None, title=title, size=(600, 460))
+		wx.Dialog.__init__(self, None, title=title, size=(600, 444))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		panel = wx.Panel(self)
 
