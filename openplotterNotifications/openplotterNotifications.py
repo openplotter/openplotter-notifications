@@ -178,7 +178,8 @@ class MyFrame(wx.Frame):
 		self.custom.SetSizer(vbox)
 
 	def getColour(self, state):
-		if state == 'normal': return self.visualNormal.GetColour()
+		if state == 'nominal': return self.visualNominal.GetColour()
+		elif state == 'normal': return self.visualNormal.GetColour()
 		elif state == 'alert': return self.visualAlert.GetColour()
 		elif state == 'warn': return self.visualWarn.GetColour()
 		elif state == 'alarm': return self.visualAlarm.GetColour()
@@ -332,6 +333,8 @@ class MyFrame(wx.Frame):
 
 	def OnReadThresholds(self):
 		self.summaryLogger.Clear()
+		try: visualNominal = eval(self.conf.get('NOTIFICATIONS', 'visualNominal'))
+		except: visualNominal = [(0, 181, 30, 255), True]
 		try: visualNormal = eval(self.conf.get('NOTIFICATIONS', 'visualNormal'))
 		except: visualNormal = [(46, 52, 54, 255), True]
 		try: visualAlert = eval(self.conf.get('NOTIFICATIONS', 'visualAlert'))
@@ -374,6 +377,7 @@ class MyFrame(wx.Frame):
 							if 'message' in zone: message = str(zone['message'])
 							else: message = ''
 							state = zone['state']
+							if state == 'nominal': stateColour = visualNominal[0]
 							if state == 'normal': stateColour = visualNormal[0]
 							if state == 'alert': stateColour = visualAlert[0]
 							if state == 'warn': stateColour = visualWarn[0]
@@ -400,6 +404,10 @@ class MyFrame(wx.Frame):
 	############################################################################
 
 	def pageVisual(self):
+		nominalLabel = wx.StaticText(self.visualMethod, label='nominal')
+		self.visualNominal = wx.ColourPickerCtrl(self.visualMethod)
+		self.nominalAuto = wx.CheckBox(self.visualMethod, label=_('auto closing'))
+
 		normalLabel = wx.StaticText(self.visualMethod, label='normal')
 		self.visualNormal = wx.ColourPickerCtrl(self.visualMethod)
 		self.normalAuto = wx.CheckBox(self.visualMethod, label=_('auto closing'))
@@ -433,6 +441,7 @@ class MyFrame(wx.Frame):
 
 		names = wx.BoxSizer(wx.VERTICAL)
 		names.AddSpacer(5)
+		names.Add(nominalLabel, 0, wx.ALL | wx.EXPAND, 10)
 		names.Add(normalLabel, 0, wx.ALL | wx.EXPAND, 10)
 		names.Add(alertLabel, 0, wx.ALL | wx.EXPAND, 10)
 		names.Add(warnLabel, 0, wx.ALL | wx.EXPAND, 10)
@@ -441,6 +450,7 @@ class MyFrame(wx.Frame):
 
 		colours = wx.BoxSizer(wx.VERTICAL)
 		colours.AddSpacer(5)
+		colours.Add(self.visualNominal, 0, wx.ALL | wx.EXPAND, 5)
 		colours.Add(self.visualNormal, 0, wx.ALL | wx.EXPAND, 5)
 		colours.Add(self.visualAlert, 0, wx.ALL | wx.EXPAND, 5)
 		colours.Add(self.visualWarn, 0, wx.ALL | wx.EXPAND, 5)
@@ -449,6 +459,7 @@ class MyFrame(wx.Frame):
 
 		auto = wx.BoxSizer(wx.VERTICAL)
 		auto.AddSpacer(5)
+		auto.Add(self.nominalAuto, 0, wx.ALL | wx.EXPAND, 10)
 		auto.Add(self.normalAuto, 0, wx.ALL | wx.EXPAND, 10)
 		auto.Add(self.alertAuto, 0, wx.ALL | wx.EXPAND, 10)
 		auto.Add(self.warnAuto, 0, wx.ALL | wx.EXPAND, 10)
@@ -463,6 +474,15 @@ class MyFrame(wx.Frame):
 		self.visualMethod.SetSizer(sizer)
 
 	def readColours(self):
+		try: visualNominal = eval(self.conf.get('NOTIFICATIONS', 'visualNominal'))
+		except: 
+			visualNominal = [(0, 181, 30, 255), True]
+			self.conf.set('NOTIFICATIONS', 'visualNominal', str(visualNominal))
+		try: 
+			self.visualNominal.SetColour(visualNominal[0])
+			self.nominalAuto.SetValue(visualNominal[1])
+		except: pass
+
 		try: visualNormal = eval(self.conf.get('NOTIFICATIONS', 'visualNormal'))
 		except: 
 			visualNormal = [(46, 52, 54, 255), True]
@@ -512,6 +532,7 @@ class MyFrame(wx.Frame):
 		subprocess.call(['pkill','-f','openplotter-notifications-visual'])
 
 	def onSave2(self,e):
+		self.conf.set('NOTIFICATIONS', 'visualNominal', str([self.visualNominal.GetColour(),self.nominalAuto.GetValue()]))
 		self.conf.set('NOTIFICATIONS', 'visualNormal', str([self.visualNormal.GetColour(),self.normalAuto.GetValue()]))
 		self.conf.set('NOTIFICATIONS', 'visualAlert', str([self.visualAlert.GetColour(),self.alertAuto.GetValue()]))
 		self.conf.set('NOTIFICATIONS', 'visualWarn', str([self.visualWarn.GetColour(),self.warnAuto.GetValue()]))
@@ -529,6 +550,14 @@ class MyFrame(wx.Frame):
 
 		playButtonImg = wx.Bitmap(self.currentdir+"/data/play.png", wx.BITMAP_TYPE_ANY)
 
+		nominalLabel = wx.StaticText(self.soundMethod, label='nominal')
+		self.soundNominal = wx.TextCtrl(self.soundMethod)
+		playButton0 = wx.BitmapButton(self.soundMethod, id=6000, bitmap=playButtonImg, size=(playButtonImg.GetWidth()+15, playButtonImg.GetHeight()+3))
+		playButton0.Bind(wx.EVT_BUTTON, self.onPlayButton)
+		nominalSelect = wx.Button(self.soundMethod, id=5000, label=_('Select'))
+		nominalSelect.Bind(wx.EVT_BUTTON, self.OnFile)
+		self.nominalStop = wx.CheckBox(self.soundMethod, label=_('auto stop'))
+
 		normalLabel = wx.StaticText(self.soundMethod, label='normal')
 		self.soundNormal = wx.TextCtrl(self.soundMethod)
 		playButton1 = wx.BitmapButton(self.soundMethod, id=6001, bitmap=playButtonImg, size=(playButtonImg.GetWidth()+15, playButtonImg.GetHeight()+3))
@@ -536,7 +565,6 @@ class MyFrame(wx.Frame):
 		normalSelect = wx.Button(self.soundMethod, id=5001, label=_('Select'))
 		normalSelect.Bind(wx.EVT_BUTTON, self.OnFile)
 		self.normalStop = wx.CheckBox(self.soundMethod, label=_('auto stop'))
-
 
 		alertLabel = wx.StaticText(self.soundMethod, label='alert')
 		self.soundAlert = wx.TextCtrl(self.soundMethod)
@@ -583,11 +611,18 @@ class MyFrame(wx.Frame):
 
 		names = wx.BoxSizer(wx.VERTICAL)
 		names.AddSpacer(10)
+		names.Add(nominalLabel, 0, wx.ALL | wx.EXPAND, 11)
 		names.Add(normalLabel, 0, wx.ALL | wx.EXPAND, 11)
 		names.Add(alertLabel, 0, wx.ALL | wx.EXPAND, 11)
 		names.Add(warnLabel, 0, wx.ALL | wx.EXPAND, 11)
 		names.Add(alarmLabel, 0, wx.ALL | wx.EXPAND, 11)
 		names.Add(emergencyLabel, 0, wx.ALL | wx.EXPAND, 11)
+
+		nominal = wx.BoxSizer(wx.HORIZONTAL)
+		nominal.Add(self.soundNominal, 1, wx.ALL | wx.EXPAND, 5)
+		nominal.Add(playButton0, 0, wx.ALL | wx.EXPAND, 5)
+		nominal.Add(nominalSelect, 0, wx.ALL | wx.EXPAND, 5)
+		nominal.Add(self.nominalStop, 0, wx.ALL | wx.EXPAND, 5)
 
 		normal = wx.BoxSizer(wx.HORIZONTAL)
 		normal.Add(self.soundNormal, 1, wx.ALL | wx.EXPAND, 5)
@@ -621,6 +656,8 @@ class MyFrame(wx.Frame):
 
 		sounds = wx.BoxSizer(wx.VERTICAL)
 		sounds.AddSpacer(5)
+		sounds.Add(nominal, 0, wx.EXPAND, 0)
+		sounds.AddSpacer(5)
 		sounds.Add(normal, 0, wx.EXPAND, 0)
 		sounds.AddSpacer(5)
 		sounds.Add(alert, 0, wx.EXPAND, 0)
@@ -638,6 +675,15 @@ class MyFrame(wx.Frame):
 		self.soundMethod.SetSizer(sizer)
 
 	def readSounds(self):
+		try: soundNominal = eval(self.conf.get('NOTIFICATIONS', 'soundNominal'))
+		except: 
+			soundNominal = ['/usr/share/sounds/openplotter/bip.mp3', True]
+			self.conf.set('NOTIFICATIONS', 'soundNominal', str(soundNominal))
+		try: 
+			self.soundNominal.SetValue(soundNominal[0])
+			self.nominalStop.SetValue(soundNominal[1])
+		except: pass
+
 		try: soundNormal = eval(self.conf.get('NOTIFICATIONS', 'soundNormal'))
 		except: 
 			soundNormal = ['/usr/share/sounds/openplotter/Bleep.mp3', True]
@@ -687,7 +733,8 @@ class MyFrame(wx.Frame):
 		select = e.GetId()
 		try:
 			subprocess.call(['pkill','-15','vlc'])
-			if select == 6001: subprocess.Popen(['cvlc', '--play-and-exit', self.soundNormal.GetValue()])
+			if select == 6000: subprocess.Popen(['cvlc', '--play-and-exit', self.soundNominal.GetValue()])
+			elif select == 6001: subprocess.Popen(['cvlc', '--play-and-exit', self.soundNormal.GetValue()])
 			elif select == 6002: subprocess.Popen(['cvlc', '--play-and-exit', self.soundAlert.GetValue()])
 			elif select == 6003: subprocess.Popen(['cvlc', '--play-and-exit', self.soundWarn.GetValue()])
 			elif select == 6004: subprocess.Popen(['cvlc', '--play-and-exit', self.soundAlarm.GetValue()])
@@ -703,7 +750,8 @@ class MyFrame(wx.Frame):
 							wildcard=_('Audio files') + ' (*.mp3)|*.mp3|' + _('All files') + ' (*.*)|*.*',
 							style=wx.FD_OPEN | wx.FD_CHANGE_DIR)
 		if dlg.ShowModal() == wx.ID_OK:
-			if select == 5001: self.soundNormal.SetValue(dlg.GetPath())
+			if select == 5000: self.soundNominal.SetValue(dlg.GetPath())
+			elif select == 5001: self.soundNormal.SetValue(dlg.GetPath())
 			elif select == 5002: self.soundAlert.SetValue(dlg.GetPath())
 			elif select == 5003: self.soundWarn.SetValue(dlg.GetPath())
 			elif select == 5004: self.soundAlarm.SetValue(dlg.GetPath())
@@ -711,6 +759,7 @@ class MyFrame(wx.Frame):
 		dlg.Destroy()
 
 	def onSave3(self,e):
+		self.conf.set('NOTIFICATIONS', 'soundNominal', str([self.soundNominal.GetValue(), self.nominalStop.GetValue()]))
 		self.conf.set('NOTIFICATIONS', 'soundNormal', str([self.soundNormal.GetValue(), self.normalStop.GetValue()]))
 		self.conf.set('NOTIFICATIONS', 'soundAlert', str([self.soundAlert.GetValue(), self.alertStop.GetValue()]))
 		self.conf.set('NOTIFICATIONS', 'soundWarn', str([self.soundWarn.GetValue(), self.warnStop.GetValue()]))
@@ -946,12 +995,12 @@ class editAction(wx.Dialog):
 		for i in self.availableActions:
 			self.actions.append(i['name'])
 
-		wx.Dialog.__init__(self, None, title=title, size=(600, 444))
+		wx.Dialog.__init__(self, None, title=title, size=(600, 425))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		panel = wx.Panel(self)
 
 		stateLabel= wx.StaticText(panel, label = _('State'))
-		self.state = wx.ComboBox(panel, choices = [_('any'),'null','normal','alert','warn','alarm','emergency'], style=wx.CB_READONLY)
+		self.state = wx.ComboBox(panel, choices = [_('any'),'null','nominal','normal','alert','warn','alarm','emergency'], style=wx.CB_READONLY)
 		if edit:
 			if edit['state'] == '': self.state.SetSelection(0)
 			else: self.state.SetValue(edit['state'])
@@ -1164,7 +1213,7 @@ class editCustom(wx.Dialog):
 		panel = wx.Panel(self)
 
 		stateLabel= wx.StaticText(panel, label = _('State'))
-		self.state = wx.ComboBox(panel, choices = ['normal','alert','warn','alarm','emergency'], style=wx.CB_READONLY)
+		self.state = wx.ComboBox(panel, choices = ['nominal','normal','alert','warn','alarm','emergency'], style=wx.CB_READONLY)
 		if edit:
 			if edit['state'] == '': self.state.SetSelection(0)
 			else: self.state.SetValue(edit['state'])

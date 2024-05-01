@@ -27,7 +27,10 @@ def main():
 	state = sys.argv[2]
 	timestamp = sys.argv[3]
 
-	if state == 'normal':
+	if state == 'nominal':
+		try: sound = eval(conf2.get('NOTIFICATIONS', 'soundNominal'))
+		except: sound = ['/usr/share/sounds/openplotter/bip.mp3', True]
+	elif state == 'normal':
 		try: sound = eval(conf2.get('NOTIFICATIONS', 'soundNormal'))
 		except: sound = ['/usr/share/sounds/openplotter/Bleep.mp3', True]
 	elif state == 'alert':

@@ -49,7 +49,10 @@ class MyFrame(wx.Frame):
 		self.timestamp = sys.argv[4]
 		timestamp = wx.StaticText(panel, label = self.timestamp)
 
-		if self.state == 'normal':
+		if self.state == 'nominal':
+			try: color = eval(self.conf.get('NOTIFICATIONS', 'visualNominal'))
+			except: color = [(0, 181, 30, 255),True]
+		elif self.state == 'normal':
 			try: color = eval(self.conf.get('NOTIFICATIONS', 'visualNormal'))
 			except: color = [(46, 52, 54, 255),True]
 		elif self.state == 'alert':

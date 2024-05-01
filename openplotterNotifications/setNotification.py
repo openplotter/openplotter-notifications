@@ -41,7 +41,7 @@ def send(sk,value):
 	else: checkConn()
 
 def main():
-	h = '''set-notification: set-notification [options] Signal_K_key (normal|alert|warn|alarm|emergency) ["message"]
+	h = '''set-notification: set-notification [options] Signal_K_key (nominal|normal|alert|warn|alarm|emergency) ["message"]
 
     Sends a notification to the Signal K server
     
@@ -78,7 +78,7 @@ def main():
 	if value == 'null':
 		send(sk,value)
 		return
-	if state == 'normal' or state == 'alert' or state == 'warn' or state == 'alarm' or state == 'emergency': value = '{"state":"'+state+'",'
+	if state == 'nominal' or state == 'normal' or state == 'alert' or state == 'warn' or state == 'alarm' or state == 'emergency': value = '{"state":"'+state+'",'
 	else: sys.exit('Error: wrong state')
 	value += '"message":"'+message.replace('"', "'")+'",'
 	value += '"method":'+str(method).replace("'", '"')+'}'
