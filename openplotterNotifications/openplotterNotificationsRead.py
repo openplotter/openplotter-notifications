@@ -109,14 +109,19 @@ def main():
 						print('Error connecting to Signal K server: '+str(e))
 						sys.stdout.flush()
 				try:
-					resp = requests.get(platform2.http+'localhost:'+platform2.skPort+'/signalk/v1/api/vessels/self/uuid', verify=False)
+					resp = requests.get(platform2.http+'localhost:'+platform2.skPort+'/signalk/v1/api/self', verify=False)
 					uuid = resp.content
 					uuid = uuid.decode("utf-8")
-					uuid = uuid.replace('"', '') 
+					uuid = uuid.replace('"', '')
+					if "vessels.undefined" in uuid:
+						if debug: 
+							print('Undefined UUID or MMSI')
+							sys.stdout.flush()
+							subprocess.Popen(['set-notification','-v','notifications.server','alert', _('Undefined UUID or MMSI')])
 				except Exception as e:
 					ws = False
 					if debug: 
-						print('Error getting Signal K UUID: '+str(e))
+						print('Error getting UUID or MMSI: '+str(e))
 						sys.stdout.flush()
 			if ws:
 				try: ws.send('{"context": "vessels.*","subscribe":[{"path":"notifications.*"}]}\n')
@@ -145,22 +150,31 @@ def main():
 															notification = value['value']
 															if 'method' in value['value']:
 																if 'context' in data:
-																	if data['context'] == 'vessels.'+uuid or data['context'] == 'vessels.self':
+																	if uuid in data['context'] or data['context'] == 'vessels.self':
 																		if 'visual' in value['value']['method']: 
-																			subprocess.Popen(['openplotter-notifications-visual', value['path'], value['value']['state'], value['value']['message'], update['timestamp']])	
+																			subprocess.Popen(['openplotter-notifications-visual', value['path'], value['value']['state'], value['value']['message'], update['timestamp'], data['context']])	
 																		if 'sound' in value['value']['method']:
-																			subprocess.Popen(['openplotter-notifications-sound', value['path'], value['value']['state'], update['timestamp']])
+																			subprocess.Popen(['openplotter-notifications-sound', value['path'], value['value']['state'], update['timestamp'], data['context']])
 														else: notification = {'state':'null','message':'','timestamp':'','method':[]}
 														if 'context' in data:
-															actions = ''
 															context = data['context'].replace('vessels.','')
-															if context+'.'+value['path'] in actionsList: actions = actionsList[context+'.'+value['path']]
+															if context in uuid:
+																if 'self.'+value['path'] in actionsList: 
+																	actions = actionsList['self.'+value['path']]
+																	if actions:
+																		thread = processActions(value['path'],actions,notification,debug,currentLanguage,conf2,platform2,update['timestamp'])
+																		thread.start()
+																if context+'.'+value['path'] in actionsList: 
+																	actions = actionsList[context+'.'+value['path']]
+																	if actions:
+																		thread = processActions(value['path'],actions,notification,debug,currentLanguage,conf2,platform2,update['timestamp'])
+																		thread.start()
 															else:
-																if context == uuid:
-																	if 'self.'+value['path'] in actionsList: actions = actionsList['self.'+value['path']]
-															if actions:
-																thread = processActions(value['path'],actions,notification,debug,currentLanguage,conf2,platform2,update['timestamp'])
-																thread.start()
+																if context+'.'+value['path'] in actionsList: 
+																	actions = actionsList[context+'.'+value['path']]
+																	if actions:
+																		thread = processActions(value['path'],actions,notification,debug,currentLanguage,conf2,platform2,update['timestamp'])
+																		thread.start()
 								except Exception as e: 
 									if debug: 
 										print('Error processing notification: '+str(e))

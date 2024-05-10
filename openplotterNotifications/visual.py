@@ -48,6 +48,7 @@ class MyFrame(wx.Frame):
 		message.ShowPosition(0)
 		self.timestamp = sys.argv[4]
 		timestamp = wx.StaticText(panel, label = self.timestamp)
+		self.context = sys.argv[5]
 
 		if self.state == 'nominal':
 			try: color = eval(self.conf.get('NOTIFICATIONS', 'visualNominal'))
@@ -113,7 +114,8 @@ class MyFrame(wx.Frame):
 	def refresh(self,e):
 		try:
 			path = self.path.replace('.','/')
-			resp = requests.get(self.platform.http+'localhost:'+self.platform.skPort+'/signalk/v1/api/vessels/self/'+path, verify=False)
+			context = self.context.replace('.','/')
+			resp = requests.get(self.platform.http+'localhost:'+self.platform.skPort+'/signalk/v1/api/'+context+'/'+path, verify=False)
 			data = ujson.loads(resp.content)
 		except: data = {}
 		if 'value' in data:

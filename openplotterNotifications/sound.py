@@ -26,6 +26,7 @@ def main():
 	path = sys.argv[1]
 	state = sys.argv[2]
 	timestamp = sys.argv[3]
+	context = sys.argv[3]
 
 	if state == 'nominal':
 		try: sound = eval(conf2.get('NOTIFICATIONS', 'soundNominal'))
@@ -51,7 +52,8 @@ def main():
 		if sound[1]:
 			try:
 				path2 = path.replace('.','/')
-				resp = requests.get(platform2.http+'localhost:'+platform2.skPort+'/signalk/v1/api/vessels/self/'+path2, verify=False)
+				context2 = context.replace('.','/')
+				resp = requests.get(platform2.http+'localhost:'+platform2.skPort+'/signalk/v1/api/'+context2+'/'+path2, verify=False)
 				data = ujson.loads(resp.content)
 			except: data = {}
 			if 'value' in data:
