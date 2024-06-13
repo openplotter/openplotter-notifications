@@ -1,3 +1,15 @@
+openplotter-notifications (4.2.0-stable) bookworm; urgency=medium
+
+  * stable
+
+ -- Sailoog <info@sailoog.com>  Thu, 13 Jun 2024 18:44:26 +0200
+
+openplotter-notifications (4.1.7-beta) bookworm; urgency=medium
+
+  * beta
+
+ -- Sailoog <info@sailoog.com>  Fri, 12 Jan 2024 12:01:34 +0100
+
 openplotter-notifications (3.2.3-stable) bullseye; urgency=medium
 
   * Add rpi-backlight action

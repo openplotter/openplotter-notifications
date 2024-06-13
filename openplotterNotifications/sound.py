@@ -26,20 +26,24 @@ def main():
 	path = sys.argv[1]
 	state = sys.argv[2]
 	timestamp = sys.argv[3]
+	context = sys.argv[3]
 
-	if state == 'normal':
+	if state == 'nominal':
+		try: sound = eval(conf2.get('NOTIFICATIONS', 'soundNominal'))
+		except: sound = ['/usr/share/sounds/openplotter/bip.mp3', True]
+	elif state == 'normal':
 		try: sound = eval(conf2.get('NOTIFICATIONS', 'soundNormal'))
 		except: sound = ['/usr/share/sounds/openplotter/Bleep.mp3', True]
-	if state == 'alert':
+	elif state == 'alert':
 		try: sound = eval(conf2.get('NOTIFICATIONS', 'soundAlert'))
 		except: sound = ['/usr/share/sounds/openplotter/Store_Door_Chime.mp3', True]
-	if state == 'warn':
+	elif state == 'warn':
 		try: sound = eval(conf2.get('NOTIFICATIONS', 'soundWarn'))
 		except: sound = ['/usr/share/sounds/openplotter/Ship_Bell.mp3', True]
-	if state == 'alarm':
+	elif state == 'alarm':
 		try: sound = eval(conf2.get('NOTIFICATIONS', 'soundAlarm'))
 		except: sound = ['/usr/share/sounds/openplotter/pup-alert.mp3', False]
-	if state == 'emergency':
+	elif state == 'emergency':
 		try: sound = eval(conf2.get('NOTIFICATIONS', 'soundEmergency'))
 		except: sound = ['/usr/share/sounds/openplotter/nuclear-alarm.ogg', False]
 
@@ -48,7 +52,8 @@ def main():
 		if sound[1]:
 			try:
 				path2 = path.replace('.','/')
-				resp = requests.get(platform2.http+'localhost:'+platform2.skPort+'/signalk/v1/api/vessels/self/'+path2, verify=False)
+				context2 = context.replace('.','/')
+				resp = requests.get(platform2.http+'localhost:'+platform2.skPort+'/signalk/v1/api/'+context2+'/'+path2, verify=False)
 				data = ujson.loads(resp.content)
 			except: data = {}
 			if 'value' in data:
@@ -56,8 +61,9 @@ def main():
 				elif 'state' in data['value']:
 					if data['value']['state'] != state: break
 					else:
-						if 'timestamp' in data['value']:
-							if data['value']['timestamp'] != timestamp: break
+						if 'timestamp' in data:
+							if data['timestamp'] != timestamp: break
+						else: break
 				else: break
 			else: break
 		time.sleep(3)

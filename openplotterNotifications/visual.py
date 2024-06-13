@@ -48,20 +48,24 @@ class MyFrame(wx.Frame):
 		message.ShowPosition(0)
 		self.timestamp = sys.argv[4]
 		timestamp = wx.StaticText(panel, label = self.timestamp)
+		self.context = sys.argv[5]
 
-		if self.state == 'normal':
+		if self.state == 'nominal':
+			try: color = eval(self.conf.get('NOTIFICATIONS', 'visualNominal'))
+			except: color = [(0, 181, 30, 255),True]
+		elif self.state == 'normal':
 			try: color = eval(self.conf.get('NOTIFICATIONS', 'visualNormal'))
 			except: color = [(46, 52, 54, 255),True]
-		if self.state == 'alert':
+		elif self.state == 'alert':
 			try: color = eval(self.conf.get('NOTIFICATIONS', 'visualAlert'))
 			except: color = [(32, 74, 135, 255),True]
-		if self.state == 'warn':
+		elif self.state == 'warn':
 			try: color = eval(self.conf.get('NOTIFICATIONS', 'visualWarn'))
 			except: color = [(196, 160, 0, 255),True]
-		if self.state == 'alarm':
+		elif self.state == 'alarm':
 			try: color = eval(self.conf.get('NOTIFICATIONS', 'visualAlarm'))
 			except: color = [(206, 92, 0, 255),False]
-		if self.state == 'emergency':
+		elif self.state == 'emergency':
 			try: color = eval(self.conf.get('NOTIFICATIONS', 'visualEmergency'))
 			except: color = [(164, 0, 0, 255),False]
 		state.SetForegroundColour(color[0])
@@ -110,7 +114,8 @@ class MyFrame(wx.Frame):
 	def refresh(self,e):
 		try:
 			path = self.path.replace('.','/')
-			resp = requests.get(self.platform.http+'localhost:'+self.platform.skPort+'/signalk/v1/api/vessels/self/'+path, verify=False)
+			context = self.context.replace('.','/')
+			resp = requests.get(self.platform.http+'localhost:'+self.platform.skPort+'/signalk/v1/api/'+context+'/'+path, verify=False)
 			data = ujson.loads(resp.content)
 		except: data = {}
 		if 'value' in data:
@@ -118,8 +123,9 @@ class MyFrame(wx.Frame):
 			elif 'state' in data['value']:
 				if data['value']['state'] != self.state: self.onClose()
 				else:
-					if 'timestamp' in data['value']:
-						if data['value']['timestamp'] != self.timestamp: self.onClose()
+					if 'timestamp' in data:
+						if data['timestamp'] != self.timestamp: self.onClose()
+					else: self.onClose()
 			else: self.onClose()
 		else: self.onClose()
 	

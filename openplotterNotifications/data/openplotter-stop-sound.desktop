@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Stop sound notifications
+Exec=pkill -f openplotter-notifications-sound
+Icon=openplotter-stop-sound
+StartupNotify=true
+Terminal=false
+Type=Application
+Categories=OpenPlotter

@@ -15,8 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import sys, ssl, re, datetime
-from openplotterSettings import conf
+import sys, ssl, re
 from openplotterSettings import platform
 from websocket import create_connection
 from openplotterSignalkInstaller import connections
@@ -24,12 +23,12 @@ from openplotterSignalkInstaller import connections
 def checkConn():
 	skConnections = connections.Connections('NOTIFICATIONS')
 	result = skConnections.checkConnection()
-	if result[0] == 'pending' or result[0] == 'error' or result[0] == 'repeat' or result[0] == 'permissions': sys.exit(str(result))
+	if result[0] == 'error': sys.exit(str(result))
 
 def send(sk,value):
 	platform2 = platform.Platform()
-	conf2 = conf.Conf()
-	token = conf2.get('NOTIFICATIONS', 'token')
+	skConnections = connections.Connections('NOTIFICATIONS')
+	token = skConnections.token
 	uri = platform2.ws+'localhost:'+platform2.skPort+'/signalk/v1/stream?subscribe=none'
 	if token:
 		headers = {'Authorization': 'Bearer '+token}
@@ -42,7 +41,7 @@ def send(sk,value):
 	else: checkConn()
 
 def main():
-	h = '''set-notification: set-notification [options] Signal_K_key (normal|alert|warn|alarm|emergency) ["message"]
+	h = '''set-notification: set-notification [options] Signal_K_key (nominal|normal|alert|warn|alarm|emergency) ["message"]
 
     Sends a notification to the Signal K server
     
@@ -79,13 +78,10 @@ def main():
 	if value == 'null':
 		send(sk,value)
 		return
-	if state == 'normal' or state == 'alert' or state == 'warn' or state == 'alarm' or state == 'emergency': value = '{"state":"'+state+'",'
+	if state == 'nominal' or state == 'normal' or state == 'alert' or state == 'warn' or state == 'alarm' or state == 'emergency': value = '{"state":"'+state+'",'
 	else: sys.exit('Error: wrong state')
 	value += '"message":"'+message.replace('"', "'")+'",'
-	value += '"method":'+str(method).replace("'", '"')+','
-	now = datetime.datetime.utcnow()
-	now = now.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-	value += '"timestamp":"'+now+'"}'
+	value += '"method":'+str(method).replace("'", '"')+'}'
 	send(sk,value)
 	return
 

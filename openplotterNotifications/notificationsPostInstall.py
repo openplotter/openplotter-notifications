@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Openplotter. If not, see <http://www.gnu.org/licenses/>.
 
-import os, sys, subprocess
+import os, subprocess
 from openplotterSettings import conf
 from openplotterSettings import language
 from openplotterSettings import platform
@@ -29,32 +29,24 @@ def main():
 	language.Language(currentdir, package, currentLanguage)
 	platform2 = platform.Platform()
 
-	print(_('Installing python packages...'))
-	try:
-		subprocess.call(['pip3', 'install', 'websocket-client', '-U'])
-		print(_('DONE'))
-	except Exception as e: print(_('FAILED: ')+str(e))
-
 	print(_('Installing/Updating signalk-zones plugin...'))
 	try:
 		if platform2.skDir:
 			subprocess.call(['npm', 'i', '--verbose', '@signalk/zones'], cwd = platform2.skDir)
-			subprocess.call(['chown', '-R', conf2.user, platform2.skDir])
-			subprocess.call(['systemctl', 'stop', 'signalk.service'])
-			subprocess.call(['systemctl', 'stop', 'signalk.socket'])
-			subprocess.call(['systemctl', 'start', 'signalk.socket'])
-			subprocess.call(['systemctl', 'start', 'signalk.service'])
 		else: print(_('Failed. Please, install Signal K server.'))
 		print(_('DONE'))
 	except Exception as e: print(_('FAILED: ')+str(e))
 
-	print(_('Checking access to Signal K server...'))
+	print(_('Creating services...'))
 	try:
-		from openplotterSignalkInstaller import connections
-		skConnections = connections.Connections('NOTIFICATIONS')
-		result = skConnections.checkConnection()
-		if result[1]: print(result[1])
-		else: print(_('DONE'))
+		if not os.path.exists(conf2.home+'/.config'): os.mkdir(conf2.home+'/.config')
+		if not os.path.exists(conf2.home+'/.config/systemd'): os.mkdir(conf2.home+'/.config/systemd')
+		if not os.path.exists(conf2.home+'/.config/systemd/user'): os.mkdir(conf2.home+'/.config/systemd/user')
+		fo = open(conf2.home+'/.config/systemd/user/openplotter-notifications-read.service', "w")
+		fo.write( '[Unit]\nPartOf=graphical-session.target\nAfter=graphical-session.target\n[Service]\nEnvironment=OPrescue=0\nEnvironmentFile=/boot/firmware/config.txt\nExecStart=openplotter-notifications-read $OPrescue\nRestart=always\nRestartSec=3\n[Install]\nWantedBy=graphical-session.target')
+		fo.close()
+		subprocess.call(['systemctl', '--user','daemon-reload'])
+		print(_('DONE'))
 	except Exception as e: print(_('FAILED: ')+str(e))
 
 	print(_('Setting version...'))

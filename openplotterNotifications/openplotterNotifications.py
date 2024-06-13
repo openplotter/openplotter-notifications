@@ -21,15 +21,7 @@ from openplotterSettings import conf
 from openplotterSettings import language
 from openplotterSettings import platform
 from openplotterSettings import selectKey
-from openplotterSignalkInstaller import connections
 from .version import version
-from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
-
-class CheckListCtrl(wx.ListCtrl, CheckListCtrlMixin, ListCtrlAutoWidthMixin):
-	def __init__(self, parent, height):
-		wx.ListCtrl.__init__(self, parent, -1, style=wx.LC_REPORT | wx.SUNKEN_BORDER, size=(650, height))
-		CheckListCtrlMixin.__init__(self)
-		ListCtrlAutoWidthMixin.__init__(self)
 
 class MyFrame(wx.Frame):
 	def __init__(self):
@@ -58,17 +50,8 @@ class MyFrame(wx.Frame):
 		toolSettings = self.toolbar1.AddTool(102, _('Settings'), wx.Bitmap(self.currentdir+"/data/settings.png"))
 		self.Bind(wx.EVT_TOOL, self.OnToolSettings, toolSettings)
 		self.toolbar1.AddSeparator()
-		aproveSK = self.toolbar1.AddTool(105, _('Approve'), wx.Bitmap(self.currentdir+"/data/sk.png"))
-		self.Bind(wx.EVT_TOOL, self.onAproveSK, aproveSK)
-		connectionSK = self.toolbar1.AddTool(106, _('Reconnect'), wx.Bitmap(self.currentdir+"/data/sk.png"))
-		self.Bind(wx.EVT_TOOL, self.onConnectionSK, connectionSK)
-		self.toolbar1.AddSeparator()
 		refresh = self.toolbar1.AddTool(103, _('Refresh'), wx.Bitmap(self.currentdir+"/data/refresh.png"))
 		self.Bind(wx.EVT_TOOL, self.onRefresh, refresh)
-		self.toolbar1.AddSeparator()
-		toolRescue = self.toolbar1.AddCheckTool(107, _('Rescue'), wx.Bitmap(self.currentdir+"/data/rescue.png"))
-		self.Bind(wx.EVT_TOOL, self.onToolRescue, toolRescue)
-		if self.conf.get('GENERAL', 'rescue') == 'yes': self.toolbar1.ToggleTool(107,True)
 
 		self.notebook = wx.Notebook(self)
 		self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.onTabChange)
@@ -146,26 +129,9 @@ class MyFrame(wx.Frame):
 		subprocess.call(['pkill', '-f', 'openplotter-settings'])
 		subprocess.Popen('openplotter-settings')
 
-	def onAproveSK(self,e):
-		if self.platform.skPort: 
-			url = self.platform.http+'localhost:'+self.platform.skPort+'/admin/#/security/access/requests'
-			webbrowser.open(url, new=2)
-
-	def onConnectionSK(self,e):
-		self.conf.set('NOTIFICATIONS', 'href', '')
-		self.conf.set('NOTIFICATIONS', 'token', '')
-		self.onRefresh()
-
 	def restartRead(self):
-		subprocess.call(['pkill','-f','openplotter-notifications-read'])
-		subprocess.call(['pkill','-f','openplotter-notifications-sound'])
-		subprocess.call(['pkill','-f','openplotter-notifications-visual'])
-		subprocess.Popen('openplotter-notifications-read')
-
-	def onToolRescue(self,e):
-		if self.toolbar1.GetToolState(107): self.conf.set('GENERAL', 'rescue', 'yes')
-		else: self.conf.set('GENERAL', 'rescue', 'no')
-		self.restartRead()
+		subprocess.call(['systemctl', '--user', 'restart', 'openplotter-notifications-read.service'])
+		self.ShowStatusBarGREEN(_('Notifications service restarted'))
 
 	def onRefresh(self, e=0):
 		self.readCustom()
@@ -175,25 +141,6 @@ class MyFrame(wx.Frame):
 		self.readSounds()
 
 		self.ShowStatusBarBLACK(' ')
-		self.toolbar1.EnableTool(105,False)
-		skConnections = connections.Connections('NOTIFICATIONS')
-		result = skConnections.checkConnection()
-		if result[0] == 'pending':
-			self.toolbar1.EnableTool(105,True)
-			self.ShowStatusBarYELLOW(result[1]+_(' Press "Approve" and then "Refresh".'))
-		elif result[0] == 'error':
-			self.ShowStatusBarRED(result[1]+_(' Try "Reconnect".'))
-		elif result[0] == 'repeat':
-			self.ShowStatusBarYELLOW(result[1]+_(' Press "Refresh".'))
-		elif result[0] == 'permissions':
-			self.ShowStatusBarYELLOW(result[1])
-		elif result[0] == 'approved':
-			self.ShowStatusBarGREEN(result[1])
-
-		test = subprocess.check_output(['ps','aux']).decode(sys.stdin.encoding)
-		if not 'openplotter-notifications-read' in test:
-			if self.conf.get('GENERAL', 'rescue') != 'yes':
-				subprocess.Popen('openplotter-notifications-read')
 
 	############################################################################
 
@@ -202,7 +149,7 @@ class MyFrame(wx.Frame):
 		self.listCustom.InsertColumn(0, _('Notification'), width=320)
 		self.listCustom.InsertColumn(1, _('State'), width=90)
 		self.listCustom.InsertColumn(2, _('Method'), width=125)
-		self.listCustom.InsertColumn(3, _('Message'), width=220)
+		self.listCustom.InsertColumn(3, _('Message'), width=210)
 		self.listCustom.Bind(wx.EVT_LIST_ITEM_SELECTED, self.onListCustomSelected)
 		self.listCustom.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.onlistCustomDeselected)
 		self.listCustom.SetTextColour(wx.BLACK)
@@ -231,7 +178,8 @@ class MyFrame(wx.Frame):
 		self.custom.SetSizer(vbox)
 
 	def getColour(self, state):
-		if state == 'normal': return self.visualNormal.GetColour()
+		if state == 'nominal': return self.visualNominal.GetColour()
+		elif state == 'normal': return self.visualNormal.GetColour()
 		elif state == 'alert': return self.visualAlert.GetColour()
 		elif state == 'warn': return self.visualWarn.GetColour()
 		elif state == 'alarm': return self.visualAlarm.GetColour()
@@ -385,6 +333,8 @@ class MyFrame(wx.Frame):
 
 	def OnReadThresholds(self):
 		self.summaryLogger.Clear()
+		try: visualNominal = eval(self.conf.get('NOTIFICATIONS', 'visualNominal'))
+		except: visualNominal = [(0, 181, 30, 255), True]
 		try: visualNormal = eval(self.conf.get('NOTIFICATIONS', 'visualNormal'))
 		except: visualNormal = [(46, 52, 54, 255), True]
 		try: visualAlert = eval(self.conf.get('NOTIFICATIONS', 'visualAlert'))
@@ -427,6 +377,7 @@ class MyFrame(wx.Frame):
 							if 'message' in zone: message = str(zone['message'])
 							else: message = ''
 							state = zone['state']
+							if state == 'nominal': stateColour = visualNominal[0]
 							if state == 'normal': stateColour = visualNormal[0]
 							if state == 'alert': stateColour = visualAlert[0]
 							if state == 'warn': stateColour = visualWarn[0]
@@ -453,6 +404,10 @@ class MyFrame(wx.Frame):
 	############################################################################
 
 	def pageVisual(self):
+		nominalLabel = wx.StaticText(self.visualMethod, label='nominal')
+		self.visualNominal = wx.ColourPickerCtrl(self.visualMethod)
+		self.nominalAuto = wx.CheckBox(self.visualMethod, label=_('auto closing'))
+
 		normalLabel = wx.StaticText(self.visualMethod, label='normal')
 		self.visualNormal = wx.ColourPickerCtrl(self.visualMethod)
 		self.normalAuto = wx.CheckBox(self.visualMethod, label=_('auto closing'))
@@ -485,19 +440,17 @@ class MyFrame(wx.Frame):
 		self.toolbar2.AddSeparator()
 
 		names = wx.BoxSizer(wx.VERTICAL)
-		names.AddSpacer(35)
+		names.AddSpacer(5)
+		names.Add(nominalLabel, 0, wx.ALL | wx.EXPAND, 10)
 		names.Add(normalLabel, 0, wx.ALL | wx.EXPAND, 10)
-		names.AddSpacer(5)
 		names.Add(alertLabel, 0, wx.ALL | wx.EXPAND, 10)
-		names.AddSpacer(5)
 		names.Add(warnLabel, 0, wx.ALL | wx.EXPAND, 10)
-		names.AddSpacer(5)
 		names.Add(alarmLabel, 0, wx.ALL | wx.EXPAND, 10)
-		names.AddSpacer(5)
 		names.Add(emergencyLabel, 0, wx.ALL | wx.EXPAND, 10)
 
 		colours = wx.BoxSizer(wx.VERTICAL)
-		colours.AddSpacer(30)
+		colours.AddSpacer(5)
+		colours.Add(self.visualNominal, 0, wx.ALL | wx.EXPAND, 5)
 		colours.Add(self.visualNormal, 0, wx.ALL | wx.EXPAND, 5)
 		colours.Add(self.visualAlert, 0, wx.ALL | wx.EXPAND, 5)
 		colours.Add(self.visualWarn, 0, wx.ALL | wx.EXPAND, 5)
@@ -505,7 +458,8 @@ class MyFrame(wx.Frame):
 		colours.Add(self.visualEmergency, 0, wx.ALL | wx.EXPAND, 5)
 
 		auto = wx.BoxSizer(wx.VERTICAL)
-		auto.AddSpacer(30)
+		auto.AddSpacer(5)
+		auto.Add(self.nominalAuto, 0, wx.ALL | wx.EXPAND, 10)
 		auto.Add(self.normalAuto, 0, wx.ALL | wx.EXPAND, 10)
 		auto.Add(self.alertAuto, 0, wx.ALL | wx.EXPAND, 10)
 		auto.Add(self.warnAuto, 0, wx.ALL | wx.EXPAND, 10)
@@ -520,6 +474,15 @@ class MyFrame(wx.Frame):
 		self.visualMethod.SetSizer(sizer)
 
 	def readColours(self):
+		try: visualNominal = eval(self.conf.get('NOTIFICATIONS', 'visualNominal'))
+		except: 
+			visualNominal = [(0, 181, 30, 255), True]
+			self.conf.set('NOTIFICATIONS', 'visualNominal', str(visualNominal))
+		try: 
+			self.visualNominal.SetColour(visualNominal[0])
+			self.nominalAuto.SetValue(visualNominal[1])
+		except: pass
+
 		try: visualNormal = eval(self.conf.get('NOTIFICATIONS', 'visualNormal'))
 		except: 
 			visualNormal = [(46, 52, 54, 255), True]
@@ -569,6 +532,7 @@ class MyFrame(wx.Frame):
 		subprocess.call(['pkill','-f','openplotter-notifications-visual'])
 
 	def onSave2(self,e):
+		self.conf.set('NOTIFICATIONS', 'visualNominal', str([self.visualNominal.GetColour(),self.nominalAuto.GetValue()]))
 		self.conf.set('NOTIFICATIONS', 'visualNormal', str([self.visualNormal.GetColour(),self.normalAuto.GetValue()]))
 		self.conf.set('NOTIFICATIONS', 'visualAlert', str([self.visualAlert.GetColour(),self.alertAuto.GetValue()]))
 		self.conf.set('NOTIFICATIONS', 'visualWarn', str([self.visualWarn.GetColour(),self.warnAuto.GetValue()]))
@@ -583,9 +547,16 @@ class MyFrame(wx.Frame):
 	############################################################################
 
 	def pageSound(self):
-		filesLabel = wx.StaticText(self.soundMethod, label=_('File'))
 
 		playButtonImg = wx.Bitmap(self.currentdir+"/data/play.png", wx.BITMAP_TYPE_ANY)
+
+		nominalLabel = wx.StaticText(self.soundMethod, label='nominal')
+		self.soundNominal = wx.TextCtrl(self.soundMethod)
+		playButton0 = wx.BitmapButton(self.soundMethod, id=6000, bitmap=playButtonImg, size=(playButtonImg.GetWidth()+15, playButtonImg.GetHeight()+3))
+		playButton0.Bind(wx.EVT_BUTTON, self.onPlayButton)
+		nominalSelect = wx.Button(self.soundMethod, id=5000, label=_('Select'))
+		nominalSelect.Bind(wx.EVT_BUTTON, self.OnFile)
+		self.nominalStop = wx.CheckBox(self.soundMethod, label=_('auto stop'))
 
 		normalLabel = wx.StaticText(self.soundMethod, label='normal')
 		self.soundNormal = wx.TextCtrl(self.soundMethod)
@@ -594,7 +565,6 @@ class MyFrame(wx.Frame):
 		normalSelect = wx.Button(self.soundMethod, id=5001, label=_('Select'))
 		normalSelect.Bind(wx.EVT_BUTTON, self.OnFile)
 		self.normalStop = wx.CheckBox(self.soundMethod, label=_('auto stop'))
-
 
 		alertLabel = wx.StaticText(self.soundMethod, label='alert')
 		self.soundAlert = wx.TextCtrl(self.soundMethod)
@@ -635,24 +605,24 @@ class MyFrame(wx.Frame):
 		cancel2 = self.toolbar5.AddTool(502, _('Cancel'), wx.Bitmap(self.currentdir+"/data/cancel.png"))
 		self.Bind(wx.EVT_TOOL, self.onCancel3, cancel2)
 		self.toolbar5.AddSeparator()
-		stopsounds = self.toolbar5.AddTool(503, _('Stop all sounds'), wx.Bitmap(self.currentdir+"/data/stop.png"))
+		stopsounds = self.toolbar5.AddTool(503, _('Stop all sounds'), wx.Bitmap(self.currentdir+"/data/sound-stop.png"))
 		self.Bind(wx.EVT_TOOL, self.onStopAllSounds, stopsounds)
 		self.toolbar5.AddSeparator()
 
 		names = wx.BoxSizer(wx.VERTICAL)
-		names.AddSpacer(35)
-		names.Add(normalLabel, 0, wx.ALL | wx.EXPAND, 10)
-		names.AddSpacer(5)
-		names.Add(alertLabel, 0, wx.ALL | wx.EXPAND, 10)
-		names.AddSpacer(5)
-		names.Add(warnLabel, 0, wx.ALL | wx.EXPAND, 10)
-		names.AddSpacer(5)
-		names.Add(alarmLabel, 0, wx.ALL | wx.EXPAND, 10)
-		names.AddSpacer(5)
-		names.Add(emergencyLabel, 0, wx.ALL | wx.EXPAND, 10)
+		names.AddSpacer(10)
+		names.Add(nominalLabel, 0, wx.ALL | wx.EXPAND, 11)
+		names.Add(normalLabel, 0, wx.ALL | wx.EXPAND, 11)
+		names.Add(alertLabel, 0, wx.ALL | wx.EXPAND, 11)
+		names.Add(warnLabel, 0, wx.ALL | wx.EXPAND, 11)
+		names.Add(alarmLabel, 0, wx.ALL | wx.EXPAND, 11)
+		names.Add(emergencyLabel, 0, wx.ALL | wx.EXPAND, 11)
 
-		title = wx.BoxSizer(wx.HORIZONTAL)
-		title.Add(filesLabel, 1, wx.ALL | wx.EXPAND, 5)
+		nominal = wx.BoxSizer(wx.HORIZONTAL)
+		nominal.Add(self.soundNominal, 1, wx.ALL | wx.EXPAND, 5)
+		nominal.Add(playButton0, 0, wx.ALL | wx.EXPAND, 5)
+		nominal.Add(nominalSelect, 0, wx.ALL | wx.EXPAND, 5)
+		nominal.Add(self.nominalStop, 0, wx.ALL | wx.EXPAND, 5)
 
 		normal = wx.BoxSizer(wx.HORIZONTAL)
 		normal.Add(self.soundNormal, 1, wx.ALL | wx.EXPAND, 5)
@@ -686,7 +656,7 @@ class MyFrame(wx.Frame):
 
 		sounds = wx.BoxSizer(wx.VERTICAL)
 		sounds.AddSpacer(5)
-		sounds.Add(title, 0, wx.EXPAND, 0)
+		sounds.Add(nominal, 0, wx.EXPAND, 0)
 		sounds.AddSpacer(5)
 		sounds.Add(normal, 0, wx.EXPAND, 0)
 		sounds.AddSpacer(5)
@@ -705,6 +675,15 @@ class MyFrame(wx.Frame):
 		self.soundMethod.SetSizer(sizer)
 
 	def readSounds(self):
+		try: soundNominal = eval(self.conf.get('NOTIFICATIONS', 'soundNominal'))
+		except: 
+			soundNominal = ['/usr/share/sounds/openplotter/bip.mp3', True]
+			self.conf.set('NOTIFICATIONS', 'soundNominal', str(soundNominal))
+		try: 
+			self.soundNominal.SetValue(soundNominal[0])
+			self.nominalStop.SetValue(soundNominal[1])
+		except: pass
+
 		try: soundNormal = eval(self.conf.get('NOTIFICATIONS', 'soundNormal'))
 		except: 
 			soundNormal = ['/usr/share/sounds/openplotter/Bleep.mp3', True]
@@ -754,7 +733,8 @@ class MyFrame(wx.Frame):
 		select = e.GetId()
 		try:
 			subprocess.call(['pkill','-15','vlc'])
-			if select == 6001: subprocess.Popen(['cvlc', '--play-and-exit', self.soundNormal.GetValue()])
+			if select == 6000: subprocess.Popen(['cvlc', '--play-and-exit', self.soundNominal.GetValue()])
+			elif select == 6001: subprocess.Popen(['cvlc', '--play-and-exit', self.soundNormal.GetValue()])
 			elif select == 6002: subprocess.Popen(['cvlc', '--play-and-exit', self.soundAlert.GetValue()])
 			elif select == 6003: subprocess.Popen(['cvlc', '--play-and-exit', self.soundWarn.GetValue()])
 			elif select == 6004: subprocess.Popen(['cvlc', '--play-and-exit', self.soundAlarm.GetValue()])
@@ -770,7 +750,8 @@ class MyFrame(wx.Frame):
 							wildcard=_('Audio files') + ' (*.mp3)|*.mp3|' + _('All files') + ' (*.*)|*.*',
 							style=wx.FD_OPEN | wx.FD_CHANGE_DIR)
 		if dlg.ShowModal() == wx.ID_OK:
-			if select == 5001: self.soundNormal.SetValue(dlg.GetPath())
+			if select == 5000: self.soundNominal.SetValue(dlg.GetPath())
+			elif select == 5001: self.soundNormal.SetValue(dlg.GetPath())
 			elif select == 5002: self.soundAlert.SetValue(dlg.GetPath())
 			elif select == 5003: self.soundWarn.SetValue(dlg.GetPath())
 			elif select == 5004: self.soundAlarm.SetValue(dlg.GetPath())
@@ -778,6 +759,7 @@ class MyFrame(wx.Frame):
 		dlg.Destroy()
 
 	def onSave3(self,e):
+		self.conf.set('NOTIFICATIONS', 'soundNominal', str([self.soundNominal.GetValue(), self.nominalStop.GetValue()]))
 		self.conf.set('NOTIFICATIONS', 'soundNormal', str([self.soundNormal.GetValue(), self.normalStop.GetValue()]))
 		self.conf.set('NOTIFICATIONS', 'soundAlert', str([self.soundAlert.GetValue(), self.alertStop.GetValue()]))
 		self.conf.set('NOTIFICATIONS', 'soundWarn', str([self.soundWarn.GetValue(), self.warnStop.GetValue()]))
@@ -796,7 +778,7 @@ class MyFrame(wx.Frame):
 		self.key = wx.ComboBox(self.actions, 705, _('Notifications'), choices=[], style=wx.CB_DROPDOWN | wx.CB_READONLY)
 		self.Bind(wx.EVT_COMBOBOX, self.onKey, self.key)
 
-		self.listActions = CheckListCtrl(self.actions, 152)
+		self.listActions = wx.ListCtrl(self.actions, 152, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
 		self.listActions.InsertColumn(0, _('Enabled'), width=70)
 		self.listActions.InsertColumn(1, _('State'), width=90)
 		self.listActions.InsertColumn(2, _('Message'), width=180)
@@ -804,7 +786,10 @@ class MyFrame(wx.Frame):
 		self.listActions.InsertColumn(4, _('Data'), width=100)
 		self.listActions.Bind(wx.EVT_LIST_ITEM_SELECTED, self.onListActionsSelected)
 		self.listActions.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.onListActionsDeselected)
-		self.listActions.OnCheckItem = self.OnCheckItem
+		self.listActions.EnableCheckBoxes(True)
+		self.listActions.Bind(wx.EVT_LIST_ITEM_CHECKED, self.OnCheckItem)
+		self.listActions.Bind(wx.EVT_LIST_ITEM_UNCHECKED, self.OnUnCheckItem)
+
 		self.checking = False
 		self.listActions.SetTextColour(wx.BLACK)
 
@@ -886,11 +871,20 @@ class MyFrame(wx.Frame):
 		self.toolbar7.EnableTool(703,False)
 		self.toolbar7.EnableTool(704,False)
 
-	def OnCheckItem(self, index, flag):
+	def OnCheckItem(self, index):
 		if self.checking:
+			i = index.GetIndex()
 			key = self.key.GetValue()
-			if flag: self.actionsList0[key][index]['enabled'] = True
-			else: self.actionsList0[key][index]['enabled'] = False
+			self.actionsList0[key][i]['enabled'] = True
+			self.conf.set('NOTIFICATIONS', 'actions', str(self.actionsList0))
+			self.readSelectedActions(key)
+			self.restartRead()
+
+	def OnUnCheckItem(self, index):
+		if self.checking:
+			i = index.GetIndex()
+			key = self.key.GetValue()
+			self.actionsList0[key][i]['enabled'] = False
 			self.conf.set('NOTIFICATIONS', 'actions', str(self.actionsList0))
 			self.readSelectedActions(key)
 			self.restartRead()
@@ -1001,12 +995,12 @@ class editAction(wx.Dialog):
 		for i in self.availableActions:
 			self.actions.append(i['name'])
 
-		wx.Dialog.__init__(self, None, title=title, size=(600, 440))
+		wx.Dialog.__init__(self, None, title=title, size=(600, 425))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		panel = wx.Panel(self)
 
 		stateLabel= wx.StaticText(panel, label = _('State'))
-		self.state = wx.ComboBox(panel, choices = [_('any'),'null','normal','alert','warn','alarm','emergency'], style=wx.CB_READONLY)
+		self.state = wx.ComboBox(panel, choices = [_('any'),'null','nominal','normal','alert','warn','alarm','emergency'], style=wx.CB_READONLY)
 		if edit:
 			if edit['state'] == '': self.state.SetSelection(0)
 			else: self.state.SetValue(edit['state'])
@@ -1014,13 +1008,13 @@ class editAction(wx.Dialog):
 		self.Bind(wx.EVT_COMBOBOX, self.onState, self.state)
 
 		messageLabel= wx.StaticText(panel, label = _('Message'))
-		self.message = wx.TextCtrl(panel)
+		self.message = wx.TextCtrl(panel,size=(-1, 25))
 		if edit: 
 			if edit['state'] == 'null': self.message.Disable()
 			else: self.message.SetValue(edit['message'])
 
 		notiLabel = wx.StaticText(panel, label = _('Notification'))
-		self.SK = wx.TextCtrl(panel)
+		self.SK = wx.TextCtrl(panel,size=(-1, 25))
 		SKedit = wx.Button(panel, label='Signal K key')
 		SKedit.Bind(wx.EVT_BUTTON, self.onSKedit)
 		if edit:
@@ -1072,20 +1066,20 @@ class editAction(wx.Dialog):
 		okBtn.Bind(wx.EVT_BUTTON, self.ok)
 
 		v1 = wx.BoxSizer(wx.VERTICAL)
-		v1.Add(stateLabel, 0, wx.ALL | wx.EXPAND, 5)
-		v1.Add(self.state, 0, wx.ALL | wx.EXPAND, 5)
+		v1.Add(stateLabel, 0, wx.ALL | wx.EXPAND, 3)
+		v1.Add(self.state, 0, wx.ALL | wx.EXPAND, 3)
 
 		v2 = wx.BoxSizer(wx.VERTICAL)
-		v2.Add(messageLabel, 0, wx.ALL | wx.EXPAND, 5)
-		v2.Add(self.message, 0, wx.ALL | wx.EXPAND, 5)
+		v2.Add(messageLabel, 0, wx.ALL | wx.EXPAND, 3)
+		v2.Add(self.message, 0, wx.ALL | wx.EXPAND, 3)
 
 		h1 = wx.BoxSizer(wx.HORIZONTAL)
-		h1.Add(v1, 1, wx.ALL | wx.EXPAND, 0)
+		h1.Add(v1, 0, wx.ALL | wx.EXPAND, 0)
 		h1.Add(v2, 1, wx.ALL | wx.EXPAND, 0)
 
 		h3 = wx.BoxSizer(wx.HORIZONTAL)
-		h3.Add(self.SK, 1, wx.ALL | wx.EXPAND, 5)
-		h3.Add(SKedit, 0, wx.ALL | wx.EXPAND, 5)
+		h3.Add(self.SK, 1, wx.ALL, 3)
+		h3.Add(SKedit, 0, wx.ALL, 3)
 
 		v3 = wx.BoxSizer(wx.VERTICAL)
 		v3.Add(self.stateBtn, 0, wx.ALL | wx.EXPAND, 3)
@@ -1094,7 +1088,7 @@ class editAction(wx.Dialog):
 		v3.Add(self.skBtn, 0, wx.ALL | wx.EXPAND, 3)
 
 		h4 = wx.BoxSizer(wx.HORIZONTAL)
-		h4.Add(self.data, 1, wx.ALL  | wx.EXPAND, 5)
+		h4.Add(self.data, 1, wx.ALL  | wx.EXPAND, 3)
 		h4.Add(v3, 0, wx.ALL | wx.EXPAND, 0)
 
 		actionbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -1103,14 +1097,14 @@ class editAction(wx.Dialog):
 		actionbox.Add(okBtn, 0, wx.LEFT | wx.EXPAND, 10)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
-		vbox.Add(notiLabel, 0, wx.ALL  | wx.EXPAND, 5)
+		vbox.Add(notiLabel, 0, wx.ALL  | wx.EXPAND, 3)
 		vbox.Add(h3, 0, wx.ALL | wx.EXPAND, 0)
 		vbox.Add(h1, 0, wx.ALL | wx.EXPAND, 0)
-		vbox.Add(actionLabel, 0, wx.ALL  | wx.EXPAND, 5)
-		vbox.Add(self.actionsList , 0, wx.ALL  | wx.EXPAND, 5)
-		vbox.Add(dataLabel, 0, wx.ALL  | wx.EXPAND, 5)
+		vbox.Add(actionLabel, 0, wx.ALL  | wx.EXPAND, 3)
+		vbox.Add(self.actionsList , 0, wx.ALL  | wx.EXPAND, 3)
+		vbox.Add(dataLabel, 0, wx.ALL  | wx.EXPAND, 3)
 		vbox.Add(h4, 1, wx.ALL | wx.EXPAND, 0)
-		vbox.Add(self.help, 0, wx.LEFT | wx.EXPAND, 5)
+		vbox.Add(self.help, 0, wx.LEFT | wx.EXPAND, 3)
 		vbox.Add(actionbox, 0, wx.ALL | wx.EXPAND, 10)
 
 		panel.SetSizer(vbox)
@@ -1214,12 +1208,12 @@ class editCustom(wx.Dialog):
 		if self.conf.get('GENERAL', 'debug') == 'yes': self.debug = True
 		else: self.debug = False
 
-		wx.Dialog.__init__(self, None, title=title, size=(450, 280))
+		wx.Dialog.__init__(self, None, title=title, size=(450, 320))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		panel = wx.Panel(self)
 
 		stateLabel= wx.StaticText(panel, label = _('State'))
-		self.state = wx.ComboBox(panel, choices = ['normal','alert','warn','alarm','emergency'], style=wx.CB_READONLY)
+		self.state = wx.ComboBox(panel, choices = ['nominal','normal','alert','warn','alarm','emergency'], style=wx.CB_READONLY)
 		if edit:
 			if edit['state'] == '': self.state.SetSelection(0)
 			else: self.state.SetValue(edit['state'])
@@ -1230,7 +1224,7 @@ class editCustom(wx.Dialog):
 		if edit: self.message.SetValue(edit['message'])
 
 		notiLabel = wx.StaticText(panel, label = _('Notification'))
-		self.SK = wx.TextCtrl(panel)
+		self.SK = wx.TextCtrl(panel,size=(-1, 25))
 		SKedit = wx.Button(panel, label='Signal K key')
 		SKedit.Bind(wx.EVT_BUTTON, self.onSKedit)
 		if edit: self.SK.SetValue(edit['key'])
@@ -1252,15 +1246,15 @@ class editCustom(wx.Dialog):
 
 		v2 = wx.BoxSizer(wx.VERTICAL)
 		v2.Add(messageLabel, 0, wx.ALL | wx.EXPAND, 5)
-		v2.Add(self.message, 0, wx.ALL | wx.EXPAND, 5)
+		v2.Add(self.message, 1, wx.ALL | wx.EXPAND, 5)
 
 		h1 = wx.BoxSizer(wx.HORIZONTAL)
 		h1.Add(v1, 0, wx.ALL | wx.EXPAND, 0)
 		h1.Add(v2, 1, wx.ALL | wx.EXPAND, 0)
 
 		h3 = wx.BoxSizer(wx.HORIZONTAL)
-		h3.Add(self.SK, 1, wx.ALL | wx.EXPAND, 5)
-		h3.Add(SKedit, 0, wx.ALL | wx.EXPAND, 5)
+		h3.Add(self.SK, 1, wx.ALL, 5)
+		h3.Add(SKedit, 0, wx.ALL, 5)
 
 		h4 = wx.BoxSizer(wx.HORIZONTAL)
 		h4.Add(self.visual, 0, wx.ALL, 5)
@@ -1310,7 +1304,7 @@ def main():
 	try:
 		platform2 = platform.Platform()
 		if not platform2.postInstall(version,'notifications'):
-			subprocess.Popen(['openplotterPostInstall', platform2.admin+' notificationsPostInstall'])
+			subprocess.Popen(['openplotterPostInstall', 'notificationsPostInstall'])
 			return
 	except: pass
 
