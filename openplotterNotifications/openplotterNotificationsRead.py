@@ -92,7 +92,6 @@ def main():
 				conf2 = conf.Conf()
 				if conf2.get('GENERAL', 'debug') == 'yes': debug = True
 				else: debug = False
-				if conf2.get('GENERAL', 'rescue') == 'yes': sys.exit('Notifications in rescue mode')
 				currentLanguage = conf2.get('GENERAL', 'lang')
 				try: actionsList = eval(conf2.get('NOTIFICATIONS', 'actions'))
 				except: actionsList = {}
