@@ -86,6 +86,11 @@ class processActions(threading.Thread):
 def main():
 	if sys.argv[1] != '1':
 		ws = False
+		visualList = {}
+		soundList = {}
+		actionsList2 = {}
+		subprocess.call(['pkill','-f','openplotter-notifications-visual'])
+		subprocess.call(['pkill','-f','openplotter-notifications-sound'])
 		while True:
 			if not ws:
 				platform2 = platform.Platform()
@@ -150,30 +155,58 @@ def main():
 															if 'method' in value['value']:
 																if 'context' in data:
 																	if uuid in data['context'] or data['context'] == 'vessels.self':
-																		if 'visual' in value['value']['method']: 
-																			subprocess.Popen(['openplotter-notifications-visual', value['path'], value['value']['state'], value['value']['message'], update['timestamp'], data['context']])	
+																		if 'visual' in value['value']['method']:
+																			if not value['path'] in visualList:
+																				subprocess.Popen(['openplotter-notifications-visual', value['path'], value['value']['state'], value['value']['message'], update['timestamp'], data['context']])
+																				visualList[value['path']] = value['value']['state']
+																			else:
+																				if value['value']['state'] != visualList[value['path']]:
+																					subprocess.Popen(['openplotter-notifications-visual', value['path'], value['value']['state'], value['value']['message'], update['timestamp'], data['context']])
+																					visualList[value['path']] = value['value']['state']
 																		if 'sound' in value['value']['method']:
-																			subprocess.Popen(['openplotter-notifications-sound', value['path'], value['value']['state'], update['timestamp'], data['context']])
-														else: notification = {'state':'null','message':'','timestamp':'','method':[]}
+																			if not value['path'] in soundList:
+																				subprocess.Popen(['openplotter-notifications-sound', value['path'], value['value']['state'], update['timestamp'], data['context']])
+																				soundList[value['path']] = value['value']['state']
+																			else:
+																				if value['value']['state'] != soundList[value['path']]:
+																					subprocess.Popen(['openplotter-notifications-sound', value['path'], value['value']['state'], update['timestamp'], data['context']])
+																					soundList[value['path']] = value['value']['state']
+														else: 
+															notification = {'state':'null','message':'','timestamp':'','method':[]}
+															visualList[value['path']] = ''
+															soundList[value['path']] = ''
 														if 'context' in data:
 															context = data['context'].replace('vessels.','')
+
 															if context in uuid:
+
 																if 'self.'+value['path'] in actionsList: 
 																	actions = actionsList['self.'+value['path']]
 																	if actions:
-																		thread = processActions(value['path'],actions,notification,debug,currentLanguage,conf2,platform2,update['timestamp'])
-																		thread.start()
+																		if not 'self.'+value['path'] in actionsList2 or notification['state'] != actionsList2['self.'+value['path']]['state'] or notification['message'] != actionsList2['self.'+value['path']]['message']:
+																			thread = processActions(value['path'],actions,notification,debug,currentLanguage,conf2,platform2,update['timestamp'])
+																			thread.start()
+																			actionsList2['self.'+value['path']] = {'state':notification['state'],'message':notification['message']}
+
+
 																if context+'.'+value['path'] in actionsList: 
 																	actions = actionsList[context+'.'+value['path']]
 																	if actions:
-																		thread = processActions(value['path'],actions,notification,debug,currentLanguage,conf2,platform2,update['timestamp'])
-																		thread.start()
+																		if not context+'.'+value['path'] in actionsList2 or notification['state'] != actionsList2[context+'.'+value['path']]['state'] or notification['message'] != actionsList2[context+'.'+value['path']]['message']:
+																			thread = processActions(value['path'],actions,notification,debug,currentLanguage,conf2,platform2,update['timestamp'])
+																			thread.start()
+																			actionsList2[context+'.'+value['path']] = {'state':notification['state'],'message':notification['message']}
+
 															else:
-																if context+'.'+value['path'] in actionsList: 
+
+																if context+'.'+value['path'] in actionsList : 
 																	actions = actionsList[context+'.'+value['path']]
 																	if actions:
-																		thread = processActions(value['path'],actions,notification,debug,currentLanguage,conf2,platform2,update['timestamp'])
-																		thread.start()
+																		if not context+'.'+value['path'] in actionsList2 or notification['state'] != actionsList2[context+'.'+value['path']]['state'] or notification['message'] != actionsList2[context+'.'+value['path']]['message']:
+																			thread = processActions(value['path'],actions,notification,debug,currentLanguage,conf2,platform2,update['timestamp'])
+																			thread.start()
+																			actionsList2[context+'.'+value['path']] = {'state':notification['state'],'message':notification['message']}
+
 								except Exception as e: 
 									if debug: 
 										print('Error processing notification: '+str(e))

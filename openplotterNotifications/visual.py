@@ -40,14 +40,14 @@ class MyFrame(wx.Frame):
 		state = wx.StaticText(panel, label = self.state)
 		self.path = sys.argv[1]
 		path = wx.StaticText(panel, label = self.path)
-		message = rt.RichTextCtrl(panel)
-		message.SetMargins((10,10))
-		message.BeginAlignment(wx.TEXT_ALIGNMENT_CENTRE)
-		message.WriteText(sys.argv[3])
-		message.EndAlignment()
-		message.ShowPosition(0)
-		self.timestamp = sys.argv[4]
-		timestamp = wx.StaticText(panel, label = self.timestamp)
+		self.message = rt.RichTextCtrl(panel)
+		self.message.SetMargins((10,10))
+		self.message.WriteText(sys.argv[3])
+		self.message.ShowPosition(0)
+		timestamp = sys.argv[4].replace('T',' - ')
+		timestamp = timestamp.replace('Z','')
+		timestamp1 = wx.StaticText(panel, label = _('First')+': '+timestamp)
+		self.timestamp2 = wx.StaticText(panel, label = _('Last')+': '+timestamp)
 		self.context = sys.argv[5]
 
 		if self.state == 'nominal':
@@ -68,12 +68,13 @@ class MyFrame(wx.Frame):
 		elif self.state == 'emergency':
 			try: color = eval(self.conf.get('NOTIFICATIONS', 'visualEmergency'))
 			except: color = [(164, 0, 0, 255),False]
+		self.autoclose = color[1]
 		state.SetForegroundColour(color[0])
 		font = wx.Font(20, wx.FONTFAMILY_DEFAULT, wx.ITALIC, wx.BOLD)
 		state.SetFont(font)
 
 		close = wx.Button(panel, label=_('Close'))
-		close.Bind(wx.EVT_BUTTON, self.onClose)
+		close.Bind(wx.EVT_BUTTON, self.onClose2)
 
 		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox1.AddStretchSpacer(1)
@@ -87,29 +88,38 @@ class MyFrame(wx.Frame):
 
 		hbox3 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox3.AddStretchSpacer(1)
-		hbox3.Add(timestamp, 0, wx.ALL | wx.EXPAND, 0)
+		hbox3.Add(timestamp1, 0, wx.ALL | wx.EXPAND, 0)
 		hbox3.AddStretchSpacer(1)
+
+		hbox4 = wx.BoxSizer(wx.HORIZONTAL)
+		hbox4.AddStretchSpacer(1)
+		hbox4.Add(self.timestamp2, 0, wx.ALL | wx.EXPAND, 0)
+		hbox4.AddStretchSpacer(1)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 		vbox.AddSpacer(5)
 		vbox.Add(hbox1, 0, wx.ALL | wx.EXPAND, 5)
 		vbox.Add(hbox2, 0, wx.ALL | wx.EXPAND, 5)
 		vbox.Add(hbox3, 0, wx.ALL | wx.EXPAND, 5)
-		vbox.Add(message, 1, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(hbox4, 0, wx.ALL | wx.EXPAND, 5)
+		vbox.Add(self.message, 1, wx.ALL | wx.EXPAND, 5)
 		vbox.Add(close, 0, wx.ALL | wx.EXPAND, 10)
 		panel.SetSizer(vbox)
 
-		if color[1]:
-			self.timer = wx.Timer(self)
-			self.Bind(wx.EVT_TIMER, self.refresh, self.timer)
-			self.timer.Start(3000)
-		else: self.timer = False
+		self.timer = wx.Timer(self)
+		self.Bind(wx.EVT_TIMER, self.refresh, self.timer)
+		self.timer.Start(2000)
 
 		self.Centre()
 
-	def onClose(self,e=0):
-		if self.timer: self.timer.Stop()
+	def onClose2(self,e=0):
+		self.timer.Stop()
 		self.Destroy()
+
+	def onClose(self):
+		if self.autoclose:
+			self.timer.Stop()
+			self.Destroy()
 
 	def refresh(self,e):
 		try:
@@ -123,9 +133,13 @@ class MyFrame(wx.Frame):
 			elif 'state' in data['value']:
 				if data['value']['state'] != self.state: self.onClose()
 				else:
+					if 'message' in data['value']:
+						self.message.Clear()
+						self.message.WriteText(data['value']['message'])
 					if 'timestamp' in data:
-						if data['timestamp'] != self.timestamp: self.onClose()
-					else: self.onClose()
+						timestamp2 = data['timestamp'].replace('T',' - ')
+						timestamp2 = timestamp2.replace('Z','')
+						self.timestamp2.SetLabel( _('Last')+': '+timestamp2)
 			else: self.onClose()
 		else: self.onClose()
 	

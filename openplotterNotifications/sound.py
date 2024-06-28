@@ -26,7 +26,7 @@ def main():
 	path = sys.argv[1]
 	state = sys.argv[2]
 	timestamp = sys.argv[3]
-	context = sys.argv[3]
+	context = sys.argv[4]
 
 	if state == 'nominal':
 		try: sound = eval(conf2.get('NOTIFICATIONS', 'soundNominal'))
@@ -60,10 +60,6 @@ def main():
 				if not data['value']: break
 				elif 'state' in data['value']:
 					if data['value']['state'] != state: break
-					else:
-						if 'timestamp' in data:
-							if data['timestamp'] != timestamp: break
-						else: break
 				else: break
 			else: break
 		time.sleep(3)
