@@ -100,6 +100,10 @@ def main():
 				currentLanguage = conf2.get('GENERAL', 'lang')
 				try: actionsList = eval(conf2.get('NOTIFICATIONS', 'actions'))
 				except: actionsList = {}
+				try: visualIgnore = eval(conf2.get('NOTIFICATIONS', 'visualIgnore'))
+				except: visualIgnore = []
+				try: soundIgnore = eval(conf2.get('NOTIFICATIONS', 'soundIgnore'))
+				except: soundIgnore = []
 				skConnections = connections.Connections('NOTIFICATIONS')
 				token = skConnections.token
 				try:
@@ -152,34 +156,26 @@ def main():
 													if 'notifications.' in value['path']:
 														if value['value']:
 															notification = value['value']
-															if 'method' in value['value']:
+															if 'method' in value['value'] and 'state' in value['value'] and 'message' in value['value'] and 'timestamp' in update:
 																if 'context' in data:
 																	if uuid in data['context'] or data['context'] == 'vessels.self':
 																		if 'visual' in value['value']['method']:
-																			if not value['path'] in visualList:
-																				subprocess.Popen(['openplotter-notifications-visual', value['path'], value['value']['state'], value['value']['message'], update['timestamp'], data['context']])
-																				visualList[value['path']] = value['value']['state']
-																			else:
-																				if value['value']['state'] != visualList[value['path']]:
+																			if not value['path'] in visualList or value['value']['state'] != visualList[value['path']]:
+																				if value['value']['state'] not in visualIgnore:
 																					subprocess.Popen(['openplotter-notifications-visual', value['path'], value['value']['state'], value['value']['message'], update['timestamp'], data['context']])
-																					visualList[value['path']] = value['value']['state']
+																				visualList[value['path']] = value['value']['state']
 																		if 'sound' in value['value']['method']:
-																			if not value['path'] in soundList:
-																				subprocess.Popen(['openplotter-notifications-sound', value['path'], value['value']['state'], update['timestamp'], data['context']])
-																				soundList[value['path']] = value['value']['state']
-																			else:
-																				if value['value']['state'] != soundList[value['path']]:
+																			if not value['path'] in soundList or value['value']['state'] != soundList[value['path']]:
+																				if value['value']['state'] not in soundIgnore:
 																					subprocess.Popen(['openplotter-notifications-sound', value['path'], value['value']['state'], update['timestamp'], data['context']])
-																					soundList[value['path']] = value['value']['state']
+																				soundList[value['path']] = value['value']['state']
 														else: 
 															notification = {'state':'null','message':'','timestamp':'','method':[]}
 															visualList[value['path']] = ''
 															soundList[value['path']] = ''
 														if 'context' in data:
 															context = data['context'].replace('vessels.','')
-
 															if context in uuid:
-
 																if 'self.'+value['path'] in actionsList: 
 																	actions = actionsList['self.'+value['path']]
 																	if actions:
@@ -187,8 +183,6 @@ def main():
 																			thread = processActions(value['path'],actions,notification,debug,currentLanguage,conf2,platform2,update['timestamp'])
 																			thread.start()
 																			actionsList2['self.'+value['path']] = {'state':notification['state'],'message':notification['message']}
-
-
 																if context+'.'+value['path'] in actionsList: 
 																	actions = actionsList[context+'.'+value['path']]
 																	if actions:
@@ -196,9 +190,7 @@ def main():
 																			thread = processActions(value['path'],actions,notification,debug,currentLanguage,conf2,platform2,update['timestamp'])
 																			thread.start()
 																			actionsList2[context+'.'+value['path']] = {'state':notification['state'],'message':notification['message']}
-
 															else:
-
 																if context+'.'+value['path'] in actionsList : 
 																	actions = actionsList[context+'.'+value['path']]
 																	if actions:

@@ -407,26 +407,32 @@ class MyFrame(wx.Frame):
 		nominalLabel = wx.StaticText(self.visualMethod, label='nominal')
 		self.visualNominal = wx.ColourPickerCtrl(self.visualMethod)
 		self.nominalAuto = wx.CheckBox(self.visualMethod, label=_('auto closing'))
+		self.nominalIgnore = wx.CheckBox(self.visualMethod, label=_('ignore'))
 
 		normalLabel = wx.StaticText(self.visualMethod, label='normal')
 		self.visualNormal = wx.ColourPickerCtrl(self.visualMethod)
 		self.normalAuto = wx.CheckBox(self.visualMethod, label=_('auto closing'))
+		self.normalIgnore = wx.CheckBox(self.visualMethod, label=_('ignore'))
 
 		alertLabel = wx.StaticText(self.visualMethod, label='alert')
 		self.visualAlert = wx.ColourPickerCtrl(self.visualMethod)
 		self.alertAuto = wx.CheckBox(self.visualMethod, label=_('auto closing'))
+		self.alertIgnore = wx.CheckBox(self.visualMethod, label=_('ignore'))
 
 		warnLabel = wx.StaticText(self.visualMethod, label='warn')
 		self.visualWarn = wx.ColourPickerCtrl(self.visualMethod)
 		self.warnAuto = wx.CheckBox(self.visualMethod, label=_('auto closing'))
+		self.warnIgnore = wx.CheckBox(self.visualMethod, label=_('ignore'))
 
 		alarmLabel = wx.StaticText(self.visualMethod, label='alarm')
 		self.visualAlarm = wx.ColourPickerCtrl(self.visualMethod)
 		self.alarmAuto = wx.CheckBox(self.visualMethod, label=_('auto closing'))
+		self.alarmIgnore = wx.CheckBox(self.visualMethod, label=_('ignore'))
 
 		emergencyLabel = wx.StaticText(self.visualMethod, label='emergency')
 		self.visualEmergency= wx.ColourPickerCtrl(self.visualMethod)
 		self.emergencyAuto = wx.CheckBox(self.visualMethod, label=_('auto closing'))
+		self.emergencyIgnore = wx.CheckBox(self.visualMethod, label=_('ignore'))
 
 		self.toolbar2 = wx.ToolBar(self.visualMethod, style= wx.TB_VERTICAL)
 		self.toolbar2.AddSeparator()
@@ -466,14 +472,39 @@ class MyFrame(wx.Frame):
 		auto.Add(self.alarmAuto, 0, wx.ALL | wx.EXPAND, 10)
 		auto.Add(self.emergencyAuto, 0, wx.ALL | wx.EXPAND, 10)
 
+		ignore = wx.BoxSizer(wx.VERTICAL)
+		ignore.AddSpacer(5)
+		ignore.Add(self.nominalIgnore, 0, wx.ALL | wx.EXPAND, 10)
+		ignore.Add(self.normalIgnore, 0, wx.ALL | wx.EXPAND, 10)
+		ignore.Add(self.alertIgnore, 0, wx.ALL | wx.EXPAND, 10)
+		ignore.Add(self.warnIgnore, 0, wx.ALL | wx.EXPAND, 10)
+		ignore.Add(self.alarmIgnore, 0, wx.ALL | wx.EXPAND, 10)
+		ignore.Add(self.emergencyIgnore, 0, wx.ALL | wx.EXPAND, 10)
+
 		sizer = wx.BoxSizer(wx.HORIZONTAL)
 		sizer.Add(names, 0, wx.ALL | wx.EXPAND, 10)
 		sizer.Add(colours, 1, wx.ALL | wx.EXPAND, 10)
 		sizer.Add(auto, 0, wx.ALL | wx.EXPAND, 10)
+		sizer.Add(ignore, 0, wx.ALL | wx.EXPAND, 10)
 		sizer.Add(self.toolbar2, 0,  wx.EXPAND, 0)
 		self.visualMethod.SetSizer(sizer)
 
 	def readColours(self):
+		try: visualIgnore = eval(self.conf.get('NOTIFICATIONS', 'visualIgnore'))
+		except: visualIgnore = []
+		if 'nominal' in visualIgnore: self.nominalIgnore.SetValue(True)
+		else: self.nominalIgnore.SetValue(False)
+		if 'normal' in visualIgnore: self.normalIgnore.SetValue(True)
+		else: self.normalIgnore.SetValue(False)
+		if 'alert' in visualIgnore: self.alertIgnore.SetValue(True)
+		else: self.alertIgnore.SetValue(False)
+		if 'warn' in visualIgnore: self.warnIgnore.SetValue(True)
+		else: self.warnIgnore.SetValue(False)
+		if 'alarm' in visualIgnore: self.alarmIgnore.SetValue(True)
+		else: self.alarmIgnore.SetValue(False)
+		if 'emergency' in visualIgnore: self.emergencyIgnore.SetValue(True)
+		else: self.emergencyIgnore.SetValue(False)
+
 		try: visualNominal = eval(self.conf.get('NOTIFICATIONS', 'visualNominal'))
 		except: 
 			visualNominal = [(0, 181, 30, 255), True]
@@ -532,17 +563,25 @@ class MyFrame(wx.Frame):
 		subprocess.call(['pkill','-f','openplotter-notifications-visual'])
 
 	def onSave2(self,e):
+		visualIgnore = []
+		if self.nominalIgnore.GetValue(): visualIgnore.append('nominal')
+		if self.normalIgnore.GetValue(): visualIgnore.append('normal')
+		if self.alertIgnore.GetValue(): visualIgnore.append('alert')
+		if self.warnIgnore.GetValue(): visualIgnore.append('warn')
+		if self.alarmIgnore.GetValue(): visualIgnore.append('alarm')
+		if self.emergencyIgnore.GetValue(): visualIgnore.append('emergency')
+		self.conf.set('NOTIFICATIONS', 'visualIgnore', str(visualIgnore))
 		self.conf.set('NOTIFICATIONS', 'visualNominal', str([self.visualNominal.GetColour(),self.nominalAuto.GetValue()]))
 		self.conf.set('NOTIFICATIONS', 'visualNormal', str([self.visualNormal.GetColour(),self.normalAuto.GetValue()]))
 		self.conf.set('NOTIFICATIONS', 'visualAlert', str([self.visualAlert.GetColour(),self.alertAuto.GetValue()]))
 		self.conf.set('NOTIFICATIONS', 'visualWarn', str([self.visualWarn.GetColour(),self.warnAuto.GetValue()]))
 		self.conf.set('NOTIFICATIONS', 'visualAlarm', str([self.visualAlarm.GetColour(),self.alarmAuto.GetValue()]))
 		self.conf.set('NOTIFICATIONS', 'visualEmergency', str([self.visualEmergency.GetColour(),self.emergencyAuto.GetValue()]))
-		self.ShowStatusBarGREEN(_('Colours saved'))
+		self.restartRead()
 
 	def onCancel2(self,e):
 		self.readColours()
-		self.ShowStatusBarRED(_('Colours reloaded'))
+		self.ShowStatusBarRED(_('Visual warning settings reloaded'))
 
 	############################################################################
 
@@ -557,6 +596,7 @@ class MyFrame(wx.Frame):
 		nominalSelect = wx.Button(self.soundMethod, id=5000, label=_('Select'))
 		nominalSelect.Bind(wx.EVT_BUTTON, self.OnFile)
 		self.nominalStop = wx.CheckBox(self.soundMethod, label=_('auto stop'))
+		self.nominalIgnoreS = wx.CheckBox(self.soundMethod, label=_('ignore'))
 
 		normalLabel = wx.StaticText(self.soundMethod, label='normal')
 		self.soundNormal = wx.TextCtrl(self.soundMethod)
@@ -565,6 +605,7 @@ class MyFrame(wx.Frame):
 		normalSelect = wx.Button(self.soundMethod, id=5001, label=_('Select'))
 		normalSelect.Bind(wx.EVT_BUTTON, self.OnFile)
 		self.normalStop = wx.CheckBox(self.soundMethod, label=_('auto stop'))
+		self.normalIgnoreS = wx.CheckBox(self.soundMethod, label=_('ignore'))
 
 		alertLabel = wx.StaticText(self.soundMethod, label='alert')
 		self.soundAlert = wx.TextCtrl(self.soundMethod)
@@ -573,6 +614,7 @@ class MyFrame(wx.Frame):
 		alertSelect = wx.Button(self.soundMethod, id=5002, label=_('Select'))
 		alertSelect.Bind(wx.EVT_BUTTON, self.OnFile)
 		self.alertStop = wx.CheckBox(self.soundMethod, label=_('auto stop'))
+		self.alertIgnoreS = wx.CheckBox(self.soundMethod, label=_('ignore'))
 
 		warnLabel = wx.StaticText(self.soundMethod, label='warn')
 		self.soundWarn = wx.TextCtrl(self.soundMethod)
@@ -581,6 +623,7 @@ class MyFrame(wx.Frame):
 		warnSelect = wx.Button(self.soundMethod, id=5003, label=_('Select'))
 		warnSelect.Bind(wx.EVT_BUTTON, self.OnFile)
 		self.warnStop = wx.CheckBox(self.soundMethod, label=_('auto stop'))
+		self.warnIgnoreS = wx.CheckBox(self.soundMethod, label=_('ignore'))
 
 		alarmLabel = wx.StaticText(self.soundMethod, label='alarm')
 		self.soundAlarm = wx.TextCtrl(self.soundMethod)
@@ -589,6 +632,7 @@ class MyFrame(wx.Frame):
 		alarmSelect = wx.Button(self.soundMethod, id=5004, label=_('Select'))
 		alarmSelect.Bind(wx.EVT_BUTTON, self.OnFile)
 		self.alarmStop = wx.CheckBox(self.soundMethod, label=_('auto stop'))
+		self.alarmIgnoreS = wx.CheckBox(self.soundMethod, label=_('ignore'))
 
 		emergencyLabel = wx.StaticText(self.soundMethod, label='emergency')
 		self.soundEmergency= wx.TextCtrl(self.soundMethod)
@@ -597,6 +641,7 @@ class MyFrame(wx.Frame):
 		emergencySelect = wx.Button(self.soundMethod, id=5005, label=_('Select'))
 		emergencySelect.Bind(wx.EVT_BUTTON, self.OnFile)
 		self.emergencyStop = wx.CheckBox(self.soundMethod, label=_('auto stop'))
+		self.emergencyIgnoreS = wx.CheckBox(self.soundMethod, label=_('ignore'))
 
 		self.toolbar5 = wx.ToolBar(self.soundMethod, style= wx.TB_VERTICAL)
 		self.toolbar5.AddSeparator()
@@ -623,36 +668,42 @@ class MyFrame(wx.Frame):
 		nominal.Add(playButton0, 0, wx.ALL | wx.EXPAND, 5)
 		nominal.Add(nominalSelect, 0, wx.ALL | wx.EXPAND, 5)
 		nominal.Add(self.nominalStop, 0, wx.ALL | wx.EXPAND, 5)
+		nominal.Add(self.nominalIgnoreS, 0, wx.ALL | wx.EXPAND, 5)
 
 		normal = wx.BoxSizer(wx.HORIZONTAL)
 		normal.Add(self.soundNormal, 1, wx.ALL | wx.EXPAND, 5)
 		normal.Add(playButton1, 0, wx.ALL | wx.EXPAND, 5)
 		normal.Add(normalSelect, 0, wx.ALL | wx.EXPAND, 5)
 		normal.Add(self.normalStop, 0, wx.ALL | wx.EXPAND, 5)
+		normal.Add(self.normalIgnoreS, 0, wx.ALL | wx.EXPAND, 5)
 
 		alert = wx.BoxSizer(wx.HORIZONTAL)
 		alert.Add(self.soundAlert, 1, wx.ALL | wx.EXPAND, 5)
 		alert.Add(playButton2, 0, wx.ALL | wx.EXPAND, 5)
 		alert.Add(alertSelect, 0, wx.ALL | wx.EXPAND, 5)
 		alert.Add(self.alertStop, 0, wx.ALL | wx.EXPAND, 5)
+		alert.Add(self.alertIgnoreS, 0, wx.ALL | wx.EXPAND, 5)
 
 		warn = wx.BoxSizer(wx.HORIZONTAL)
 		warn.Add(self.soundWarn, 1, wx.ALL | wx.EXPAND, 5)
 		warn.Add(playButton3, 0, wx.ALL | wx.EXPAND, 5)
 		warn.Add(warnSelect, 0, wx.ALL | wx.EXPAND, 5)
 		warn.Add(self.warnStop, 0, wx.ALL | wx.EXPAND, 5)
+		warn.Add(self.warnIgnoreS, 0, wx.ALL | wx.EXPAND, 5)
 
 		alarm = wx.BoxSizer(wx.HORIZONTAL)
 		alarm.Add(self.soundAlarm, 1, wx.ALL | wx.EXPAND, 5)
 		alarm.Add(playButton4, 0, wx.ALL | wx.EXPAND, 5)
 		alarm.Add(alarmSelect, 0, wx.ALL | wx.EXPAND, 5)
 		alarm.Add(self.alarmStop, 0, wx.ALL | wx.EXPAND, 5)
+		alarm.Add(self.alarmIgnoreS, 0, wx.ALL | wx.EXPAND, 5)
 
 		emergency = wx.BoxSizer(wx.HORIZONTAL)
 		emergency.Add(self.soundEmergency, 1, wx.ALL | wx.EXPAND, 5)
 		emergency.Add(playButton5, 0, wx.ALL | wx.EXPAND, 5)
 		emergency.Add(emergencySelect, 0, wx.ALL | wx.EXPAND, 5)
 		emergency.Add(self.emergencyStop, 0, wx.ALL | wx.EXPAND, 5)
+		emergency.Add(self.emergencyIgnoreS, 0, wx.ALL | wx.EXPAND, 5)
 
 		sounds = wx.BoxSizer(wx.VERTICAL)
 		sounds.AddSpacer(5)
@@ -675,6 +726,21 @@ class MyFrame(wx.Frame):
 		self.soundMethod.SetSizer(sizer)
 
 	def readSounds(self):
+		try: soundIgnore = eval(self.conf.get('NOTIFICATIONS', 'soundIgnore'))
+		except: soundIgnore = []
+		if 'nominal' in soundIgnore: self.nominalIgnoreS.SetValue(True)
+		else: self.nominalIgnoreS.SetValue(False)
+		if 'normal' in soundIgnore: self.normalIgnoreS.SetValue(True)
+		else: self.normalIgnoreS.SetValue(False)
+		if 'alert' in soundIgnore: self.alertIgnoreS.SetValue(True)
+		else: self.alertIgnoreS.SetValue(False)
+		if 'warn' in soundIgnore: self.warnIgnoreS.SetValue(True)
+		else: self.warnIgnoreS.SetValue(False)
+		if 'alarm' in soundIgnore: self.alarmIgnoreS.SetValue(True)
+		else: self.alarmIgnoreS.SetValue(False)
+		if 'emergency' in soundIgnore: self.emergencyIgnoreS.SetValue(True)
+		else: self.emergencyIgnoreS.SetValue(False)
+
 		try: soundNominal = eval(self.conf.get('NOTIFICATIONS', 'soundNominal'))
 		except: 
 			soundNominal = ['/usr/share/sounds/openplotter/bip.mp3', True]
@@ -759,17 +825,25 @@ class MyFrame(wx.Frame):
 		dlg.Destroy()
 
 	def onSave3(self,e):
+		soundIgnore = []
+		if self.nominalIgnoreS.GetValue(): soundIgnore.append('nominal')
+		if self.normalIgnoreS.GetValue(): soundIgnore.append('normal')
+		if self.alertIgnoreS.GetValue(): soundIgnore.append('alert')
+		if self.warnIgnoreS.GetValue(): soundIgnore.append('warn')
+		if self.alarmIgnoreS.GetValue(): soundIgnore.append('alarm')
+		if self.emergencyIgnoreS.GetValue(): soundIgnore.append('emergency')
+		self.conf.set('NOTIFICATIONS', 'soundIgnore', str(soundIgnore))
 		self.conf.set('NOTIFICATIONS', 'soundNominal', str([self.soundNominal.GetValue(), self.nominalStop.GetValue()]))
 		self.conf.set('NOTIFICATIONS', 'soundNormal', str([self.soundNormal.GetValue(), self.normalStop.GetValue()]))
 		self.conf.set('NOTIFICATIONS', 'soundAlert', str([self.soundAlert.GetValue(), self.alertStop.GetValue()]))
 		self.conf.set('NOTIFICATIONS', 'soundWarn', str([self.soundWarn.GetValue(), self.warnStop.GetValue()]))
 		self.conf.set('NOTIFICATIONS', 'soundAlarm', str([self.soundAlarm.GetValue(), self.alarmStop.GetValue()]))
 		self.conf.set('NOTIFICATIONS', 'soundEmergency', str([self.soundEmergency.GetValue(), self.emergencyStop.GetValue()]))
-		self.ShowStatusBarGREEN(_('Sounds saved'))
+		self.restartRead()
 
 	def onCancel3(self,e):
 		self.readSounds()
-		self.ShowStatusBarRED(_('Sounds reloaded'))
+		self.ShowStatusBarRED(_('Sound warning settings reloaded'))
 
 	############################################################################
 
