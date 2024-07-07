@@ -52,6 +52,9 @@ class MyFrame(wx.Frame):
 		self.toolbar1.AddSeparator()
 		refresh = self.toolbar1.AddTool(103, _('Refresh'), wx.Bitmap(self.currentdir+"/data/refresh.png"))
 		self.Bind(wx.EVT_TOOL, self.onRefresh, refresh)
+		self.toolbar1.AddSeparator()
+		viewer = self.toolbar1.AddTool(104, _('Viewer'), wx.Bitmap(self.currentdir+"/data/show.png"))
+		self.Bind(wx.EVT_TOOL, self.onViewer, viewer)
 
 		self.notebook = wx.Notebook(self)
 		self.notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.onTabChange)
@@ -60,17 +63,17 @@ class MyFrame(wx.Frame):
 		self.soundMethod = wx.Panel(self.notebook)
 		self.actions = wx.Panel(self.notebook)
 		self.custom = wx.Panel(self.notebook)
-		self.notebook.AddPage(self.custom, _('Send'))
 		self.notebook.AddPage(self.summary, _('Zones'))
+		self.notebook.AddPage(self.custom, _('Send'))
 		self.notebook.AddPage(self.actions, _('Actions'))
 		self.notebook.AddPage(self.visualMethod, _('Visual'))
 		self.notebook.AddPage(self.soundMethod, _('Sound'))
 
 		self.il = wx.ImageList(24, 24)
-		img0 = self.il.Add(wx.Bitmap(self.currentdir+"/data/notifications.png", wx.BITMAP_TYPE_PNG))
-		img1 = self.il.Add(wx.Bitmap(self.currentdir+"/data/sk.png", wx.BITMAP_TYPE_PNG))
+		img0 = self.il.Add(wx.Bitmap(self.currentdir+"/data/sk.png", wx.BITMAP_TYPE_PNG))
+		img1 = self.il.Add(wx.Bitmap(self.currentdir+"/data/notifications.png", wx.BITMAP_TYPE_PNG))
 		img2 = self.il.Add(wx.Bitmap(self.currentdir+"/data/openplotter-24.png", wx.BITMAP_TYPE_PNG))
-		img3 = self.il.Add(wx.Bitmap(self.currentdir+"/data/visual.png", wx.BITMAP_TYPE_PNG))
+		img3 = self.il.Add(wx.Bitmap(self.currentdir+"/data/notifications-visual.png", wx.BITMAP_TYPE_PNG))
 		img4 = self.il.Add(wx.Bitmap(self.currentdir+"/data/play.png", wx.BITMAP_TYPE_PNG))
 
 		self.notebook.AssignImageList(self.il)
@@ -133,6 +136,10 @@ class MyFrame(wx.Frame):
 		subprocess.call(['systemctl', '--user', 'restart', 'openplotter-notifications-read.service'])
 		self.ShowStatusBarGREEN(_('Notifications service restarted'))
 
+	def onViewer(self,e=0):
+		subprocess.call(['pkill','-f','openplotter-notifications-viewer'])
+		subprocess.Popen('openplotter-notifications-viewer')
+
 	def onRefresh(self, e=0):
 		self.readCustom()
 		self.OnReadThresholds()
@@ -146,7 +153,7 @@ class MyFrame(wx.Frame):
 
 	def pageCustom(self):
 		self.listCustom = wx.ListCtrl(self.custom, -1, style=wx.LC_REPORT | wx.LC_SINGLE_SEL | wx.LC_HRULES, size=(-1,200))
-		self.listCustom.InsertColumn(0, _('Notification'), width=320)
+		self.listCustom.InsertColumn(0, _('Notification'), width=300)
 		self.listCustom.InsertColumn(1, _('State'), width=90)
 		self.listCustom.InsertColumn(2, _('Method'), width=125)
 		self.listCustom.InsertColumn(3, _('Message'), width=210)

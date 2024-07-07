@@ -31,7 +31,7 @@ class MyFrame(wx.Frame):
 
 		wx.Frame.__init__(self, None, title=_('Notifications'), size=(400,300))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
-		icon = wx.Icon(self.currentdir+"/data/openplotter-notifications.png", wx.BITMAP_TYPE_PNG)
+		icon = wx.Icon(self.currentdir+"/data/openplotter-notifications-visual.png", wx.BITMAP_TYPE_PNG)
 		self.SetIcon(icon)
 
 		panel = wx.Panel(self, wx.ID_ANY)
