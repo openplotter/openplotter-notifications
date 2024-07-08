@@ -1,3 +1,13 @@
+openplotter-notifications (4.3.0-stable) bookworm; urgency=medium
+
+  * Allow multiple notifications for the same state
+  * Add ignore to visual anf sound notiifications
+  * Add notifications viewer
+  * Update icons
+  * Update translations
+
+ -- Sailoog <info@sailoog.com>  Thu, 27 Jun 2024 18:54:12 +0200
+
 openplotter-notifications (4.2.0-stable) bookworm; urgency=medium
 
   * stable
