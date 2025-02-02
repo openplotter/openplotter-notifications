@@ -1,3 +1,10 @@
+openplotter-notifications (4.4.0-stable) bookworm; urgency=medium
+
+  * Update translations
+  * Add expressions to actions
+
+ -- Sailoog <info@sailoog.com>  Sun, 02 Feb 2025 19:32:13 +0100
+
 openplotter-notifications (4.3.0-stable) bookworm; urgency=medium
 
   * Allow multiple notifications for the same state
