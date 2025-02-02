@@ -73,6 +73,15 @@ class processActions(threading.Thread):
 												if self.debug: 
 													print('Error processing keys in action data: '+str(e))
 													sys.stdout.flush()
+										result = re.findall(r'<\((.*?)\)>', data, re.DOTALL)
+										for i in result:
+											try:
+												data2 = eval(i)
+												data = data.replace('<('+i+')>',str(data2))
+											except Exception as e:
+												if self.debug: 
+													print('Error processing expression in action data: '+str(e))
+													sys.stdout.flush()
 										target.run(ID,data)
 								except Exception as e:
 									if self.debug: 

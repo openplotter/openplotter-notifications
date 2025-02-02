@@ -1076,7 +1076,7 @@ class editAction(wx.Dialog):
 		for i in self.availableActions:
 			self.actions.append(i['name'])
 
-		wx.Dialog.__init__(self, None, title=title, size=(600, 425))
+		wx.Dialog.__init__(self, None, title=title, size=(600, 400))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		panel = wx.Panel(self)
 
@@ -1107,7 +1107,6 @@ class editAction(wx.Dialog):
 		self.actionsList = wx.ComboBox(panel, choices = self.actions, style=wx.CB_READONLY)
 		self.Bind(wx.EVT_COMBOBOX, self.onActionsList, self.actionsList)
 
-		dataLabel= wx.StaticText(panel, label = _('Data'))
 		self.data = wx.TextCtrl(panel,style= wx.TE_MULTILINE)
 
 		self.stateBtn = wx.Button(panel, label='< '+_('state'))
@@ -1118,6 +1117,8 @@ class editAction(wx.Dialog):
 		self.timestampBtn.Bind(wx.EVT_BUTTON, self.onAddTimestamp)
 		self.skBtn = wx.Button(panel, label='< '+_('Signal K value'))
 		self.skBtn.Bind(wx.EVT_BUTTON, self.onAddsk)
+		self.expressionBtn = wx.Button(panel, label='< '+_('Expression'))
+		self.expressionBtn.Bind(wx.EVT_BUTTON, self.onExpression)
 
 		self.help= wx.StaticText(panel, label = '')
 
@@ -1126,6 +1127,7 @@ class editAction(wx.Dialog):
 		self.messageBtn.Disable()
 		self.timestampBtn.Disable()
 		self.skBtn.Disable()
+		self.expressionBtn.Disable()
 		self.help.SetLabel('')
 
 		if edit: 
@@ -1139,6 +1141,7 @@ class editAction(wx.Dialog):
 							self.messageBtn.Enable()
 							self.timestampBtn.Enable()
 							self.skBtn.Enable()
+							self.expressionBtn.Enable()
 							self.data.SetValue(edit['data'])
 							self.help.SetLabel(i['help'])		
 
@@ -1146,19 +1149,14 @@ class editAction(wx.Dialog):
 		okBtn = wx.Button(panel, wx.ID_OK)
 		okBtn.Bind(wx.EVT_BUTTON, self.ok)
 
-		v1 = wx.BoxSizer(wx.VERTICAL)
-		v1.Add(stateLabel, 0, wx.ALL | wx.EXPAND, 3)
-		v1.Add(self.state, 0, wx.ALL | wx.EXPAND, 3)
-
-		v2 = wx.BoxSizer(wx.VERTICAL)
-		v2.Add(messageLabel, 0, wx.ALL | wx.EXPAND, 3)
-		v2.Add(self.message, 0, wx.ALL | wx.EXPAND, 3)
-
 		h1 = wx.BoxSizer(wx.HORIZONTAL)
-		h1.Add(v1, 0, wx.ALL | wx.EXPAND, 0)
-		h1.Add(v2, 1, wx.ALL | wx.EXPAND, 0)
+		h1.Add(stateLabel, 0, wx.ALL | wx.EXPAND, 3)
+		h1.Add(self.state, 0, wx.ALL | wx.EXPAND, 3)
+		h1.Add(messageLabel, 0, wx.ALL | wx.EXPAND, 3)
+		h1.Add(self.message, 1, wx.ALL | wx.EXPAND, 3)
 
 		h3 = wx.BoxSizer(wx.HORIZONTAL)
+		h3.Add(notiLabel, 0, wx.ALL  | wx.EXPAND, 3)
 		h3.Add(self.SK, 1, wx.ALL, 3)
 		h3.Add(SKedit, 0, wx.ALL, 3)
 
@@ -1167,10 +1165,15 @@ class editAction(wx.Dialog):
 		v3.Add(self.messageBtn, 0, wx.ALL | wx.EXPAND, 3)
 		v3.Add(self.timestampBtn, 0, wx.ALL | wx.EXPAND, 3)
 		v3.Add(self.skBtn, 0, wx.ALL | wx.EXPAND, 3)
+		v3.Add(self.expressionBtn, 0, wx.ALL | wx.EXPAND, 3)
 
 		h4 = wx.BoxSizer(wx.HORIZONTAL)
 		h4.Add(self.data, 1, wx.ALL  | wx.EXPAND, 3)
 		h4.Add(v3, 0, wx.ALL | wx.EXPAND, 0)
+
+		h5 = wx.BoxSizer(wx.HORIZONTAL)
+		h5.Add(actionLabel, 0, wx.ALL  | wx.EXPAND, 3)
+		h5.Add(self.actionsList , 1, wx.ALL  | wx.EXPAND, 3)
 
 		actionbox = wx.BoxSizer(wx.HORIZONTAL)
 		actionbox.AddStretchSpacer(1)
@@ -1178,12 +1181,11 @@ class editAction(wx.Dialog):
 		actionbox.Add(okBtn, 0, wx.LEFT | wx.EXPAND, 10)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
-		vbox.Add(notiLabel, 0, wx.ALL  | wx.EXPAND, 3)
 		vbox.Add(h3, 0, wx.ALL | wx.EXPAND, 0)
+		vbox.AddSpacer(5)
 		vbox.Add(h1, 0, wx.ALL | wx.EXPAND, 0)
-		vbox.Add(actionLabel, 0, wx.ALL  | wx.EXPAND, 3)
-		vbox.Add(self.actionsList , 0, wx.ALL  | wx.EXPAND, 3)
-		vbox.Add(dataLabel, 0, wx.ALL  | wx.EXPAND, 3)
+		vbox.AddSpacer(5)
+		vbox.Add(h5, 0, wx.ALL | wx.EXPAND, 0)
 		vbox.Add(h4, 1, wx.ALL | wx.EXPAND, 0)
 		vbox.Add(self.help, 0, wx.LEFT | wx.EXPAND, 3)
 		vbox.Add(actionbox, 0, wx.ALL | wx.EXPAND, 10)
@@ -1202,6 +1204,7 @@ class editAction(wx.Dialog):
 				self.messageBtn.Enable()
 				self.timestampBtn.Enable()
 				self.skBtn.Enable()
+				self.expressionBtn.Enable()
 				self.data.SetValue(self.availableActions[selected]['default'])
 				self.help.SetLabel(self.availableActions[selected]['help'])
 			else: 
@@ -1211,6 +1214,7 @@ class editAction(wx.Dialog):
 				self.messageBtn.Disable()
 				self.timestampBtn.Disable()
 				self.skBtn.Disable()
+				self.expressionBtn.Disable()
 				self.help.SetLabel('')
 
 	def onState(self,e=0):
@@ -1231,13 +1235,16 @@ class editAction(wx.Dialog):
 		dlg.Destroy()
 
 	def onAddState(self,e):
-		self.data.AppendText('<|s|>')
+		self.data.AppendText('\n<|s|>')
 
 	def onAddMessage(self,e):
-		self.data.AppendText('<|m|>')
+		self.data.AppendText('\n<|m|>')
 
 	def onAddTimestamp(self,e):
-		self.data.AppendText('<|t|>')
+		self.data.AppendText('\n<|t|>')
+
+	def onExpression(self,e):
+		self.data.AppendText('\n<(put your maths here)>')
 
 	def onAddsk(self,e):
 		dlg = selectKey.SelectKey('',1)
@@ -1245,7 +1252,7 @@ class editAction(wx.Dialog):
 		if res == wx.OK:
 			key = dlg.selected_key.replace(':','.')
 			vessel = dlg.skvessels.GetValue()
-			self.data.AppendText('<|'+vessel+'||'+key+'|>')
+			self.data.AppendText('\n<|'+vessel+'||'+key+'|>')
 		dlg.Destroy()
 
 	def ok(self,e):
