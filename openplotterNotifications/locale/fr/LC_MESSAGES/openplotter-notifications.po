@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openplotter\n"
 "POT-Creation-Date: 2024-07-07 15:58+0200\n"
-"PO-Revision-Date: 2024-07-08 21:06+0200\n"
+"PO-Revision-Date: 2025-02-02 20:52+0100\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr\n"
@@ -66,11 +66,11 @@ msgstr "Saisir une valeur comprise entre 0 et 100"
 
 #: data/openplotter-notifications-viewer.desktop:3
 msgid "Notifications Viewer"
-msgstr ""
+msgstr "Visionneuse de notifications"
 
 #: data/openplotter-notifications-viewer.desktop:5
 msgid "openplotter-notifications-viewer"
-msgstr ""
+msgstr "openplotter-notifications-visionneuse"
 
 #: data/openplotter-notifications.desktop:3 openplotterNotifications.py:859
 #: visual.py:32
@@ -87,7 +87,7 @@ msgstr "Couper les alertes sonores"
 
 #: data/openplotter-stop-sound.desktop:5
 msgid "openplotter-stop-sound"
-msgstr ""
+msgstr "openplotter-son-arrêt"
 
 #: notificationsPostInstall.py:32
 msgid "Installing/Updating signalk-zones plugin..."
@@ -139,7 +139,7 @@ msgstr "Actualiser"
 
 #: openplotterNotifications.py:56
 msgid "Viewer"
-msgstr ""
+msgstr "Visionneuse"
 
 #: openplotterNotifications.py:66
 msgid "Zones"
@@ -241,7 +241,7 @@ msgstr "fermeture automatique"
 #: openplotterNotifications.py:624 openplotterNotifications.py:633
 #: openplotterNotifications.py:642 openplotterNotifications.py:651
 msgid "ignore"
-msgstr ""
+msgstr "ignorer"
 
 #: openplotterNotifications.py:446 openplotterNotifications.py:655
 msgid "Save"
@@ -257,7 +257,7 @@ msgstr "Fermer toutes les fenêtres"
 
 #: openplotterNotifications.py:591
 msgid "Visual warning settings reloaded"
-msgstr ""
+msgstr "Paramètres d'avertissement visuel rechargés"
 
 #: openplotterNotifications.py:603 openplotterNotifications.py:612
 #: openplotterNotifications.py:621 openplotterNotifications.py:630
@@ -293,7 +293,7 @@ msgstr "Tous les fichiers"
 
 #: openplotterNotifications.py:853
 msgid "Sound warning settings reloaded"
-msgstr ""
+msgstr "Réglages d'avertissement sonore rechargés"
 
 #: openplotterNotifications.py:863
 msgid "Enabled"
@@ -391,7 +391,7 @@ msgstr "service en cours d'exécution"
 
 #: startup.py:60
 msgid "service not running"
-msgstr "service pas en cours d'exécution"
+msgstr "service arrêté"
 
 #: startup.py:71
 msgid "Access to Signal K server validated"
@@ -399,31 +399,31 @@ msgstr "Accès au serveur Signal K validé"
 
 #: viewer.py:47
 msgid "Notifications viewer"
-msgstr ""
+msgstr "Visionneuse de notifications"
 
 #: viewer.py:53 viewer.py:75 viewer.py:262
 msgid "Vessel"
-msgstr ""
+msgstr "Navire"
 
 #: viewer.py:69
 msgid "Filter"
-msgstr ""
+msgstr "Filtre"
 
 #: viewer.py:71
 msgid "Reset"
-msgstr ""
+msgstr "Réinitialiser"
 
 #: viewer.py:79 viewer.py:292
 msgid "Timestamp"
-msgstr ""
+msgstr "Horodatage"
 
 #: viewer.py:256
 msgid "Notification details"
-msgstr ""
+msgstr "Détails de la notification"
 
 #: viewer.py:287
 msgid "Source"
-msgstr ""
+msgstr "Source"
 
 #: viewer.py:297 visual.py:76
 msgid "Close"
@@ -431,8 +431,8 @@ msgstr "Fermer"
 
 #: visual.py:49
 msgid "First"
-msgstr ""
+msgstr "Premier"
 
 #: visual.py:50 visual.py:142
 msgid "Last"
-msgstr ""
+msgstr "Dernier"
