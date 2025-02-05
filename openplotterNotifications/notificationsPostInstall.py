@@ -43,9 +43,10 @@ def main():
 		if not os.path.exists(conf2.home+'/.config/systemd'): os.mkdir(conf2.home+'/.config/systemd')
 		if not os.path.exists(conf2.home+'/.config/systemd/user'): os.mkdir(conf2.home+'/.config/systemd/user')
 		fo = open(conf2.home+'/.config/systemd/user/openplotter-notifications-read.service', "w")
-		fo.write( '[Unit]\nPartOf=graphical-session.target\nAfter=graphical-session.target\n[Service]\nEnvironment=OPrescue=0\nEnvironmentFile=/boot/firmware/config.txt\nExecStart=openplotter-notifications-read $OPrescue\nRestart=always\nRestartSec=3\n[Install]\nWantedBy=graphical-session.target')
+		fo.write( '[Service]\nEnvironment=OPrescue=0\nEnvironmentFile=-/boot/firmware/config.txt\nExecStart=openplotter-notifications-read $OPrescue\nRestart=always\nRestartSec=3')
 		fo.close()
 		subprocess.call(['systemctl', '--user','daemon-reload'])
+		subprocess.call(['systemctl', '--user','restart', 'openplotter-notifications-read'])
 		print(_('DONE'))
 	except Exception as e: print(_('FAILED: ')+str(e))
 
