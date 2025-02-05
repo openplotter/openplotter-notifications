@@ -14,7 +14,7 @@ Install Notifications from openplotter-settings app.
 
 Install openplotter-notifications dependencies:
 
-`sudo apt install openplotter-settings openplotter-signalk-installer python3-websocket`
+`sudo apt install openplotter-settings openplotter-signalk-installer python3-websocket python3-requests`
 
 Clone the repository:
 
