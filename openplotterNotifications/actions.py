@@ -71,12 +71,7 @@ class Actions:
 				process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				out, err = process.communicate()
 				if err:
-					err = err.decode()
-					err = err.replace('\n','')
-					process2 = subprocess.Popen(['set-notification','-s','-v','notifications.openplotter.actions','alert', err], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-					out2, err2 = process2.communicate()
-					if err2:
-						if self.debug: print('Error setting notification: '+str(err2))
+					if self.debug: print('Error setting notification: '+str(err))
 			elif action == 'sk':
 				from openplotterSignalkInstaller import connections
 				from openplotterSettings import platform
