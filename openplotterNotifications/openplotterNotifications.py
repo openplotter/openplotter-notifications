@@ -33,6 +33,7 @@ class MyFrame(wx.Frame):
 		self.currentdir = os.path.dirname(os.path.abspath(__file__))
 		self.currentLanguage = self.conf.get('GENERAL', 'lang')
 		self.language = language.Language(self.currentdir,'openplotter-notifications',self.currentLanguage)
+		self.hostID = self.conf.get('GENERAL', 'hostID')
 
 		wx.Frame.__init__(self, None, title='Notifications '+version, size=(800,444))
 		self.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
@@ -867,9 +868,10 @@ class MyFrame(wx.Frame):
 		self.listActions.InsertColumn(4, _('Data'), width=100)
 		self.listActions.Bind(wx.EVT_LIST_ITEM_SELECTED, self.onListActionsSelected)
 		self.listActions.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.onListActionsDeselected)
-		self.listActions.EnableCheckBoxes(True)
-		self.listActions.Bind(wx.EVT_LIST_ITEM_CHECKED, self.OnCheckItem)
-		self.listActions.Bind(wx.EVT_LIST_ITEM_UNCHECKED, self.OnUnCheckItem)
+		if self.hostID != 'ubuntu':
+			self.listActions.EnableCheckBoxes(True)
+			self.listActions.Bind(wx.EVT_LIST_ITEM_CHECKED, self.OnCheckItem)
+			self.listActions.Bind(wx.EVT_LIST_ITEM_UNCHECKED, self.OnUnCheckItem)
 
 		self.checking = False
 		self.listActions.SetTextColour(wx.BLACK)
@@ -932,7 +934,8 @@ class MyFrame(wx.Frame):
 					self.listActions.SetItem(index, 2, i['message'])
 					self.listActions.SetItem(index, 3, i['name'])
 					self.listActions.SetItem(index, 4, i['data'])
-					if i['enabled']: self.listActions.CheckItem(index)
+					if self.hostID != 'ubuntu': 
+						if i['enabled']: self.listActions.CheckItem(index)
 				self.checking = True
 
 	def onListActionsSelected(self, e):
