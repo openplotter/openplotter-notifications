@@ -1,3 +1,9 @@
+openplotter-notifications (4.4.6-stable) bookworm; urgency=medium
+
+  * Fix issues in desktops running ubuntu
+
+ -- Sailoog <info@sailoog.com>  Wed, 05 Feb 2025 18:44:27 +0100
+
 openplotter-notifications (4.4.0-stable) bookworm; urgency=medium
 
   * Update translations
