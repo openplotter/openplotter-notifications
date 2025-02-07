@@ -861,11 +861,13 @@ class MyFrame(wx.Frame):
 		self.Bind(wx.EVT_COMBOBOX, self.onKey, self.key)
 
 		self.listActions = wx.ListCtrl(self.actions, 152, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
-		self.listActions.InsertColumn(0, _('Enabled'), width=70)
+		if self.hostID != 'ubuntu': self.listActions.InsertColumn(0, _('Enabled'), width=70)
+		else: self.listActions.InsertColumn(0, ' ', width=70)
 		self.listActions.InsertColumn(1, _('State'), width=90)
 		self.listActions.InsertColumn(2, _('Message'), width=180)
 		self.listActions.InsertColumn(3, _('Action'), width=180)
-		self.listActions.InsertColumn(4, _('Data'), width=100)
+		self.listActions.InsertColumn(4, _('Data'), width=120)
+		self.listActions.InsertColumn(5, _('Repeat'), width=70)
 		self.listActions.Bind(wx.EVT_LIST_ITEM_SELECTED, self.onListActionsSelected)
 		self.listActions.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.onListActionsDeselected)
 		if self.hostID != 'ubuntu':
@@ -934,6 +936,10 @@ class MyFrame(wx.Frame):
 					self.listActions.SetItem(index, 2, i['message'])
 					self.listActions.SetItem(index, 3, i['name'])
 					self.listActions.SetItem(index, 4, i['data'])
+					if 'repeat' in i:
+						if i['repeat'] == '1': self.listActions.SetItem(index, 5, _('yes'))
+						else: self.listActions.SetItem(index, 5, _('no'))
+					else: self.listActions.SetItem(index, 5, _('no'))
 					if self.hostID != 'ubuntu': 
 						if i['enabled']: self.listActions.CheckItem(index)
 				self.checking = True
@@ -1005,7 +1011,9 @@ class MyFrame(wx.Frame):
 		module = self.actionsSelected[selected]['module']
 		ID = self.actionsSelected[selected]['ID']
 		data = self.actionsSelected[selected]['data']
-		edit = {'key':key,'selected':selected,'state':state,'message':message,'module':module,'ID':ID,'data':data}
+		if 'repeat' in self.actionsSelected[selected]: repeat = self.actionsSelected[selected]['repeat']
+		else: repeat = '0'
+		edit = {'key':key,'selected':selected,'state':state,'message':message,'module':module,'ID':ID,'data':data,'repeat':repeat}
 		self.setAction(edit)
 
 	def setAction(self,edit):
@@ -1110,6 +1118,10 @@ class editAction(wx.Dialog):
 		self.actionsList = wx.ComboBox(panel, choices = self.actions, style=wx.CB_READONLY)
 		self.Bind(wx.EVT_COMBOBOX, self.onActionsList, self.actionsList)
 
+		self.repeat = wx.CheckBox(panel, label=_('Repeat'))
+		if edit:
+			if edit['repeat'] == '1': self.repeat.SetValue(True)
+
 		self.data = wx.TextCtrl(panel,style= wx.TE_MULTILINE)
 
 		self.stateBtn = wx.Button(panel, label='< '+_('state'))
@@ -1177,6 +1189,7 @@ class editAction(wx.Dialog):
 		h5 = wx.BoxSizer(wx.HORIZONTAL)
 		h5.Add(actionLabel, 0, wx.ALL  | wx.EXPAND, 3)
 		h5.Add(self.actionsList , 1, wx.ALL  | wx.EXPAND, 3)
+		h5.Add(self.repeat , 0, wx.ALL  | wx.EXPAND, 3)
 
 		actionbox = wx.BoxSizer(wx.HORIZONTAL)
 		actionbox.AddStretchSpacer(1)
@@ -1283,7 +1296,9 @@ class editAction(wx.Dialog):
 		ID = self.availableActions[selected]['ID']
 		name = self.availableActions[selected]['name']
 		data = self.data.GetValue()
-		self.actionResult = {'enabled': True,'state':state,'message':message,'name':name,'module':module,'ID':ID,'data':data}
+		if self.repeat.GetValue(): repeat = '1'
+		else: repeat = '0'
+		self.actionResult = {'enabled': True,'state':state,'message':message,'name':name,'module':module,'ID':ID,'data':data,'repeat':repeat}
 		self.EndModal(wx.ID_OK)
 
 ################################################################################

@@ -22,7 +22,7 @@ from websocket import create_connection
 from openplotterSignalkInstaller import connections
 
 class processActions(threading.Thread):
-	def __init__(self, path, actions, notification,debug,currentLanguage,conf,platform,timestamp):
+	def __init__(self, path, actions, notification,debug,currentLanguage,conf,platform,timestamp,repeated):
 		threading.Thread.__init__(self)
 		self.path = path
 		self.actions = actions
@@ -32,11 +32,16 @@ class processActions(threading.Thread):
 		self.conf = conf
 		self.platform = platform
 		self.timestamp = timestamp
+		self.repeated = repeated
 
 	def run(self):
 		try:
 			for a in self.actions:
 				if a['enabled']:
+					if self.repeated:
+						if 'repeat' in a:
+							if a['repeat'] != '1': continue
+						else: continue
 					if not a['state'] or self.notification['state'] == a['state']:
 						if not a['message'] or self.notification['message'] == a['message']:
 							module = a['module']
@@ -182,32 +187,27 @@ def main():
 															notification = {'state':'null','message':'','timestamp':'','method':[]}
 															visualList[value['path']] = ''
 															soundList[value['path']] = ''
-														if 'context' in data:
-															context = data['context'].replace('vessels.','')
-															if context in uuid:
-																if 'self.'+value['path'] in actionsList: 
-																	actions = actionsList['self.'+value['path']]
-																	if actions:
-																		if not 'self.'+value['path'] in actionsList2 or notification['state'] != actionsList2['self.'+value['path']]['state'] or notification['message'] != actionsList2['self.'+value['path']]['message']:
-																			thread = processActions(value['path'],actions,notification,debug,currentLanguage,conf2,platform2,update['timestamp'])
-																			thread.start()
-																			actionsList2['self.'+value['path']] = {'state':notification['state'],'message':notification['message']}
-																if context+'.'+value['path'] in actionsList: 
-																	actions = actionsList[context+'.'+value['path']]
-																	if actions:
-																		if not context+'.'+value['path'] in actionsList2 or notification['state'] != actionsList2[context+'.'+value['path']]['state'] or notification['message'] != actionsList2[context+'.'+value['path']]['message']:
-																			thread = processActions(value['path'],actions,notification,debug,currentLanguage,conf2,platform2,update['timestamp'])
-																			thread.start()
-																			actionsList2[context+'.'+value['path']] = {'state':notification['state'],'message':notification['message']}
-															else:
-																if context+'.'+value['path'] in actionsList : 
-																	actions = actionsList[context+'.'+value['path']]
-																	if actions:
-																		if not context+'.'+value['path'] in actionsList2 or notification['state'] != actionsList2[context+'.'+value['path']]['state'] or notification['message'] != actionsList2[context+'.'+value['path']]['message']:
-																			thread = processActions(value['path'],actions,notification,debug,currentLanguage,conf2,platform2,update['timestamp'])
-																			thread.start()
-																			actionsList2[context+'.'+value['path']] = {'state':notification['state'],'message':notification['message']}
 
+														if 'context' in data:
+															repeated = False
+															actions = []
+															context = data['context'].replace('vessels.','')
+															if context in uuid or context == 'self':
+																if 'self.'+value['path'] in actionsList:
+																	contextPath = 'self.'+value['path']
+																	actions.extend(actionsList[contextPath])
+																	if not contextPath in actionsList2 or notification['state'] != actionsList2[contextPath]['state'] or notification['message'] != actionsList2[contextPath]['message']:
+																		actionsList2[contextPath] = {'state':notification['state'],'message':notification['message']}
+																	else: repeated = True
+															if context+'.'+value['path'] in actionsList:
+																contextPath = context+'.'+value['path']
+																actions.extend(actionsList[contextPath])
+																if not contextPath in actionsList2 or notification['state'] != actionsList2[contextPath]['state'] or notification['message'] != actionsList2[contextPath]['message']:
+																	actionsList2[contextPath] = {'state':notification['state'],'message':notification['message']}
+																else: repeated = True
+															if actions:
+																thread = processActions(value['path'],actions,notification,debug,currentLanguage,conf2,platform2,update['timestamp'],repeated)
+																thread.start()
 								except Exception as e: 
 									if debug: 
 										print('Error processing notification: '+str(e))
