@@ -1,3 +1,10 @@
+openplotter-notifications (4.5.0-stable) bookworm; urgency=medium
+
+  * Add option to repeat actions
+  * Update translations
+
+ -- Sailoog <info@sailoog.com>  Thu, 06 Feb 2025 20:13:15 +0100
+
 openplotter-notifications (4.4.6-stable) bookworm; urgency=medium
 
   * Fix issues in desktops running ubuntu
